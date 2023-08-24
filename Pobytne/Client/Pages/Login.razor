@@ -1,0 +1,54 @@
+﻿@page "/login"
+@inject HttpClient httpClient
+@inject IJSRuntime js
+@inject AuthenticationStateProvider authStateProv
+@inject NavigationManager navManager
+<form>
+  <!-- Email input -->
+  <div class="form-outline mb-4">
+    <input type="email" id="form2Example1" class="form-control" @bind="logRequest.Name"/>
+    <label class="form-label" for="form2Example1">Email address</label>
+  </div>
+
+  <!-- Password input -->
+  <div class="form-outline mb-4">
+    <input type="password" id="form2Example2" class="form-control" @bind="logRequest.Password" />
+    <label class="form-label" for="form2Example2">Password</label>
+  </div>
+
+  <!-- Submit button -->
+  <button type="button" class="btn btn-primary btn-block mb-4" @onclick="Authenticate">Sign in</button>
+
+</form>
+
+@code {
+    private LoginRequest logRequest = new();
+    private async Task Authenticate()
+    {
+        //try
+        //{
+        //    await AuthenticationService.Login(logRequest);
+        //    navManager.NavigateTo("/", true);
+        //}
+        //catch(Exception ex)
+        //{
+        //    await js.InvokeVoidAsync("alert", ex.Message);
+        //    return;
+        //}
+        var logResponse = await httpClient.PostAsJsonAsync<LoginRequest>("/api/User/Login",logRequest);
+        if (logResponse.IsSuccessStatusCode)
+        {
+            var user = await logResponse.Content.ReadFromJsonAsync<UserAccount>();
+            await js.InvokeVoidAsync("alert", user.ToString());
+            var customAuthStateProvider =(CustomAuthenticationStateProvider) authStateProv;
+            await customAuthStateProvider.UpdateAuthenticationState(user);
+            navManager.NavigateTo("/", true);
+        }
+        else if(logResponse.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            await js.InvokeVoidAsync("alert", "invalid Username or Password");
+            return;
+        }
+    }
+
+}

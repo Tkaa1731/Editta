@@ -1,0 +1,63 @@
+﻿<div class="card">
+    <div class="card-header">
+        <h4>@header</h4>
+    </div>
+    <div class="card-body">
+        
+        <form>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="inputName">Name</label>
+              <input type="text" class="form-control" id="inputName" placeholder="Name" @bind="@module.Name">
+            </div>
+            <div class="form-group col-md-6">
+              <label for="inputShortName">Shortname</label>
+              <input type="text" class="form-control" id="inputShortName" placeholder="Short name" @bind="@module.ShortName">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputEvidenceType">Evidence type</label>
+            <input type="number" class="form-control" id="inputEvidenceType" placeholder="Evidence type" @bind="@module.EvidenceType">
+          </div>
+          <div class="form-group">
+            <label for="inputLicenceNumber">License number</label>
+            <input type="number" class="form-control" id="inputLicenceNumber" @bind="@module.LicenseNumber" disabled>
+          </div>
+            @if(Type == FormEnum.Edit)
+            {
+                <button type="submit" class="btn btn-primary" @onclick="Update">Update</button>
+            }
+            else if(Type == FormEnum.Insert)
+            {
+                <button type="submit" class="btn btn-primary" @onclick="Insert">Insert new</button>
+            }
+        </form>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public Module? module { get; set; }
+    [Parameter]
+    public FormEnum Type { get; set; }
+    public string header { 
+        get 
+        {
+            if (Type == FormEnum.Edit) return "Editing of record";
+            else if (Type == FormEnum.Insert) return "Add new record";
+            return "Unknown operation";
+        }
+    }
+    private void Update()
+    {
+   
+    }
+    private void Delete()
+    {
+        
+    }
+    private void Insert()
+    {
+
+    }
+
+}
