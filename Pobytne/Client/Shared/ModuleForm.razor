@@ -8,11 +8,11 @@
           <div class="form-row">
             <div class="form-group col-md-6">
               <label for="inputName">Name</label>
-              <input type="text" class="form-control" id="inputName" placeholder="Name" @bind="@module.Name">
+              <input type="text" class="form-control" id="inputName" placeholder="Name" @bind="@module.ModuleName">
             </div>
             <div class="form-group col-md-6">
               <label for="inputShortName">Shortname</label>
-              <input type="text" class="form-control" id="inputShortName" placeholder="Short name" @bind="@module.ShortName">
+              <input type="text" class="form-control" id="inputShortName" placeholder="Short name" @bind="@module.ModuleShortName">
             </div>
           </div>
           <div class="form-group">
@@ -35,6 +35,10 @@
     </div>
 </div>
 @code {
+    public enum FormEnum
+    {
+        Edit,Insert
+    }
     [Parameter]
     public Module? module { get; set; }
     [Parameter]

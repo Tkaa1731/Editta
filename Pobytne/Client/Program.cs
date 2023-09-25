@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Blazored.LocalStorage;
 using Pobytne.Client.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
+using Havit.Blazor.Components.Web;
 
 namespace Pobytne.Client
 {
@@ -17,6 +18,7 @@ namespace Pobytne.Client
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddBlazoredLocalStorage();
             builder.Services.AddScoped<AuthenticationStateProvider,CustomAuthenticationStateProvider>();
+            builder.Services.AddHxServices();
             builder.Services.AddAuthorizationCore();
 
             await builder.Build().RunAsync();

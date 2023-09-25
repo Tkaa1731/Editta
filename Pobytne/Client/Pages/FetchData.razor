@@ -16,12 +16,12 @@ else
         @foreach (var l in licenseList)
         {
             <ul>
-                <a @onclick="() => LicenseChoosed(l.LicenseNumber)">@l.NameOfOrganization | @l.LicenseNumber</a>
+                <a @onclick="() => LicenseChoosed(l.LicenseNumber)">@l.NameOfOrganization| @l.LicenseNumber</a>
                 @if (choosedLicense == l.LicenseNumber && modulesDic.ContainsKey(choosedLicense))
                 {
                     @foreach(var m in modulesDic[choosedLicense])
                     {                        
-                        <li><a @onclick="() => GetUsersOfModule(m.Id)">Uživatelé @m.Name</a></li>
+                        <li><a @onclick="() => GetUsersOfModule(m.Id)">Uživatelé @m.ModuleName</a></li>
                     }
                     <li><a @onclick="GetUsers">Users</a></li>
                 }
@@ -31,11 +31,11 @@ else
 }
 @if(choosedUser is not null)
 {
-    <UserForm user="@choosedUser" Type="FormEnum.Edit"/>
+    <UserForm user="@choosedUser" Type="UserForm.FormEnum.Edit"/>
 }
 else if(choosedModule is not null)
 {
-    <ModuleForm module="@choosedModule" Type="FormEnum.Edit"/>
+    <ModuleForm module="@choosedModule" Type="ModuleForm.FormEnum.Edit"/>
 }
 <div style="max-height:325px;overflow:auto;">
     <table class="table table-hover">
@@ -75,8 +75,8 @@ else if(choosedModule is not null)
                 {
                     <tr @onclick="()=>UserDetail(i.Id)">
                       <th scope="row">@i.Id</th>
+                      <td>@i.UserLogin</td>
                       <td>@i.UserName</td>
-                      <td>@i.FullName</td>
                       <td>@i.Email</td>
                     </tr>      
                 }            
@@ -116,14 +116,13 @@ else if(choosedModule is not null)
         choosedLicense = license;
         if (!modulesDic.ContainsKey(license))
         {
-            await js.InvokeVoidAsync("alert", "MODULES LOADING");
             // load modules
             modulesList = await Http.GetFromJsonAsync<Module[]>($"api/Module/ModulesList?licenseNumber={choosedLicense}");//TODO: Proc nefunguji controllers
             if(modulesList is not null)
                 modulesDic.Add(license, modulesList);            
         }
         if (!usersDic.ContainsKey(license))
-        {    await js.InvokeVoidAsync("alert", "USERS LOADING");        
+        {     
             //load users
             usersList = await Http.GetFromJsonAsync<User[]>($"api/User/UsersList?licenseNumber={choosedLicense}");
             if(usersList is not null)
@@ -137,7 +136,7 @@ else if(choosedModule is not null)
         choosedUser = null;
 
         if (modulesDic is not null && modulesDic.ContainsKey(choosedLicense))
-            usersList = usersDic[choosedLicense].Where(u=> u.AccessPermition.Exists(p => p.ModuleId == moduleId)).ToArray();  
+            usersList = usersDic[choosedLicense].Where(u=> u.AccessPermition.Exists(p => p.Id == moduleId)).ToArray();  
 
     }
     private void GetUsers()

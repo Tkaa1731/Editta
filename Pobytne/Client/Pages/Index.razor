@@ -49,7 +49,7 @@
         {
             var user = await localStorage.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
             if(user is not null)
-                permitions = user.AccessPermition;
+                permitions = user.User.AccessPermition;
         }
         else
             permitions = new();

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.IdentityModel.Tokens;
+using Pobytne.Data;
+using Pobytne.Data.Tables;
 using Pobytne.Server;
 using Pobytne.Server.Authentication;
 using Pobytne.Server.Service;
@@ -34,10 +36,16 @@ namespace Pobytne
                     ValidateAudience = false
                 };
             });
-            builder.Services.AddSingleton<UserService>();
-			builder.Services.AddSingleton<ModuleService>();
-            builder.Services.AddSingleton<LicenseService>();
+            builder.Services.AddScoped<UserService>();
+			builder.Services.AddScoped<ModuleService>();
+            builder.Services.AddScoped<LicenseService>();
 
+            builder.Services.AddScoped<UserTable>();
+            builder.Services.AddScoped<LicenseTable>();
+            builder.Services.AddScoped<ModuleTable>();
+            builder.Services.AddScoped<PermitionTable>();
+
+            Database.OnInitialize();
 
 			var app = builder.Build();
 

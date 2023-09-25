@@ -1,4 +1,5 @@
 ﻿using Pobytne.Data;
+using Pobytne.Data.Tables;
 using Pobytne.Shared.Authentication;
 using Pobytne.Shared.Procedural;
 
@@ -6,27 +7,44 @@ namespace Pobytne.Server.Service
 {
     public class UserService
     {
+        private readonly UserTable _userTable;
+        private readonly LicenseTable _licenseTable;
+        private readonly PermitionTable _permitionTable;
+        private readonly ModuleTable _moduleTable;
+        public UserService(UserTable user,LicenseTable license, PermitionTable permition, ModuleTable module) 
+        {
+            _userTable = user;
+            _licenseTable = license;
+            _permitionTable = permition;
+            _moduleTable = module;
+        }
 
         public async Task<UserAccount> GetAccount(LoginRequest userAccount)
         {
-            var result = await UserTable.Login(userAccount.Name);
-            if (result == null) throw new Exception("UserAccount not found");
-            if (!result.CheckPassword(userAccount.Password)) throw new Exception("Wrong password");
+            var user = await _userTable.GetByLogin(userAccount.Name);
 
-            var license = await LicenseTable.CheckLicense(result.LicenseNumber);
-            if (!license.IsPaid) throw new Exception("Your license is now unavalible");
+            if (user == null) throw new Exception("UserAccount not found");
+            if (!user.CheckPassword(userAccount.Password)) throw new Exception("Wrong password");
 
-            var accessPermition = await PermitionTable.GetAllOfUser(result.Id);
-            if (accessPermition == null) throw new Exception("User does not have any valid AccessPermition");
+            if (!await _licenseTable.CheckLicense(user.LicenseNumber)) throw new Exception("Your license is now unavalible");
 
-            result.AccessPermition = accessPermition;
+            //var accessPermition = await PermitionTable.GetAll(new{ UserId = user.Id });
+            var accessPermition = await _permitionTable.GetAll(user.Id);
+
+            if (accessPermition.Count() == 0) throw new Exception("User does not have any valid AccessPermition");
+
+            UserAccount result = new(user);
+            result.User.AccessPermition = accessPermition.ToList();
             return result;
         }
-        public async Task<List<User>> GetUsers(long licenseNumber)
+        public async Task<IEnumerable<User>> GetUsersByLicense(int licenseNumber)
         {
-            var users = UserTable.GetAll(licenseNumber).Result;
+                var users = await _userTable.GetAll(new{ LicenseNumber = licenseNumber});
             foreach(var u in users)
-                u.AccessPermition = await PermitionTable.GetAllOfUser(u.Id);
+            {
+                var per = await _permitionTable.GetAll(u.Id);
+                u.AccessPermition = per.ToList(); //await PermitionTable.GetAll(new{ UserId = u.Id });
+            }
             return users;
         }
     }

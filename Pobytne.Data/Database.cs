@@ -1,34 +1,23 @@
-﻿using System.Data;
+﻿using Dapper;
+using Dapper.FluentMap;
+using Pobytne.Data.mappers;
+using Pobytne.Shared.Procedural;
 using System.Data.SqlClient;
 
 namespace Pobytne.Data
 {
-    internal static class Database
+    public class Database
     {
-        private readonly static string _databaseName = "PobytneTest";
-        private readonly static string _userName = "UserPobytneTest";
-        private readonly static string _password = "HesloPobytne23+";
-        private readonly static string _serverAddress = "pobytne.cz,3341";
-        private readonly static string _connectionString = $"Server={_serverAddress};Database={_databaseName};User Id={_userName};Password={_password};";
-
-        public static async Task<List<T>> Select<T>(string sql, Func<IDataRecord,T,T> parserFunction) where T : class, new()
+        public static void OnInitialize()
         {
-            List<T> list = new List<T>();
-            using (var connection = new SqlConnection(_connectionString))
+            FluentMapper.Initialize(configure =>
             {
-                await connection.OpenAsync();
-                using (var command = new SqlCommand(sql, connection))
-                {
-                    var result = command.ExecuteReader();
-                    while (result.Read())
-                    {
-                        T item = new T();   
-                        list.Add(parserFunction(result,item));
-                    }
-                }
-                await connection.CloseAsync();
-            }
-            return list;
+                configure.AddMap(new UserMapper());
+                configure.AddMap(new ModuleMapper());
+                configure.AddMap(new LicenseMapper());
+                configure.AddMap(new PermitionMapper());
+            });
         }
     }
+
 }

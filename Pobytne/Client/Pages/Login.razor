@@ -6,8 +6,8 @@
 <form>
   <!-- Email input -->
   <div class="form-outline mb-4">
-    <input type="email" id="form2Example1" class="form-control" @bind="logRequest.Name"/>
-    <label class="form-label" for="form2Example1">Email address</label>
+    <input type="text" id="form2Example1" class="form-control" @bind="logRequest.Name"/>
+    <label class="form-label" for="form2Example1">Login name</label>
   </div>
 
   <!-- Password input -->
@@ -39,9 +39,9 @@
         if (logResponse.IsSuccessStatusCode)
         {
             var user = await logResponse.Content.ReadFromJsonAsync<UserAccount>();
-            await js.InvokeVoidAsync("alert", user.ToString());
             var customAuthStateProvider =(CustomAuthenticationStateProvider) authStateProv;
             await customAuthStateProvider.UpdateAuthenticationState(user);
+            await js.InvokeVoidAsync("alert", user.ToString());
             navManager.NavigateTo("/", true);
         }
         else if(logResponse.StatusCode == HttpStatusCode.Unauthorized)

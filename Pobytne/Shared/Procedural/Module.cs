@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Pobytne.Shared.Struct;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pobytne.Shared.Procedural
 {
@@ -13,12 +9,15 @@ namespace Pobytne.Shared.Procedural
     public class Module
     {
         [Key]
-        public int Id { get; set;}
-        public string Name { get; set; } = string.Empty;
-        public string ShortName { get; set; } = string.Empty;
-        [ForeignKey("License")]
-        public int LicenseId { get; set;}
-        public int LicenseNumber { get; set;}
-        public int EvidenceType { get; set;}
+        public int Id { get; set; }
+        public string ModuleName { get; set; } = string.Empty;
+        public string ModuleShortName { get; set; } = string.Empty;
+        public int LicenseNumber { get; set; }
+        public int EvidenceType { get; set; }
+        public bool OnlyUsersByIdOfModule { get; set; }
+        public int CreationUserId { get; set; }
+        public DateTime CreationDate{ get; set; }
+        [Editable(false)]
+        public string CreationUserName { get; set; } = string.Empty;
     }
 }

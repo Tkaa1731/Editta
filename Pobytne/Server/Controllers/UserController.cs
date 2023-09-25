@@ -41,18 +41,10 @@ namespace Pobytne.Server.Controllers
         [HttpGet]
         [Route("UsersList")]
         //[Authorize(Roles = "Administrator")]
-        public ActionResult<List<User>> Get([FromQuery]long licenseNumber)
+        public ActionResult<IEnumerable<User>> Get([FromQuery]int licenseNumber)
         {//TODO: Get by module
             //long licenseNumber = 26591537;
-            return _userService.GetUsers(licenseNumber).Result;
-        }
-        [HttpGet]
-        [Route("List")]
-        //[Authorize(Roles = "Administrator")]
-        public ActionResult<List<User>> GetList()
-        {//TODO: Get by module
-            //long licenseNumber = 26591537;
-            return new List<User>() { new Shared.Procedural.User { UserName="Terezka" } };
+            return _userService.GetUsersByLicense(licenseNumber).Result.ToList();
         }
     }
 }

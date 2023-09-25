@@ -15,10 +15,10 @@ namespace Pobytne.Server.Controllers
 			_licenseService = licenseService;
 		}
 		[HttpGet]
-		//[Authorize(Roles = "Administrator")]
-		public ActionResult<List<License>> Get()
+		//TODO:[Authorize(Roles = "Administrator")]
+		public ActionResult<IEnumerable<License>> Get()
 		{//TODO: Get by module
-			return _licenseService.GetLicenses().Result;
+			return _licenseService.GetLicenses().Result.ToList();
 		}
     }
 }

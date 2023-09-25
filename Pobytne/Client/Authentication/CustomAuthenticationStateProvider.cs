@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Pobytne.Client.Extensions;
 using Pobytne.Shared.Authentication;
-using Pobytne.Shared.Procedural;
-using System.Reflection.Metadata;
 using System.Security.Claims;
 
 namespace Pobytne.Client.Authentication
@@ -17,17 +15,17 @@ namespace Pobytne.Client.Authentication
             _localStorageService = localStorageService;
         }
 
-        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+        public override async Task<AuthenticationState> GetAuthenticationStateAsync()//TODO:GetToken()
         {
             try
             {
-                var user = await _localStorageService.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
+                var user = await _localStorageService.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);// get entity of UserAccount from LS
                 if (user == null)
-                    return await Task.FromResult(new AuthenticationState(_anonymous));
+                    return await Task.FromResult(new AuthenticationState(_anonymous));// no one is logged
                 var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name,user.UserName),
-                    new Claim("License",user.LicenseNumber.ToString())
+                    new Claim(ClaimTypes.Name,user.User.UserName),
+                    new Claim("License",user.User.LicenseNumber.ToString())
                 },"JwtAuth"));
                 return await Task.FromResult(new AuthenticationState(claimsPrincipal));
             }
@@ -43,8 +41,8 @@ namespace Pobytne.Client.Authentication
             {
                 claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name,user.UserName),
-                    new Claim("License",user.LicenseNumber.ToString())
+                    new Claim(ClaimTypes.Name,user.User.UserName),
+                    new Claim("License",user.User.LicenseNumber.ToString())
 
                 }));
                 user.ExpiryTimeStamp = DateTime.Now.AddSeconds(user.ExpiresIn);

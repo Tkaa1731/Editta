@@ -19,9 +19,9 @@ namespace Pobytne.Server.Controllers
 		[HttpGet]
 		[Route("ModulesList")]
 		//[Authorize(Roles = "Administrator")]
-		public ActionResult<List<Module>> Get([FromQuery]long licenseNumber)
+		public ActionResult<IEnumerable<Module>> Get([FromQuery]int licenseNumber)
 		{//TODO: Get by module
-			return _moduleService.GetModules(licenseNumber).Result;
+			return _moduleService.GetModulesByLicense(licenseNumber).Result.ToList();
 		}
 
     }

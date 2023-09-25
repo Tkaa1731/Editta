@@ -11,7 +11,7 @@ namespace Pobytne.Server.Authentication
     public class JwtAuthenticationManager
     {
         public const string JWT_SECURITY_KEY = "yPkCqn4kSWLtaJwXvN2jGzpQRyTZ3gdXkt7FeBJP";
-        private const int JWT_TOKEN_VALIDITY_MINS = 20;
+        private const int JWT_TOKEN_VALIDITY_MINS = 2;
 
         private UserService _userService;
 
@@ -34,10 +34,10 @@ namespace Pobytne.Server.Authentication
                 var tokenKey = Encoding.ASCII.GetBytes(JWT_SECURITY_KEY);
                 var claimsIdentity = new ClaimsIdentity(new List<Claim>
                     {
-                        new Claim(ClaimTypes.Name, userAccount.Result.UserName),
-                        new Claim("License",userAccount.Result.LicenseNumber.ToString())
+                        new Claim(ClaimTypes.Name, userAccount.Result.User.UserName),
+                        new Claim("License",userAccount.Result.User.LicenseNumber.ToString())
                     });
-                var signingCredentials = new SigningCredentials(
+                var signingCredentials = new SigningCredentials( //klic a algoritmus sifry
                     new SymmetricSecurityKey(tokenKey),
                     SecurityAlgorithms.HmacSha256Signature);
                 var securityTokenDescriptor = new SecurityTokenDescriptor
@@ -52,13 +52,10 @@ namespace Pobytne.Server.Authentication
                 var token = jwtSecurityTokenHandler.WriteToken(securityToken);
 
                 /* Returning the User Session object */
-                var userSession = new UserAccount
-                {
-                    UserName = userAccount.Result.UserName,
-                    AccessPermition = userAccount.Result.AccessPermition,
-                    Token = token,
-                    ExpiresIn = (int)tokenExpiryTimeStamp.Subtract(DateTime.Now).TotalSeconds
-                };
+                var userSession = userAccount.Result;
+                userSession.Token = token;
+                userSession.ExpiresIn = (int)tokenExpiryTimeStamp.Subtract(DateTime.Now).TotalSeconds;
+
                 return userSession;
             }
             catch (Exception ex)
