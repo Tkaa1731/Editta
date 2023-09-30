@@ -2,6 +2,7 @@
 using System.Data.SqlClient;
 using System.Data;
 using Dapper;
+using System.Transactions;
 
 namespace Pobytne.Data.Tables
 {
@@ -53,23 +54,42 @@ namespace Pobytne.Data.Tables
                 return await cnn.RecordCountAsync<User>(conditions);
             }
         }
-        public async Task<bool> Insert(User user, int editorId)
+        public async Task<IEnumerable<User>> GetWithPermitions(object conditions)
         {
-            user.CreationUserId = editorId;
             using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
             {
-                var rowsAffected = await cnn.InsertAsync(user);
-                if (rowsAffected > 0) { return true; }
-                return false;
+                string sql = @"SELECT * 
+                                FROM S_LoginUser u
+                                JOIN S_Opravneni o ON u.IDLogin = o. IDLogin
+                                WHERE o.IDModulu = @IDModulu;";
+
+                var users = await cnn.QueryAsync<User,Permition,User>(sql, (u, p) => {
+                    u.AccessPermition = new List<Permition>() { p };
+                    return u;
+                },conditions,
+                splitOn: "IDOpravneni");
+                return users;
+            }
+        }
+        public async Task<bool> Insert(User user)
+        {
+            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            {
+                try
+                {
+                    var rowsAffected = await cnn.InsertAsync(user);
+                    if (rowsAffected > 0) { return true; }
+                    return false;
+                }
+                catch(Exception ex) { Console.WriteLine(ex.Message); return false; }
             }
         }
         public async Task<IEnumerable<User>> Select()
         {
             throw new NotImplementedException();
         }
-        public async Task<User?> Update(User user, int editorId)
+        public async Task<User?> Update(User user)
         {
-            user.CreationUserId = editorId;
             using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
             {
                 await cnn.UpdateAsync(user);

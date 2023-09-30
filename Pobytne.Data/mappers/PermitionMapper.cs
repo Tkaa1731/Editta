@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pobytne.Data.mappers
+namespace Pobytne.Data.Mappers
 {
     internal class PermitionMapper : EntityMap<Permition>
     {

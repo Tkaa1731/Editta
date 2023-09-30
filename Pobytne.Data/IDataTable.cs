@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pobytne.Data.Tables
+namespace Pobytne.Data
 {
     internal interface IDataTable<T>
     {
         Task<IEnumerable<T>> Select();
         Task<int> Delete(int id);
-        Task<bool> Insert(T item);
-        Task<T?> Update(T item);
+        Task<bool> Insert(T item, int editorId);
+        Task<T?> Update(T item, int editorId);
 
     }
 }

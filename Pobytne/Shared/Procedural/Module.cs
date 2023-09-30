@@ -1,12 +1,12 @@
-﻿using Pobytne.Shared.Struct;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Dapper;
+using Pobytne.Shared.Struct;
+
 
 namespace Pobytne.Shared.Procedural
 {
     [Serializable]
     [Table("S_Moduly")]
-    public class Module
+    public class Module : IListItem
     {
         [Key]
         public int Id { get; set; }
@@ -19,5 +19,11 @@ namespace Pobytne.Shared.Procedural
         public DateTime CreationDate{ get; set; }
         [Editable(false)]
         public string CreationUserName { get; set; } = string.Empty;
+        [Editable(false)]
+        public string Name => ModuleName;
+        [Editable(false)]
+        public string Description => $"Type of evidence {EvidenceType}";
+        //[Editable(false)]
+        //public Type Type { get => typeof(Module); }
     }
 }

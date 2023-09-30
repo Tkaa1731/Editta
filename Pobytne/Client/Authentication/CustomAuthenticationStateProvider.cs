@@ -24,6 +24,7 @@ namespace Pobytne.Client.Authentication
                     return await Task.FromResult(new AuthenticationState(_anonymous));// no one is logged
                 var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
                 {
+                    new Claim("Id",user.User.Id.ToString()),
                     new Claim(ClaimTypes.Name,user.User.UserName),
                     new Claim("License",user.User.LicenseNumber.ToString())
                 },"JwtAuth"));
@@ -41,6 +42,7 @@ namespace Pobytne.Client.Authentication
             {
                 claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
                 {
+                    new Claim("Id",user.User.Id.ToString()),
                     new Claim(ClaimTypes.Name,user.User.UserName),
                     new Claim("License",user.User.LicenseNumber.ToString())
 

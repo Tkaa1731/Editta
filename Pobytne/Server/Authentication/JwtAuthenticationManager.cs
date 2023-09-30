@@ -34,6 +34,7 @@ namespace Pobytne.Server.Authentication
                 var tokenKey = Encoding.ASCII.GetBytes(JWT_SECURITY_KEY);
                 var claimsIdentity = new ClaimsIdentity(new List<Claim>
                     {
+                        new Claim("Id",userAccount.Id.ToString()),
                         new Claim(ClaimTypes.Name, userAccount.Result.User.UserName),
                         new Claim("License",userAccount.Result.User.LicenseNumber.ToString())
                     });

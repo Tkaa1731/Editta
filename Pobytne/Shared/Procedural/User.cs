@@ -5,9 +5,10 @@ using Pobytne.Shared.Struct;
 namespace Pobytne.Shared.Procedural
 {
     [Table("S_LoginUser")]
-    public class User : ICreation
+    public class User : ICreation, IListItem
     {
         [Key]
+        [Editable(false)]
         public int Id { get; set; }
         public string UserLogin { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
@@ -30,7 +31,12 @@ namespace Pobytne.Shared.Procedural
         public DateTime CreationDate { get; set; }
         [Editable(false)]
         public string CreationUserName { get; set; } = string.Empty;
-
+        [Editable(false)]
+        public string Name => UserLogin;
+        [Editable(false)]
+        public string Description => UserName;
+        //[Editable(false)]
+        //public Type Type { get => typeof(User); }
         public bool CheckPassword(string password) => _password == password;
     }
 }

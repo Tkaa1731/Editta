@@ -1,0 +1,91 @@
+﻿@inject HttpClient httpClient
+@inject IJSRuntime js
+<div class="card">
+    <div class="card-header">
+        <h4>@header</h4>
+    </div>
+    <div class="card-body">
+        
+        <form>
+            <HxInputText @bind-Value="user.UserLogin" Label="Login user" Type="InputType.Text" />
+            <HxInputText @bind-Value="user.UserName" Label="Name user" Type="InputType.Text" />
+
+            <HxInputText @bind-Value="user.Email" Label="Email" Type="InputType.Email" />
+            <HxInputText @bind-Value="user.PhoneNumber" Label="Phone number" Type="InputType.Tel"/>
+
+            <HxInputNumber Label="License Number" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="licenseNumber" Enabled="false" />
+            <HxSwitch Text="Valid user" @bind-Value="@user.Valid" />
+
+            <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="user.ValidTo" MinDate="@minDate" />
+
+            @if (formType == FormEnum.Edit)
+            {
+                <span><button type="button" class="btn btn-danger" @onclick="Delete">Delete</button></span>
+                <span><button type="button" class="btn btn-primary" @onclick="Update">Update</button></span>
+            }
+            else if (formType == FormEnum.Insert)
+            {
+                <button type="button" class="btn btn-primary" @onclick="Insert">Insert new</button>
+            }
+        </form>
+    </div>
+</div>
+@code {
+    private DateTime minDate { get; set; }
+    public enum FormEnum
+    {
+        Edit,Insert
+    }
+    [Parameter]
+    public FormEnum formType { get; set; }
+    [Parameter]
+    public User user { get; set; } = new User() { Id = 0, Valid = true, ValidTo = DateTime.Now.AddYears(1), LicenseNumber = 0, CreationUserId = 1, CreationDate = DateTime.Now};
+    [Parameter]
+    public int licenseNumber{ get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; } = default!;
+    public string header { 
+        get 
+        {
+            if (formType == FormEnum.Edit) return "Editing of record";
+            else if (formType == FormEnum.Insert) return "Add new record";
+            return "Unknown operation";
+        }
+    }
+    public UserForm()
+    {
+        minDate = DateTime.Now.AddDays(1);
+        if (user.LicenseNumber == 0)
+            user.LicenseNumber = licenseNumber;
+    }
+    private async Task Update()
+    {
+        // var authState = await authenticationState;
+        // if (authState.User.Identity.IsAuthenticated)
+        //     user.CreationUserId = authState.User.Identity.
+        var logResponse = await httpClient.PostAsJsonAsync<User>("/api/User/Update", user);
+        if (logResponse.IsSuccessStatusCode)
+        {
+            await js.InvokeVoidAsync("alert", "Updating was successful");
+        }
+        else
+        {
+            await js.InvokeVoidAsync("alert", "Failure!");
+        }
+    }
+    private void Delete()
+    {
+
+    }
+    private void Insert()
+    {
+        user.Password = GetRandomPassword();
+        user.ValidFrom = DateTime.Now;
+
+    }
+    private string GetRandomPassword()// TODO: Vymyslet co s heslem
+    {
+        return "Password";
+    }
+
+}

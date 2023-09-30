@@ -41,12 +41,12 @@ namespace Pobytne.Data.Tables
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert(License item, int editorId)
+        public Task<bool> Insert(License item)
         {
             throw new NotImplementedException();
         }
 
-        public Task<License?> Update(License item, int editorId)
+        public Task<License?> Update(License item)
         {
             throw new NotImplementedException();
         }
