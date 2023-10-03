@@ -1,7 +1,10 @@
 ﻿@page "/fetchdata"
+@using Pobytne.Client.Shared.Forms
 @inject HttpClient Http
 @inject AuthenticationStateProvider authStateProv
 @inject NavigationManager navManager
+@inject PobytneService<License> licenceService
+@inject PobytneService<Module> moduleService
 @inject IJSRuntime js
 @attribute [Authorize]
 
@@ -31,11 +34,11 @@ else
 }
 @if(choosedUser is not null)
 {
-    <UserForm user="@choosedUser" Type="UserForm.FormEnum.Edit"/>
+    <UserForm user="@choosedUser" formType="UserForm.FormEnum.Edit" licenseNumber="@choosedLicense"/>
 }
 else if(choosedModule is not null)
 {
-    <ModuleForm module="@choosedModule" Type="ModuleForm.FormEnum.Edit"/>
+    <ModuleForm module="@choosedModule" formType="ModuleForm.FormEnum.Edit"/>
 }
 <div style="max-height:325px;overflow:auto;">
     <table class="table table-hover">
@@ -90,7 +93,7 @@ else if(choosedModule is not null)
     private License[]? licenseList;
     private Dictionary<long, User[]> usersDic { get; set; } = new();
     private Dictionary<long,Module[]> modulesDic { get; set; } = new();
-    private long choosedLicense { get; set; } = -1;
+    private int choosedLicense { get; set; } = -1;
     private Module? choosedModule;
     private User? choosedUser;
     private Module[]? modulesList;

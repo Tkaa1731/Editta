@@ -1,8 +1,5 @@
-﻿using Dapper;
-using Dapper.FluentMap;
-using Pobytne.Data.mappers;
-using Pobytne.Shared.Procedural;
-using System.Data.SqlClient;
+﻿using Dapper.FluentMap;
+using Pobytne.Data.Mappers;
 
 namespace Pobytne.Data
 {
@@ -18,6 +15,7 @@ namespace Pobytne.Data
                 configure.AddMap(new PermitionMapper());
             });
         }
+
     }
 
 }

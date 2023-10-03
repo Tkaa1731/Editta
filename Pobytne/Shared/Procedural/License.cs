@@ -6,7 +6,7 @@ namespace Pobytne.Shared.Procedural
 {
     [Serializable]
     [Table("S_Licence")]
-    public class License : IContact, ICreation
+    public class License : IContact, ICreation, IListItem
     {
         [Key]
         public int Id { get; set; }
@@ -33,5 +33,11 @@ namespace Pobytne.Shared.Procedural
         public DateTime CreationDate { get; set; }
         [Editable(false)]
         public string CreationUserName { get; set; } = string.Empty;
+        [Editable(false)]
+        public string Name => ICO.ToString();
+        [Editable(false)]
+        public string Description => NameOfOrganization;
+        //[Editable(false)]
+        //public Type Type { get => typeof(License); }
     }
 }

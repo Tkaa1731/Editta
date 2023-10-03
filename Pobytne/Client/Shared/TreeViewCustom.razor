@@ -1,0 +1,178 @@
+﻿@inject HttpClient HttpClient
+@inject IJSRuntime js
+<div class="row">
+    <div class="col-lg-3" style="height: 800px">
+        <HxTreeView TItem="IDirectory"
+        @bind-SelectedItem="SelectedDirectory"
+                    Items="@fileSystem"
+                    CssClass="border rounded p-2"
+                    ItemTitleSelector="@(p => p.Name)"
+                    ItemIconSelector="@(p => p.Icon)"
+                    ItemChildrenSelector="@(p => p.Subdirectories)" />
+    </div>
+    <div class="col-lg-9">
+        @if (SelectedDirectory == null)
+        {
+            <p>No directory selected.</p>
+        }
+        else
+        {
+            <ListCustom ListItems=@listOfItems></ListCustom>
+        }
+    </div>
+</div>
+
+@code {
+    private IDirectory SelectedDirectory { get => _selectedDirectory; set {  _selectedDirectory = value; OnSelect(); } }
+    private IDirectory _selectedDirectory { get; set; }
+
+    private List<IListItem> listOfItems { get; set; } = new List<IListItem>();
+    private List<LicenseDir> fileSystem { get; set; } 
+    private PobytneService<Module> pobytneService { get; set; }
+
+    private void OnSelect()
+    {
+        if(_selectedDirectory is not null)
+            SelectedDirectory.OnSelect();
+        listOfItems = SelectedDirectory.ItemsList;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        fileSystem = new List<LicenseDir>();
+        List<License>? licenses = await HttpClient.GetFromJsonAsync<List<License>>("api/License");
+
+        if(licenses is not null)
+            foreach (var  l in licenses)
+                fileSystem.Add(new LicenseDir(HttpClient, l));
+
+        if(fileSystem.Count > 0)
+            SelectedDirectory = fileSystem[0];
+    }
+
+    public interface IDirectory
+    {
+        string Name { get;}
+        IconBase Icon { get;}
+        List<IDirectory> Subdirectories { get;}
+        List<IListItem> ItemsList { get;}
+        void OnSelect();
+        void AddNew();
+    }
+    public class LicenseDir : IDirectory // Add/update module
+    {
+        private readonly HttpClient _http;
+        public LicenseDir(HttpClient httpClient, License license)
+        {
+            Modules = new List<IDirectory>() { };
+            _http = httpClient;
+            License = license;
+            Users = new UserDir(httpClient,License.LicenseNumber);
+            LoadData();
+        }
+        public License License { get; set; }
+        public List<IDirectory> Modules { get; set; }
+        public IDirectory Users { get; set; }
+        public List<IListItem> ItemsList { get; set; }
+        public List<IDirectory> Subdirectories
+        {
+            get{
+                List<IDirectory> result = new List<IDirectory>() { Users };
+                return Modules.Concat(result).ToList();
+            } 
+        }
+
+        public string Name { get { return $"{License.NameOfOrganization} | {License.LicenseNumber}"; } }
+        public IconBase Icon { get { return BootstrapIcon.Folder; } }
+
+        public void AddNew()
+        {
+
+        }
+        private async Task LoadData()
+        {
+            var modules = await _http.GetFromJsonAsync<List<Module>>($"api/Module/ModulesList?licenseNumber={License.LicenseNumber}");
+            if (modules is not null)
+                foreach (Module m in modules)
+                {
+                    Modules.Add(new ModuleDir(_http, m) as IDirectory);
+                }
+        }
+        public void OnSelect()
+        {
+            List<ModuleDir?> modules = Modules.Select(m => m as ModuleDir).ToList();
+            ItemsList = modules.Select(m => m.Module as IListItem).ToList();
+        }
+    }
+    public class ModuleDir : IDirectory // add/update permition for user
+    {
+        private readonly HttpClient _http;
+        public ModuleDir(HttpClient httpClient, Module module)
+        {
+            _http = httpClient;
+            Module = module;
+        }
+        public Module Module { get; set; }
+        public List<IListItem> UsersOfModule { get; set; } = new List<IListItem>() { };
+
+        public string Name { get { return Module.ModuleName; } }
+        public IconBase Icon { get { return BootstrapIcon.FolderPlus; } }
+        public List<IListItem> ItemsList { get => UsersOfModule; }
+        public List<IDirectory> Subdirectories { get { return new List<IDirectory>(); } }
+        public void AddNew()
+        {
+
+        }
+        private async Task LoadData()
+        {
+            if(UsersOfModule.Count <= 0)
+            {
+                var users = await _http.GetFromJsonAsync<List<User>>($"api/User/UsersList?userOfModule={Module.Id}");
+                if (users is not null)
+                    UsersOfModule = users.Select(u => u as IListItem).ToList();
+            }
+        }
+        public void OnSelect()
+        {
+            LoadData();
+        }
+
+    }
+    public class UserDir : IDirectory// add/update user
+    {
+        private readonly HttpClient _http;
+        private readonly int _licenseNumber;
+        public UserDir(HttpClient httpClient, int licenseNumber)
+        {
+            _http = httpClient;
+            _licenseNumber = licenseNumber;
+            _name = "Users :";
+        }
+        public List<IListItem> Users { get; set; } = new List<IListItem>() { };
+        private string _name{ get; set; }
+        public string Name { get { return _name; } }
+        public IconBase Icon { get { return BootstrapIcon.People; } }
+        public List<IListItem> ItemsList { get => Users; }
+        public List<IDirectory> Subdirectories { get { return new List<IDirectory>(); } }
+        public void AddNew()
+        {
+
+        }
+        private async Task LoadData()
+        {
+            if(Users.Count <= 0)
+            {
+                var users = await _http.GetFromJsonAsync<List<User>>($"api/User/UsersList?licenseNumber={_licenseNumber}");
+                if (users is not null)
+                    Users = users.Select(u => u as IListItem).ToList();
+            }
+            _name += " Load ";
+            
+        }
+        public void  OnSelect(){
+            LoadData();
+            _name += " Select ";
+        }
+    }
+
+}

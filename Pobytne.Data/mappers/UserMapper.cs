@@ -1,7 +1,7 @@
 ﻿using Dapper.FluentMap.Mapping;
 using Pobytne.Shared.Procedural;
 
-namespace Pobytne.Data.mappers
+namespace Pobytne.Data.Mappers
 {
     internal class UserMapper : EntityMap<User>
     {
@@ -19,6 +19,8 @@ namespace Pobytne.Data.mappers
             Map(u => u.ValidTo).ToColumn("PlatiDo");
             Map(u => u.CreationUserId).ToColumn("Kdo");
             Map(u => u.CreationDate).ToColumn("Kdy");
+            Map(u => u.Email).ToColumn("Email");
+            Map(u => u.Valid).ToColumn("Valid");
         }
     }
 }

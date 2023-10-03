@@ -38,13 +38,24 @@ namespace Pobytne.Server.Controllers
             //if (loginedUser == null) { return null; }
             //return loginedUser;
         }
+        [HttpPost]
+        [Route("Update")]
+        public ActionResult<User?> Update([FromBody]User updateUser) 
+        {
+            return _userService.Update(updateUser).Result;
+        }
         [HttpGet]
         [Route("UsersList")]
         //[Authorize(Roles = "Administrator")]
-        public ActionResult<IEnumerable<User>> Get([FromQuery]int licenseNumber)
+        public ActionResult<IEnumerable<User>> Get([FromQuery]int licenseNumber = -1, [FromQuery]int userOfModule = -1)
         {//TODO: Get by module
             //long licenseNumber = 26591537;
-            return _userService.GetUsersByLicense(licenseNumber).Result.ToList();
+            if(licenseNumber > 0)
+                return _userService.GetUsersByLicense(licenseNumber).Result.ToList();
+            if(userOfModule > 0)
+                return _userService.GetUsersByModule(userOfModule).Result.ToList();
+            else
+                return new List<User>();
         }
     }
 }

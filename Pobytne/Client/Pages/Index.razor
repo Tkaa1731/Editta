@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using Blazored.LocalStorage;
+@using Pobytne.Client.Shared.Forms
 @inject IJSRuntime js
 @inject ILocalStorageService localStorage
 @inject HttpClient Http
@@ -8,39 +9,35 @@
 <AuthorizeView>
 	<Authorized>
 		<h1>Hello, @context.User.Identity.Name !</h1>
-	</Authorized>
-	<NotAuthorized>
-		<h1>Hello, Please LoginFirst</h1>
-	</NotAuthorized>
-</AuthorizeView>
 
-
-<AuthorizeView>
-	<Authorized>
 		<br /><br />
         @foreach(var module in permitions)
         {
-            <div class="card w-25">
+            <span class="card w-25">
                 <div class="card-body">
                     <h5>Permition id : @module.Id</h5>
                     <h5 class="card-title">Module name : @module.ModuleName</h5>
                     <p>permition string : @module.PermitionString</p>
                 </div>
-            </div>
+            </span>
         }
     </Authorized>
 </AuthorizeView>
+
+<button @onclick="ShowPopUp">POPUP</button>
+<LoginForm @ref="loginForm"></LoginForm>
+
 
 @code{
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
     [EditorRequired]
     private List<Permition> permitions { get; set; } = new();
+    //public IDirectory[] list{ get{ return new(); }}
+    private LoginForm loginForm { get; set; }
+    private async Task ShowPopUp(){
 
-    private async Task DisplayGreetingAlert(){
-        var authState = await authenticationState;
-        var message = $"Hello {authState.User.Identity.Name}!";
-        await js.InvokeVoidAsync("alert", message);
+        await loginForm.Show();
     }
     protected async override Task OnInitializedAsync()
     {
@@ -54,5 +51,9 @@
         else
             permitions = new();
         return;
-	}
+    }
+    // private async IDirectory[] GetLicenses()
+    // {
+    //     return Array.Empty<IDirectory>();   
+    // }
 }

@@ -25,13 +25,13 @@ namespace Pobytne.Data.Tables
             throw new NotImplementedException();
         }
 
-        public Task<bool> Insert(Permition item, int editorId)
+        public Task<bool> Insert(Permition item)
         {
             throw new NotImplementedException();
         }
 
 
-        public Task<Permition?> Update(Permition item, int editorId)
+        public Task<Permition?> Update(Permition item)
         {
             throw new NotImplementedException();
         }

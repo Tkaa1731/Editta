@@ -1,3 +1,4 @@
+using Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.IdentityModel.Tokens;
@@ -46,8 +47,9 @@ namespace Pobytne
             builder.Services.AddScoped<PermitionTable>();
 
             Database.OnInitialize();
+            SimpleCRUD.SetColumnNameResolver(new MyFluentMapperNameResolver());
 
-			var app = builder.Build();
+            var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
