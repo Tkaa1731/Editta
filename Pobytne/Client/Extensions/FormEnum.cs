@@ -2,6 +2,6 @@
 {
     public enum FormEnum
     {
-        Edit,Insert
+        Update,Insert
     }
 }

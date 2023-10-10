@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 
 namespace Pobytne.Data.Tables
 {
-    public class PermitionTable : IDataTable<Permition>
+    public class PermitionTable //: IDataTable<Permition>
     {
         public async Task<IEnumerable<Permition>> GetAll(int idLogin)
         {
@@ -20,24 +20,20 @@ namespace Pobytne.Data.Tables
                 return await cnn.QueryAsync<Permition>(sql, condition);
             }
         }
-        public Task<IEnumerable<Permition>> Select()
+        public async Task<int?> Insert(Permition item)
         {
-            throw new NotImplementedException();
+            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            return await cnn.InsertAsync(item);
         }
-
-        public Task<bool> Insert(Permition item)
+        public async Task<int> Update(Permition item)
         {
-            throw new NotImplementedException();
+            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            return await cnn.UpdateAsync(item);
         }
-
-
-        public Task<Permition?> Update(Permition item)
+        public async Task<int> Delete(int id)
         {
-            throw new NotImplementedException();
-        }
-        public Task<int> Delete(int id)
-        {
-            throw new NotImplementedException();
+            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            return await cnn.DeleteAsync(id);
         }
     }
 }

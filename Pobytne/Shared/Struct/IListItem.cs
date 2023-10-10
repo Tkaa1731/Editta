@@ -12,6 +12,6 @@ namespace Pobytne.Shared.Struct
         string Name { get; }
         string Description{  get; }
         DateTime CreationDate { get; set; }
-        //Type Type { get; }
+        int CreationUserId { get; set; }
     }
 }

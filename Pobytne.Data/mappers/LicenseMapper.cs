@@ -9,7 +9,6 @@ namespace Pobytne.Data.Mappers
         {
             Map(l => l.Id).ToColumn("IDLicence");
             Map(l => l.LicenseNumber).ToColumn("CisloLicence");
-            Map(l => l.ICO).ToColumn("ICO");
             Map(l => l.NameOfOrganization).ToColumn("NazevOrganizace");
             Map(l => l.ContactPerson).ToColumn("KontaktniOsoba");
             Map(l => l.VersionType).ToColumn("TypVerze");
@@ -21,7 +20,6 @@ namespace Pobytne.Data.Mappers
             Map(l => l.City).ToColumn("Obec");
             Map(l => l.Street).ToColumn("Ulice");
             Map(l => l.PostNumber).ToColumn("PSC");
-            Map(l => l.Email).ToColumn("Email");
             Map(l => l.PhoneNumber).ToColumn("Telefon");
             Map(l => l.ValidFrom).ToColumn("PlatiOd");
             Map(l => l.ValidTo).ToColumn("PlatiDo");

@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace Pobytne.Client.Extensions
 {
-    public static class LocalStorageService
+    public static class LocalStorageService 
     {
         public const string USER_SESSION = "UserSession";
         public const string MODULE_SESSION = "ActiveModule";

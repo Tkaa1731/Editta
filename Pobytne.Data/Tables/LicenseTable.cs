@@ -1,12 +1,11 @@
-﻿using Pobytne.Shared.Struct;
-using Pobytne.Shared.Procedural;
+﻿using Pobytne.Shared.Procedural;
 using System.Data.SqlClient;
 using System.Data;
 using Dapper;
 
 namespace Pobytne.Data.Tables
 {
-    public class LicenseTable : IDataTable<License>
+    public class LicenseTable //: IDataTable<License>
     {
         public async Task<IEnumerable<License>> GetAll(object condition)
         {
@@ -31,24 +30,32 @@ namespace Pobytne.Data.Tables
             }
         }
 
-        public Task<IEnumerable<License>> Select()
+        public async Task<IEnumerable<License>> Select(int id)
         {
-            throw new NotImplementedException();
+            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            {
+                string sql = @"SELECT * FROM S_Licence WHERE CisloLicence=@CisloLicence;";
+                var param = new { CisloLicence = id };
+                return  await cnn.QueryAsync<License>(sql, param);
+            }
         }
 
-        public Task<int> Delete(int id)
+        public async Task<int> Delete(int id)
         {
-            throw new NotImplementedException();
+            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            return await cnn.DeleteAsync(id);
         }
 
-        public Task<bool> Insert(License item)
+        public async Task<int?> Insert(License item)
         {
-            throw new NotImplementedException();
+            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            return await cnn.InsertAsync(item);
         }
 
-        public Task<License?> Update(License item)
+        public async Task<int> Update(License item)
         {
-            throw new NotImplementedException();
+            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            return await cnn.UpdateAsync(item);
         }
     }
 }

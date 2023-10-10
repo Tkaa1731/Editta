@@ -5,7 +5,7 @@ using Dapper;
 
 namespace Pobytne.Data.Tables
 {
-    public class ModuleTable : IDataTable<Module>
+    public class ModuleTable
     {
 
         public async Task<IEnumerable<Module>> GetAll(object conditions)
@@ -34,28 +34,21 @@ namespace Pobytne.Data.Tables
         }
 
 
-        public Task<bool> Insert(Module item)
+        public async Task<int?> Insert(Module item)
         {
-            throw new NotImplementedException();
+            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            return await cnn.InsertAsync(item);
         }
 
-        public async Task<Module?> Update(Module item)
+        public async Task<int> Update(Module item)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
-            {
-                await cnn.UpdateAsync(item);
-                var result = await Select(item.Id);
-                return result.First();
-            }
+            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            return await cnn.UpdateAsync(item);
         }
-        public Task<int> Delete(int id)
+        public async Task<int> Delete(int id)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<Module>> Select()
-        {
-            throw new NotImplementedException();
+            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            return await cnn.DeleteAsync(id);
         }
     }
 }
