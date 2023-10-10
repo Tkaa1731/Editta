@@ -15,7 +15,7 @@ namespace Pobytne.Data
             var property = map.PropertyMaps.FirstOrDefault(x => x.PropertyInfo == propertyInfo);
             if (property == null)
             {
-                throw new NotImplementedException("Property not resolved!");
+                return propertyInfo.Name;
             }
             return property.ColumnName;
         }

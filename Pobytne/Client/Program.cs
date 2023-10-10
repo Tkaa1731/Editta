@@ -12,6 +12,15 @@ namespace Pobytne.Client
 {
     public class Program
     {
+        public static void ConfigureServices(IServiceCollection services)
+        {
+            // ...
+            services.AddBlazoredLocalStorage();
+            services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+            services.AddHxServices();
+            services.AddAuthorizationCore();
+            // ...
+        }
         public static async Task Main(string[] args)
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -19,12 +28,7 @@ namespace Pobytne.Client
             builder.RootComponents.Add<HeadOutlet>("head::after");
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-            builder.Services.AddBlazoredLocalStorage();
-            builder.Services.AddScoped<AuthenticationStateProvider,CustomAuthenticationStateProvider>();
-
-
-            builder.Services.AddHxServices();
-            builder.Services.AddAuthorizationCore();
+            ConfigureServices(builder.Services);
 
             await builder.Build().RunAsync();
         }

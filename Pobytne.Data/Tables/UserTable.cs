@@ -6,7 +6,7 @@ using System.Transactions;
 
 namespace Pobytne.Data.Tables
 {
-    public class UserTable : IDataTable<User>
+    public class UserTable //: IDataTable<User>
     {
         public async Task<User?> GetByLogin(string loginUser)
         {
@@ -71,41 +71,20 @@ namespace Pobytne.Data.Tables
                 return users;
             }
         }
-        public async Task<bool> Insert(User user)
+        public async Task<int?> Insert(User user)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
-            {
-                try
-                {
-                    var rowsAffected = await cnn.InsertAsync(user);
-                    if (rowsAffected > 0) { return true; }
-                    return false;
-                }
-                catch(Exception ex) { Console.WriteLine(ex.Message); return false; }
-            }
+            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            return await cnn.InsertAsync(user);
         }
-        public async Task<IEnumerable<User>> Select()
+        public async Task<int> Update(User user)
         {
-            throw new NotImplementedException();
+            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            return await cnn.UpdateAsync(user);
         }
-        public async Task<User?> Update(User user)
+        public async Task<int> Delete(int id)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
-            {
-                await cnn.UpdateAsync(user);
-                var result = await GetByLogin(user.UserLogin);
-                return result;
-            }
+            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            return await cnn.DeleteAsync(id);
         }
-        public async Task<int> Delete(int idLogin)
-        {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
-            {
-                var rowsAffected = await cnn.DeleteAsync<User>(new { IDLogin = idLogin });
-                return rowsAffected;
-            }
-        }
-
-
     }
 }

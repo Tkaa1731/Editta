@@ -1,8 +1,75 @@
 ﻿@page "/EditLicenses"
+@attribute [Authorize]
+@inject HttpClient HttpClient
+@inject IJSRuntime js
+
 <PageTitle>EditLicense</PageTitle>
-
-<TreeViewCustom></TreeViewCustom>
-
+<div class="row">
+    <div class="col-lg-3" style="height: 800px">
+        <HxTreeView TItem="IDirectory"
+                    SelectedItemChanged="OnSelect"
+                    Items="@fileSystem"
+                    CssClass="border rounded p-2"
+                    ItemTitleSelector="@(p => p.Name)"
+                    ItemIconSelector="@(p => p.Icon)"
+                    ItemChildrenSelector="@(p => p.Subdirectories)" />
+    </div>
+    <div class="col-lg-9">
+        <ListCustom ListItems=@listOfItems currentItem=selectedItem selectedItemChanged=OnItemSelect EventNewItem="OnNewItem"></ListCustom>
+    </div>
+</div>
+<FormMessageBox formItem="formItem" @ref=formMessageBox OnSuccessRequest="OnSuccessRequestHandler"></FormMessageBox>
 @code {
 
+    private IDirectory? selectedDirectory;
+    private IListItem? selectedItem;
+    private IListItem? formItem;
+    private List<IListItem>? listOfItems;
+    private List<Directory> fileSystem = new();
+    private FormMessageBox formMessageBox = new();
+
+
+    private async Task OnSelect(IDirectory e)
+    {
+        this.selectedDirectory = e;
+        if (selectedDirectory is not null)
+        {
+            await selectedDirectory.OnSelect();
+            listOfItems = selectedDirectory.ItemsList;            
+        }
+    }
+    private async Task OnItemSelect(IListItem i)
+    {
+        if(i is not null)
+        {
+            formItem = i;
+            await formMessageBox.UpdateForm();            
+        }
+        selectedItem = null;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        fileSystem = new List<Directory>() { new Directory(HttpClient, "Pobytne licence") };
+        await fileSystem[0].OnSelect();
+    }
+    private async Task OnNewItem()
+    {
+        if(selectedDirectory is not null)
+        {
+            formItem = selectedDirectory.GetNew();
+            await formMessageBox.InsertForm();            
+        }
+    }
+    private async Task OnSuccessRequestHandler(IListItem newItem)
+    {
+        if (selectedDirectory is not null)
+        {
+            selectedDirectory.AddNew(newItem);
+            await OnSelect(selectedDirectory);            
+        }
+        StateHasChanged();
+    }
+    //TODO: After Update Insert I add instance to the driir but I need the DataBase one ...Update Insert request has to return an instance
+    //TODO: Delete
+    //TODO: Permition form
 }

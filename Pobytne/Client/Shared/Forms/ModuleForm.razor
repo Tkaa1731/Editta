@@ -1,67 +1,57 @@
-﻿<div class="card">
-    <div class="card-header">
-        <h4>@header</h4>
-    </div>
-    <div class="card-body">
-        
-        <form>
-          <div class="form-row">
-            <div class="form-group col-md-6">
-              <label for="inputName">Name</label>
-              <input type="text" class="form-control" id="inputName" placeholder="Name" @bind="@module.ModuleName">
+﻿@if(module is not null)
+{
+    <EditForm Model="@module" OnValidSubmit=OnValidSubmitHandler>
+	    <DataAnnotationsValidator />
+
+        <div class="row align-items-start">
+            <div class="col">
+                <HxInputText @bind-Value="module.ModuleName" Label="Name of module" Type="InputType.Text" />
             </div>
-            <div class="form-group col-md-6">
-              <label for="inputShortName">Shortname</label>
-              <input type="text" class="form-control" id="inputShortName" placeholder="Short name" @bind="@module.ModuleShortName">
+            <div class="col">
+                <HxInputText @bind-Value="module.ModuleShortName" Label="ShortName" Type="InputType.Text" />
             </div>
-          </div>
-          <div class="form-group">
-            <label for="inputEvidenceType">Evidence type</label>
-            <input type="number" class="form-control" id="inputEvidenceType" placeholder="Evidence type" @bind="@module.EvidenceType">
-          </div>
-          <div class="form-group">
-            <label for="inputLicenceNumber">License number</label>
-            <input type="number" class="form-control" id="inputLicenceNumber" @bind="@module.LicenseNumber" disabled>
-          </div>
-            @if(formType == FormEnum.Edit)
-            {
-                <button type="submit" class="btn btn-primary" @onclick="Update">Update</button>
-            }
-            else if(formType == FormEnum.Insert)
-            {
-                <button type="submit" class="btn btn-primary" @onclick="Insert">Insert new</button>
-            }
-        </form>
-    </div>
-</div>
+        </div>
+        <div class="row align-items-start">
+            <div class="col">
+                <HxInputNumber Label="License Number" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="module.LicenseNumber" Enabled="false" />
+            </div>
+            <div class="col">
+                <HxInputNumber Label="Evidence type" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="module.EvidenceType"/>
+            </div>
+        </div>
+
+        <HxSwitch Text="Only users by ID of module" @bind-Value="@module.OnlyUsersByIdOfModule" />
+
+        <div class="d-grid gap-2">
+            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        </div>
+
+    </EditForm>
+}
+
 @code {
-    public enum FormEnum
-    {
-        Edit,Insert
-    }
+    [EditorRequired]
     [Parameter]
     public Module? module { get; set; }
+    [EditorRequired]
     [Parameter]
     public FormEnum formType { get; set; }
-    public string header { 
-        get 
+    [EditorRequired]
+    [Parameter]
+    public EventCallback<string> OnValidSubmit { get; set; }
+    private string ButtonText
+    {
+        get
         {
-            if (formType == FormEnum.Edit) return "Editing of record";
-            else if (formType == FormEnum.Insert) return "Add new record";
-            return "Unknown operation";
+            if (formType == FormEnum.Insert) return "Insert";
+            return "Update";
         }
     }
-    private void Update()
+    private async Task OnValidSubmitHandler()
     {
-   
+        if (formType == FormEnum.Insert)
+            await OnValidSubmit.InvokeAsync("Insert");
+        else if (formType == FormEnum.Update)
+            await OnValidSubmit.InvokeAsync("Update");
     }
-    private void Delete()
-    {
-        
-    }
-    private void Insert()
-    {
-
-    }
-
 }

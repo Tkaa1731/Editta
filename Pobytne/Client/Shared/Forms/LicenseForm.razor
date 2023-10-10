@@ -1,0 +1,109 @@
+﻿@if(license is not null)
+{
+    <EditForm Model="@license" OnValidSubmit=OnValidSubmitHandler>
+        <DataAnnotationsValidator />
+
+        <div class="row align-items-start">
+            <div class="col-sm-7">
+                <HxInputText @bind-Value="license.NameOfOrganization" Label="Name of organization" Type="InputType.Text" />
+            </div>
+            <div class="col-sm">
+                <HxInputNumber Label="ICO" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="license.ICO" @oninput="ICOChangedHandler" Enabled="formType == FormEnum.Insert" />
+            </div>
+            <div class="col-sm">
+                <HxInputNumber Label="License Number" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="@license.ICO" Enabled="false"/>
+            </div>
+        </div>
+        <div class="row align-items-center">
+            <div class="col">
+                <HxInputNumber Label="Version" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="license.VersionType" />
+            </div>
+            <div class="col">
+                <HxSwitch CssClass="mt-3" Text="Demo" @bind-Value="@license.IsDemo" />
+            </div>
+            <div class="col">
+                <HxSwitch CssClass="mt-3" Text="Blocked" @bind-Value="@license.IsBlocked" />
+            </div>
+            <div class="col">
+                <HxSwitch CssClass="mt-3" Text="Payed" @bind-Value="@license.IsPayed" />
+            </div>
+        </div>
+        <div class="row align-items-start">
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidTo" MinDate=DateTime.Now.AddDays(1) Label="Valid To" />
+            </div>
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.DateOfPayment"  Label="Date of payment" Enabled="license.IsPayed" />
+            </div>
+        </div>
+        <hr style="height: 2px;color: #999;">
+        <div class="row align-items-start">
+            <div class="col">
+                <HxInputText @bind-Value="license.ContactPerson" Label="Name of contact person" Type="InputType.Text" />
+            </div>
+        </div>
+        <div class="row align-items-start">
+            <div class="col-sm-7">
+                <HxInputText @bind-Value="license.Email" Label="Email" Type="InputType.Email" />
+            </div>
+            <div class="col-sm">
+                <HxInputText @bind-Value="license.PhoneNumber" Label="Phone number" Type="InputType.Tel" />
+            </div>
+        </div>
+        <div class="row align-items-start">
+            <div class="col-sm">
+                <HxInputText @bind-Value="license.City" Label="City" Type="InputType.Text" />
+            </div>
+            <div class="col-sm">
+                <HxInputText @bind-Value="license.Street" Label="Street" Type="InputType.Text" />
+            </div>
+            <div class="col-sm-3">
+                <HxInputText @bind-Value="license.PostNumber" Label="Post number" Type="InputType.Text" />
+            </div>
+        </div>
+        <div class="d-grid gap-2 mt-3">
+            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        </div>
+
+    </EditForm>
+}
+@code {
+    [EditorRequired]
+    [Parameter]
+    public License license{ get; set; } = new();
+    [Parameter]
+    public FormEnum formType { get; set; }
+    [Parameter]
+    public EventCallback<string> OnValidSubmit { get; set; }
+    private string ButtonText
+    {
+        get
+        {
+            if (formType == FormEnum.Insert) return "Insert";
+            return "Update";
+        }
+    }
+    private async Task OnValidSubmitHandler()
+    {
+        license.LicenseNumber = license.ICO;
+        if (formType == FormEnum.Insert)
+            await OnValidSubmit.InvokeAsync("Insert");
+        else if (formType == FormEnum.Update)
+            await OnValidSubmit.InvokeAsync("Update");
+    }
+
+    private void ICOChangedHandler(ChangeEventArgs e)
+    {
+        if(e.Value is not null)
+        {
+            if (int.TryParse(e.Value.ToString(), out int newValue))
+            {
+                license.ICO = newValue;
+            }
+            else
+            {
+                license.ICO = 0;
+            }            
+        }
+    }
+}

@@ -1,11 +1,9 @@
-﻿using Pobytne.Data;
-using Pobytne.Data.Tables;
+﻿using Pobytne.Data.Tables;
 using Pobytne.Shared.Procedural;
-using System.Collections;
 
 namespace Pobytne.Server
 {
-	public class LicenseService
+    public class LicenseService
 	{
         private readonly UserTable _userTable;
         private readonly LicenseTable _licenseTable;
@@ -22,5 +20,17 @@ namespace Pobytne.Server
 		{
 			return await _licenseTable.GetAll(new {});
 		}
-	}
+        public async Task<int> Update(License updateLicense)
+        {
+            return await _licenseTable.Update(updateLicense);
+        }
+        public async Task<int?> Insert(License insertLicense)
+        {
+            return await _licenseTable.Insert(insertLicense);
+        }
+        public async Task<int> Delete(int it)
+        {
+            return await _licenseTable.Delete(it);
+        }
+    }
 }

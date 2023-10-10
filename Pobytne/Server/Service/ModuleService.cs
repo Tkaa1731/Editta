@@ -21,5 +21,17 @@ namespace Pobytne.Server
 		{
 			return await _moduleTable.GetAll(new{ CisloLicence = licenseNumber});
 		}
-	}
+        public async Task<int> Update(Module updateModule)
+        {
+            return await _moduleTable.Update(updateModule);
+        }
+        public async Task<int?> Insert(Module insertModule)
+        {
+            return await _moduleTable.Insert(insertModule);
+        }
+        public async Task<int> Delete(int it)
+        {
+            return await _moduleTable.Delete(it);
+        }
+    }
 }
