@@ -7,7 +7,7 @@ using System.Data;
 
 namespace Pobytne.Server.Controllers
 {
-	[Route("api/[controller]")]
+	[Route("[controller]/[action]")]
 	[ApiController]
 	public class ModuleController : ControllerBase
 	{
