@@ -1,6 +1,4 @@
-﻿using Havit.Blazor.Components.Web.Bootstrap;
-using Havit.Blazor.Components.Web;
-using Pobytne.Shared.Procedural;
+﻿using Havit.Blazor.Components.Web;
 using Pobytne.Shared.Struct;
 
 namespace Pobytne.Client.Extensions.IDirectory
@@ -12,7 +10,7 @@ namespace Pobytne.Client.Extensions.IDirectory
         List<IDirectory> Subdirectories { get; }
         List<IListItem> ItemsList { get; }
         Task OnSelect();
-        void AddNew(IListItem newItem);
+        Task AddNew();
         IListItem GetNew();
     }
 }

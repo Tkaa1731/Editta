@@ -13,23 +13,21 @@
 					<div class="card-body p-5 text-center">
 
 						<h3 class="mb-5">Sign in</h3>
-                        <form>
-                            <!-- Email input -->
-                            <div class="form-outline mb-4">
-                              <input type="text" id="form2Example1" class="form-control" @bind="logRequest.Name"/>
-                              <label class="form-label" for="form2Example1">Login name</label>
+                        <EditForm Model="@logRequest" OnValidSubmit=Authenticate>
+                            <DataAnnotationsValidator />
+
+                            <div class="row align-items-start">
+                                <div class="col">
+                                    <HxInputText @bind-Value="logRequest.Name" Label="User login" Type="InputType.Text" />
+                                </div>
+                                <div class="col">
+                                    <HxInputText @bind-Value="logRequest.Password" Label="Password" Type="InputType.Password" />
+                                </div>
                             </div>
-                            
-                            <!-- Password input -->
-                            <div class="form-outline mb-4">
-                              <input type="password" id="form2Example2" class="form-control" @bind="logRequest.Password" />
-                              <label class="form-label" for="form2Example2">Password</label>
+                            <div class="d-grid gap-2">
+                                <HxSubmit Color="ThemeColor.Success">Login</HxSubmit>
                             </div>
-                            
-                            <!-- Submit button -->
-                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Authenticate">Login</button>
-                            
-						</form>
+                        </EditForm>
 					</div>
 				</div>
 			</div>

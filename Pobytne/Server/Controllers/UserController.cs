@@ -63,15 +63,39 @@ namespace Pobytne.Server.Controllers
         [HttpGet]
         [Route("UsersList")]
         //[Authorize(Roles = "Administrator")]
-        public ActionResult<IEnumerable<User>> Get([FromQuery]int licenseNumber = -1, [FromQuery]int userOfModule = -1)
-        {//TODO: Get by module
-            //long licenseNumber = 26591537;
+        public ActionResult<IEnumerable<User>> GetByLicOrMod([FromQuery]int licenseNumber = -1, [FromQuery]int userOfModule = -1)
+        {
             if(licenseNumber > 0)
                 return _userService.GetUsersByLicense(licenseNumber).Result.ToList();
             if(userOfModule > 0)
                 return _userService.GetUsersByModule(userOfModule).Result.ToList();
             else
                 return new List<User>();
+        }
+        [HttpGet]
+        [Route("GetRest")]
+        //[Authorize(Roles = "Administrator")] GetRest?moduleId={module}"
+        public ActionResult<IEnumerable<User>> GetRest([FromQuery] int moduleId)
+        {
+            return _userService.GetUsersExsModule(moduleId).Result.ToList();
+        }
+        [HttpGet]
+        [Route("{id}")]
+        //[Authorize(Roles = "Administrator")]
+        public ActionResult<User> GetById(int id)
+        {
+            try
+            {
+                User? u =  _userService.GetUserById(id).Result;
+                if (u is not null)
+                    return u;
+                else
+                    return BadRequest("Insert failed");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error :{ex.Message}");
+            }
         }
         // DELETE api/<ItemsController>/5
         [HttpDelete("{id}")]

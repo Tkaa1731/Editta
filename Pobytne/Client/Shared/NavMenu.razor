@@ -1,5 +1,5 @@
-﻿
-<div class="top-row ps-3 navbar navbar-dark">
+﻿6
+<div class="top-row ps-3 navbar navbar-dark ">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Pobytne</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -10,21 +10,16 @@
 
 <div class="navmenu" @onclick="ToggleNavMenu">
     <nav class="flex-column">
-        <div class="nav-item px-3">
+        <div class="nav-item">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house" aria-hidden="true"></span> Home
+                <span class="bi bi-house fs-3" aria-hidden="true"></span>
             </NavLink>
         </div>
         <AuthorizeView>
             <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="fetchdata">
-                        <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
+                <div class="nav-item">
                     <NavLink class="nav-link" href="EditLicenses">
-                        <span class="bi bi-pencil-square" aria-hidden="true"></span> Edit Licenses
+                        <span class="bi bi-pencil-square fs-3" aria-hidden="true"></span>
                     </NavLink>
                 </div>
             </Authorized>

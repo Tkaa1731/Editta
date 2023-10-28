@@ -37,15 +37,11 @@ namespace Pobytne.Client.Extensions.IDirectory
         public string Name { get { return $"{License.NameOfOrganization} | {License.LicenseNumber}"; } }
         public IconBase Icon { get { return BootstrapIcon.Folder; } }
 
-        public void AddNew(IListItem newItem)
-        {
-            Module? m = newItem as Module;
-            if (m is not null) 
-                Modules.Add(new ModuleDir(_http, m));
-        }
+        public async Task AddNew() => await LoadData();
         private async Task LoadData()
         {
             var modules = await _http.GetFromJsonAsync<List<Module>>($"api/Module/ModulesList?licenseNumber={License.LicenseNumber}");
+            Modules.Clear();
             if (modules is not null)
                 foreach (Module m in modules)
                     Modules.Add(new ModuleDir(_http, m));

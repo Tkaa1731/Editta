@@ -32,18 +32,11 @@ namespace Pobytne.Client.Extensions.IDirectory
 			}
 		}
 
-		public void AddNew(IListItem newItem)
-		{
-			License? l = newItem as License;
-			if(l is not null)
-			{
-                Licenses.Add(new LicenseDir(_http, l));
-            }
-
-		}
+		public async Task AddNew() => await LoadData();
 		private async Task LoadData()
 		{
 			var licenses = await _http.GetFromJsonAsync<List<License>>("api/License");
+			Licenses.Clear();
 			if (licenses is not null)
 				foreach (License l in licenses)
 				{

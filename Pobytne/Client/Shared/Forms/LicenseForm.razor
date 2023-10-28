@@ -29,8 +29,8 @@
             </div>
         </div>
         <div class="row align-items-start">
-            <div class="col">
-                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidTo" MinDate=DateTime.Now.AddDays(1) Label="Valid To" />
+            <div class="col">+
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidTo" MinDate="DateTime.Now.AddDays(1)" Label="Valid To" />
             </div>
             <div class="col">
                 <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.DateOfPayment"  Label="Date of payment" Enabled="license.IsPayed" />
@@ -70,7 +70,7 @@
 @code {
     [EditorRequired]
     [Parameter]
-    public License license{ get; set; } = new();
+    public License? license{ get; set; }
     [Parameter]
     public FormEnum formType { get; set; }
     [Parameter]

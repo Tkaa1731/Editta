@@ -19,28 +19,27 @@ namespace Pobytne.Client.Extensions.IDirectory
         public IconBase Icon => BootstrapIcon.FolderPlus;
         public List<IListItem> ItemsList { get; set; } = new();
         public List<IDirectory> Subdirectories => new();
-        public void AddNew(IListItem newItem)
-        {
-            ItemsList.Add(newItem);
-        }
+        public async Task AddNew() => await LoadData();
         private async Task LoadData()
         {
-            if (ItemsList.Count <= 0)
-            {
-                var users = await _http.GetFromJsonAsync<List<User>>($"api/User/UsersList?userOfModule={Module.Id}");
-                if (users is not null)
-                    ItemsList = users.Select(u => u as IListItem).ToList();
-            }
+            var users = await _http.GetFromJsonAsync<List<User>>($"api/User/UsersList?userOfModule={Module.Id}");
+            ItemsList.Clear();
+            if (users is not null)
+                ItemsList = users.Select(u => u as IListItem).ToList();
         }
         public async Task OnSelect()
         {
-            await LoadData();
+            if (ItemsList.Count <= 0)
+            {
+                await LoadData();
+            }
         }
 
         public IListItem GetNew() => new User() {
             AccessPermition = new List<Permition>{
                 new Permition() { 
-                    ModuleId = Module.Id 
+                    ModuleId = Module.Id ,
+                    ModuleName = Module.Name ,
                 } },
             LicenseNumber = Module.LicenseNumber
         };

@@ -58,9 +58,10 @@ namespace Pobytne.Data.Tables
         {
             using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
             {
-                string sql = @"SELECT * 
+                string sql = @"SELECT u.*, o.*, m.Nazev AS ModuleName
                                 FROM S_LoginUser u
-                                JOIN S_Opravneni o ON u.IDLogin = o. IDLogin
+                                LEFT JOIN S_Opravneni o ON u.IDLogin = o. IDLogin
+                                LEFT JOIN S_Moduly m ON o.IDModulu = m.IDModulu 
                                 WHERE o.IDModulu = @IDModulu;";
 
                 var users = await cnn.QueryAsync<User,Permition,User>(sql, (u, p) => {
@@ -68,6 +69,21 @@ namespace Pobytne.Data.Tables
                     return u;
                 },conditions,
                 splitOn: "IDOpravneni");
+                return users;
+            }
+        }
+        public async Task<IEnumerable<User>> GetByLicenseExsModule(int idModulu)
+        {
+            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            {
+                string sql = @"SELECT *
+                            FROM S_LoginUser u
+                            WHERE u.CisloLicence IN(SELECT CisloLicence FROM S_Moduly WHERE IDModulu = @IDModulu) AND u.IDLogin NOT IN (SELECT u.IDLogin
+                            FROM S_LoginUser u
+                            JOIN S_Opravneni o ON o.IDLogin = u.IDLogin
+                            WHERE o.IDModulu = @IDModulu);";
+
+                var users = await cnn.QueryAsync<User>(sql, new { IDModulu = idModulu });
                 return users;
             }
         }
