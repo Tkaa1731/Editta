@@ -52,9 +52,22 @@ namespace Pobytne.Server.Service
             var users = await _userTable.GetWithPermitions(new { IDModulu = moduleId});
             return users;
         }
-        public async Task<User?> Update(User updateUser)
+        public async Task<int> Update(User updateUser)
         {
             return await _userTable.Update(updateUser);
+        }
+        public async Task<int?> Insert(User insertUser)
+        {
+            insertUser.Password = GeneratePassword();
+            return await _userTable.Insert(insertUser);
+        }
+        public async Task<int> Delete(int it)
+        {
+            return await _userTable.Delete(it);
+        }
+        private string GeneratePassword()
+        {
+            return "heslo";
         }
     }
 }

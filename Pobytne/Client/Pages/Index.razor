@@ -8,7 +8,7 @@
 
 <AuthorizeView>
 	<Authorized>
-		<h1>Hello, @context.User.Identity.Name !</h1>
+		<h1>Hello, @context.User.Identity?.Name !</h1>
 
 		<br /><br />
         @foreach(var module in permitions)
@@ -24,21 +24,13 @@
     </Authorized>
 </AuthorizeView>
 
-<button @onclick="ShowPopUp">POPUP</button>
-<LoginForm @ref="loginForm"></LoginForm>
-
-
 @code{
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
     [EditorRequired]
     private List<Permition> permitions { get; set; } = new();
-    //public IDirectory[] list{ get{ return new(); }}
-    private LoginForm loginForm { get; set; }
-    private async Task ShowPopUp(){
 
-        await loginForm.Show();
-    }
+
     protected async override Task OnInitializedAsync()
     {
         var authState = await authenticationState;
@@ -52,8 +44,4 @@
             permitions = new();
         return;
     }
-    // private async IDirectory[] GetLicenses()
-    // {
-    //     return Array.Empty<IDirectory>();   
-    // }
 }

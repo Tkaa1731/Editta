@@ -1,0 +1,103 @@
+﻿@inject IJSRuntime js
+@inject HttpClient httpClient
+
+
+<HxModal @ref="myModal" Backdrop="ModalBackdrop.Static" Size="ModalSize.Large" OnClosed="HandleHideClick">
+    <HeaderTemplate><p class=@headerStyle>@headerText</p></HeaderTemplate>
+    <BodyTemplate>
+        @switch (formItem)
+        {
+            case User user:
+                <UserForm user=user formType=formType OnValidSubmit="Request" ></UserForm>
+                break;
+            case Module module:
+                <ModuleForm module=module formType=formType OnValidSubmit="Request"></ModuleForm>
+                break;
+            case License license:
+                <LicenseForm license=license formType=formType OnValidSubmit="Request"></LicenseForm>
+                break;
+        }
+    </BodyTemplate>
+</HxModal>
+
+@code
+{
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; } = default!;
+    [Parameter]
+    public EventCallback<IListItem> OnSuccessRequest{ get; set; }
+    [Parameter]
+    [EditorRequired]
+    public IListItem? formItem{ get; set; }
+    private FormEnum formType;
+
+    public HxModal myModal = new();
+
+    private string headerText = "";
+    private string headerStyle = "";
+
+    public async Task UpdateForm()
+    {
+        formType = FormEnum.Update;
+        await myModal.ShowAsync();
+    }
+    public async Task InsertForm()
+    {
+        formType = FormEnum.Insert;
+        await myModal.ShowAsync();
+    }
+    private async Task HandleHideClick()
+    {
+        headerText = "";
+        headerStyle = "";
+        await myModal.HideAsync();
+    }
+    private async Task GetAuthor()
+    {
+        var authState = await authenticationState;
+        if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated && formItem is not null)
+        {
+            formItem.CreationDate = DateTime.Now;
+            formItem.CreationUserId = 1; // TODO: v ramci dodelavani A&A vratit id prihlaseneho uzivatele
+        }
+    }
+    private async Task Request(string request)
+    {
+        if(formItem is not null)
+        {   
+            headerStyle = "h2 text-danger";
+            await GetAuthor();
+            HttpResponseMessage logResponse = new HttpResponseMessage();
+            switch (formItem)
+            {
+                case User user:
+                    logResponse = await httpClient.PostAsJsonAsync<User?>($"/api/User/{request}", user);
+                    break;
+                case Module module:
+                    logResponse = await httpClient.PostAsJsonAsync<Module?>($"/api/Module/{request}", module);
+                    break;
+                case License license:
+                    logResponse = await httpClient.PostAsJsonAsync<License?>($"/api/License/{request}", license);
+                    break;
+                default:
+                    await js.InvokeVoidAsync("alert", "neni implementovano");
+                    break;//TODO: dodelat permitions
+            }
+            if(logResponse.ReasonPhrase is not null)
+                headerText = logResponse.ReasonPhrase;
+            if (logResponse.IsSuccessStatusCode)
+            {
+                headerStyle = "h2 text-success";
+                if (formType == FormEnum.Update)
+                    formItem = null;
+                await OnSuccessRequest.InvokeAsync(formItem);
+            }
+
+            StateHasChanged();// rerender componennt
+
+            await Task.Delay(1000);
+
+            await HandleHideClick();
+        }
+    }
+}

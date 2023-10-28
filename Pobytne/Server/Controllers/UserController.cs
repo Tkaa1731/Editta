@@ -4,6 +4,7 @@ using Pobytne.Server.Service;
 using Pobytne.Server.Authentication;
 using Pobytne.Shared.Authentication;
 using Pobytne.Shared.Procedural;
+using System.Reflection;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -40,9 +41,24 @@ namespace Pobytne.Server.Controllers
         }
         [HttpPost]
         [Route("Update")]
-        public ActionResult<User?> Update([FromBody]User updateUser) 
+        public async Task<IActionResult> Update([FromBody]User updateUser) 
         {
-            return _userService.Update(updateUser).Result;
+            if (updateUser is null)
+            {
+                return BadRequest("Invalid data");
+            }
+            try
+            {
+                int rowsAffected = await _userService.Update(updateUser);
+                if (rowsAffected > 0)
+                    return Ok("Update successful");
+                else
+                    return BadRequest("Update failed");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error :{ex.Message}");
+            }
         }
         [HttpGet]
         [Route("UsersList")]
@@ -56,6 +72,33 @@ namespace Pobytne.Server.Controllers
                 return _userService.GetUsersByModule(userOfModule).Result.ToList();
             else
                 return new List<User>();
+        }
+        // DELETE api/<ItemsController>/5
+        [HttpDelete("{id}")]
+        public void Delete(int id)
+        {
+        }
+        // POST api/<ItemsController>
+        [HttpPost]
+        [Route("Insert")]
+        public async Task<IActionResult> Insert([FromBody] User insertUser)
+        {
+            if (insertUser is null)
+            {
+                return BadRequest("Invalid data");
+            }
+            try
+            {
+                int? rowsAffected = await _userService.Insert(insertUser);
+                if (rowsAffected > 0)
+                    return Ok("Insert successful");
+                else
+                    return BadRequest("Insert failed");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error :{ex.Message}");
+            }
         }
     }
 }

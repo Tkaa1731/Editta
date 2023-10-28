@@ -1,45 +1,80 @@
 ﻿@inject IJSRuntime js
-<HxListLayout Title="Culture infos" TFilterModel="FilterModelDto">
-    <CommandsTemplate>
-        <HxButton Text="New item" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="NewItemClicked" />
-    </CommandsTemplate>
+<HxListLayout TFilterModel="FilterModelDto">
+        <TitleTemplate>
+            List of items <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@ListItems?.Count</HxBadge>
+        </TitleTemplate>
+        <SearchTemplate>
+        <HxInputText Placeholder="Search" Type="InputType.Search" @bind-Value="SearchText" Enabled="ListItems is not null" />
+        </SearchTemplate>
+        <CommandsTemplate>
+            <HxButton Text="New item" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="NewItemClicked" Enabled="ListItems is not null" />
+        </CommandsTemplate>
+    
     <DataTemplate>
-        <HxGrid @ref="gridComponent" ContentNavigationMode="GridContentNavigationMode.Pagination" Responsive="true" TItem="IListItem" PageSize="10" DataProvider="LoadDataItems" SelectedDataItem="currentItem" SelectedDataItemChanged="HandleSelectedDataItemChanged">
+        <HxGrid @ref="gridComponent" ContentNavigationMode="GridContentNavigationMode.Pagination" Responsive="true" TItem="IListItem" PageSize="15" DataProvider="LoadDataItems" SelectedDataItem="currentItem" SelectedDataItemChanged="HandleSelectedDataItemChanged">
             <Columns>
                 <HxGridColumn HeaderText="Id" ItemTextSelector="@(item => item.Id.ToString())" SortKeySelector="@(item => item.Id)" IsDefaultSortColumn="true" />
                 <HxGridColumn HeaderText="Name" ItemTextSelector="@(item => item.Name)" SortKeySelector="@(item => item.Name)" />
                 <HxGridColumn HeaderText="Description" ItemTextSelector="@(item => item.Description)" SortKeySelector="@(item => item.Description)" />
                 <HxGridColumn HeaderText="Cretiondate" ItemTextSelector="@(item => item.CreationDate.ToString())" SortKeySelector="@(item => item.CreationDate)" />
                 <HxContextMenuGridColumn Context="item">
-@*                     <HxContextMenu>
-                        <HxContextMenuItem Text="Delete" OnClick="async () => await DeleteItemClicked(item)" ConfirmationQuestion="@($"Are you sure you want to delete {item.Name}?")" />
-                    </HxContextMenu> *@
-					<a onclick="async ()=> await DeleteItemClicked(item) " style="color:red;"><HxIcon Icon="@BootstrapIcon.Trash" /></a>
+					<HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" OnClick="async ()=> await DeleteItemClicked(item)" />
 				</HxContextMenuGridColumn>
             </Columns>
         </HxGrid>
     </DataTemplate>
-    <DetailTemplate>
-        Edit: @currentItem?.Id
-    </DetailTemplate>
 </HxListLayout>
 
 @code {
     [Parameter]
-    public List<IListItem> ListItems { get; set; } = new List<IListItem>();
-    private IListItem? currentItem;
+    [EditorRequired]
+    public List<IListItem>? ListItems 
+    {
+        get
+        {
+            return listItems;
+        }
+        set
+        {
+            listItems = value;
+            SearchText = "";
+        } 
+    }
+    private List<IListItem>? listItems { get; set; }
+    [Parameter]
+    public IListItem? currentItem { get; set; }
     private HxGrid<IListItem>? gridComponent;
+    [Parameter]
+    public EventCallback<IListItem?> selectedItemChanged { get; set; }
+    [Parameter]
+    public EventCallback EventNewItem{ get; set; }
+
+    private string SearchText
+    {
+        get
+        {
+            return searchText;
+        }
+        set
+        {
+            searchText = value;
+            if(gridComponent is not null)
+                gridComponent.RefreshDataAsync();
+        }
+    }
+    private string searchText = string.Empty;
+    private Task<GridDataProviderResult<IListItem>> LoadDataItems(GridDataProviderRequest<IListItem> request)
+    {
+        IEnumerable<IListItem>? result = ListItems?.Where(c => c.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        return Task.FromResult(request.ApplyTo(result));
+    }
 
     protected async override Task OnParametersSetAsync()
     {
         base.OnParametersSet();
         if(gridComponent is not null)
             await gridComponent.RefreshDataAsync();
-    }
-    private Task<GridDataProviderResult<IListItem>> LoadDataItems(GridDataProviderRequest<IListItem> request)
-    {
-        IEnumerable<IListItem> result = ListItems;
-        return Task.FromResult(request.ApplyTo(result));
     }
 
     private async Task DeleteItemClicked(IListItem editableCultureInfo)
@@ -49,18 +84,18 @@
             await gridComponent.RefreshDataAsync();
     }
 
-    private Task HandleSelectedDataItemChanged(IListItem selection)
+    private async Task HandleSelectedDataItemChanged(IListItem selection)
     {
         currentItem = selection;
+        await selectedItemChanged.InvokeAsync(currentItem);
         // await dataItemEditComponent.ShowAsync();
-        return Task.CompletedTask;
     }
 
-    private Task NewItemClicked()// async
+    private async Task NewItemClicked()// async
     {
         //currentItem = new();
         // await dataItemEditComponent.ShowAsync();
-        return Task.CompletedTask;
+        await EventNewItem.InvokeAsync();
     }
 
     public record FilterModelDto { }

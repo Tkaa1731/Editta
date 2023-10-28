@@ -19,8 +19,6 @@ namespace Pobytne.Data.Mappers
             Map(u => u.ValidTo).ToColumn("PlatiDo");
             Map(u => u.CreationUserId).ToColumn("Kdo");
             Map(u => u.CreationDate).ToColumn("Kdy");
-            Map(u => u.Email).ToColumn("Email");
-            Map(u => u.Valid).ToColumn("Valid");
         }
     }
 }
