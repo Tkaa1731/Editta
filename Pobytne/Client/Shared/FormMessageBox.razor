@@ -8,7 +8,12 @@
         @switch (formItem)
         {
             case User user:
-                <UserForm user=user formType=formType OnValidSubmit="Request" ></UserForm>
+                @if(user.AccessPermition is null)
+                {
+                    <UserForm user=user formType=formType OnValidSubmit="Request" ></UserForm>
+                    break;
+                }
+                <PermitionForm permition="user.AccessPermition.First()" formType="formType" OnValidSubmit="Request"></PermitionForm>
                 break;
             case Module module:
                 <ModuleForm module=module formType=formType OnValidSubmit="Request"></ModuleForm>
@@ -25,7 +30,7 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
     [Parameter]
-    public EventCallback<IListItem> OnSuccessRequest{ get; set; }
+    public EventCallback OnSuccessRequest{ get; set; }
     [Parameter]
     [EditorRequired]
     public IListItem? formItem{ get; set; }
@@ -71,13 +76,16 @@
             switch (formItem)
             {
                 case User user:
-                    logResponse = await httpClient.PostAsJsonAsync<User?>($"/api/User/{request}", user);
+                    if (user.AccessPermition is null)
+                        logResponse = await httpClient.PostAsJsonAsync($"/api/User/{request}", user);
+                    else
+                        logResponse = await httpClient.PostAsJsonAsync($"/api/Permition/{request}", user.AccessPermition.First());
                     break;
                 case Module module:
-                    logResponse = await httpClient.PostAsJsonAsync<Module?>($"/api/Module/{request}", module);
+                    logResponse = await httpClient.PostAsJsonAsync($"/api/Module/{request}", module);
                     break;
                 case License license:
-                    logResponse = await httpClient.PostAsJsonAsync<License?>($"/api/License/{request}", license);
+                    logResponse = await httpClient.PostAsJsonAsync($"/api/License/{request}", license);
                     break;
                 default:
                     await js.InvokeVoidAsync("alert", "neni implementovano");
@@ -88,9 +96,7 @@
             if (logResponse.IsSuccessStatusCode)
             {
                 headerStyle = "h2 text-success";
-                if (formType == FormEnum.Update)
-                    formItem = null;
-                await OnSuccessRequest.InvokeAsync(formItem);
+                await OnSuccessRequest.InvokeAsync();
             }
 
             StateHasChanged();// rerender componennt

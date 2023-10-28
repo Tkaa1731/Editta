@@ -11,15 +11,17 @@
 		<h1>Hello, @context.User.Identity?.Name !</h1>
 
 		<br /><br />
-        @foreach(var module in permitions)
-        {
-            <span class="card w-25">
-                <div class="card-body">
-                    <h5>Permition id : @module.Id</h5>
-                    <h5 class="card-title">Module name : @module.ModuleName</h5>
-                    <p>permition string : @module.PermitionString</p>
-                </div>
-            </span>
+        @if(permitions is not null){
+            @foreach(var module in permitions)
+            {
+                <span class="card w-25">
+                    <div class="card-body">
+                        <h5>Permition id : @module.Id</h5>
+                        <h5 class="card-title">Module name : @module.ModuleName</h5>
+                        <p>permition string : @module.PermitionString</p>
+                    </div>
+                </span>
+            }
         }
     </Authorized>
 </AuthorizeView>
@@ -28,20 +30,20 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
     [EditorRequired]
-    private List<Permition> permitions { get; set; } = new();
-
+    private List<Permition>? permitions => _user?.AccessPermition;
+    private User? _user;
 
     protected async override Task OnInitializedAsync()
     {
         var authState = await authenticationState;
-        if (authState.User.Identity.IsAuthenticated)
+        if ( authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
         {
             var user = await localStorage.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
             if(user is not null)
-                permitions = user.User.AccessPermition;
+                _user = user.User;
         }
-        else
-            permitions = new();
+
         return;
     }
+    private void Submit(){}
 }

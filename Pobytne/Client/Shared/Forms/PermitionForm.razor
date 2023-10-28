@@ -1,68 +1,217 @@
-﻿<div class="card">
-    <div class="card-header">
-        <h4>@header</h4>
-    </div>
-    <div class="card-body">
+﻿@inject HttpClient _http
+@inject IJSRuntime js
+@if(permition is not null)
+{
+    <h3>Module name: @permition.ModuleName</h3>
+    <h1>@pString</h1>
+    <EditForm Model="@model" OnValidSubmit=OnValidSubmitHandler>
+    <DataAnnotationsValidator />
 
-        <form>
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="inputName">Name</label>
-                    <input type="text" class="form-control" id="inputName" placeholder="Name" @bind="@module.ModuleName">
+        <div class="row align-items-start m-3">
+            <div class="col">
+
+                <HxSelect TItem="UserRecord"
+                          TValue="int?"
+                          Label="User"
+                          Data="@userList"
+                @bind-Value="@model.userId"
+                          TextSelector="@(u => u.userName)"
+                          ValueSelector="@(u => u.id)"
+                          Nullable="true"
+                          NullText="-select name-"
+                          NullDataText="Loading users..." 
+                          Enabled="formType == FormEnum.Insert" />
+            </div>
+        </div>        
+        @foreach (PermitionEnum rec in Enum.GetValues(typeof(PermitionEnum)))
+        {
+    
+            <div class="row align-items-start">
+                    <div class="col">
+                    <p>@accessList[rec].PermitionString</p>
+                    </div>
+                    <div class="col">
+
+                        <HxSelect TItem="AccessRecord"
+                                  TValue="AccessEnum"
+                                  Data="@access"
+                    @bind-Value="@accessList[rec].Access"
+                                  TextSelector="@(p => p.accessStr)"
+                                  ValueSelector="@(p => p.accesVal)"
+                                  Nullable="false"/>
+                    </div>
                 </div>
-                <div class="form-group col-md-6">
-                    <label for="inputShortName">Shortname</label>
-                    <input type="text" class="form-control" id="inputShortName" placeholder="Short name" @bind="@module.ModuleShortName">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="inputEvidenceType">Evidence type</label>
-                <input type="number" class="form-control" id="inputEvidenceType" placeholder="Evidence type" @bind="@module.EvidenceType">
-            </div>
-            <div class="form-group">
-                <label for="inputLicenceNumber">License number</label>
-                <input type="number" class="form-control" id="inputLicenceNumber" @bind="@module.LicenseNumber" disabled>
-            </div>
-            @if (Type == FormEnum.Edit)
-            {
-                <button type="submit" class="btn btn-primary" @onclick="Update">Update</button>
-            }
-            else if (Type == FormEnum.Insert)
-            {
-                <button type="submit" class="btn btn-primary" @onclick="Insert">Insert new</button>
-            }
-        </form>
-    </div>
-</div>
+        }
+        <div class="d-grid gap-2">
+            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        </div>
+    </EditForm>
+}
+
 @code {
-    public enum FormEnum
-    {
-        Edit, Insert
-    }
+    [EditorRequired]
     [Parameter]
-    public Module? module { get; set; }
+    public FormEnum formType { get; set; }
+    [EditorRequired]
     [Parameter]
-    public FormEnum Type { get; set; }
-    public string header
+    public EventCallback<string> OnValidSubmit { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public Permition? permition{ get; set; }
+
+    private UserModel model = new();
+    private Dictionary<PermitionEnum, PermitionRecord> accessList { get; }
+    private List<UserRecord> userList = new(); //HxSelect component
+    private List<AccessRecord> access = new(); //HxSelect component
+    private string ButtonText
     {
         get
         {
-            if (Type == FormEnum.Edit) return "Editing of record";
-            else if (Type == FormEnum.Insert) return "Add new record";
-            return "Unknown operation";
+            if (formType == FormEnum.Insert) return "Insert";
+            return "Update";
         }
     }
-    private void Update()
+
+    private record AccessRecord(string accessStr, AccessEnum accesVal);
+    private record UserRecord(string userName,int id);
+    private class UserModel
     {
-
+        [Required(ErrorMessage = "Choose a user.")]
+        public int? userId { get; set; }
     }
-    private void Delete()
+    private class PermitionRecord {
+        public string PermitionString { get; set; }
+        public AccessEnum Access { get; set; }
+        public PermitionRecord(string permitionStr)
+        {
+            PermitionString = permitionStr;
+            Access = AccessEnum.NoAccess;
+        }
+    }
+
+    private string pString;
+    private async Task OnValidSubmitHandler()
     {
-
+        if(permition is not null && model.userId.HasValue)
+        {
+            permition.UserId = model.userId.Value;
+            GetPermitionString();
+            pString = permition.PermitionString;
+            // if (formType == FormEnum.Insert)
+            //     await OnValidSubmit.InvokeAsync("Insert");// TODO: dodelat update a insert pro permition
+            // else if (formType == FormEnum.Update)
+            //     await OnValidSubmit.InvokeAsync("Update");            
+        }
     }
-    private void Insert()
+
+    public PermitionForm()
     {
+        accessList = new Dictionary<PermitionEnum, PermitionRecord>();
+        accessList[PermitionEnum.Aplication] = new PermitionRecord("Nastavení aplikace");
+        accessList[PermitionEnum.License] = new PermitionRecord("Seznam licencí");
+        accessList[PermitionEnum.LoginUser] = new PermitionRecord("Seznam uživatelů aplikace");
+        accessList[PermitionEnum.Module] = new PermitionRecord("Seznam modulů");
+        accessList[PermitionEnum.Permition] = new PermitionRecord("Seznam oprávnění");
+        accessList[PermitionEnum.PropertiesRecord] = new PermitionRecord("Seznam účetní spefikace");
+        accessList[PermitionEnum.PaymentType] = new PermitionRecord("Typy plateb");
+        accessList[PermitionEnum.Record] = new PermitionRecord("Seznam záznamů");
+        accessList[PermitionEnum.EvidenceMotion] = new PermitionRecord("Sklad zboží");
+        accessList[PermitionEnum.CashMotion] = new PermitionRecord("Vedlejší pokladna");
+        accessList[PermitionEnum.Customer] = new PermitionRecord("Seznam klientů");
+        accessList[PermitionEnum.Evidence] = new PermitionRecord("Evidence záznamů");
+        accessList[PermitionEnum.Pernament] = new PermitionRecord("Permanentky");
+        accessList[PermitionEnum.EvidenceSummary] = new PermitionRecord("Souhrny evidence");
+        accessList[PermitionEnum.CashSummary] = new PermitionRecord("Souhrny druhů plateb");
+        accessList[PermitionEnum.PernamentSummary] = new PermitionRecord("Souhrny permanentky");
+        accessList[PermitionEnum.ContractReportSummary] = new PermitionRecord("Souhrny dohody - zprávy");
+        accessList[PermitionEnum.EvidenceStorageSummary] = new PermitionRecord("Souhrny stavu zásob");
+        accessList[PermitionEnum.Contract] = new PermitionRecord("Dohody vpp");
+        accessList[PermitionEnum.ContractPerson] = new PermitionRecord("Dohody - osoby");
+        accessList[PermitionEnum.ContractSupplement] = new PermitionRecord("Dohody - přílohy");
+        accessList[PermitionEnum.ContractSeason] = new PermitionRecord("Dohody dle období");
+        accessList[PermitionEnum.ContractReport] = new PermitionRecord("Dohody - zprávy");
 
+        access = new List<AccessRecord>
+        {
+            new AccessRecord("Bez přístupu",AccessEnum.NoAccess),
+            new AccessRecord("Jen pro čtení",AccessEnum.ReadOnly),
+            new AccessRecord("Plný přístup",AccessEnum.FullAccess),
+        };
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && permition is not null)
+        {
+            LoadPermition();
+            if (permition.UserId > 0)
+                await LoadUsers(permition.UserId);
+            else
+                await LoadUsers();
+        }
+    }
+    private async Task LoadUsers(int id = -1)
+    {
+        if(permition is not null)
+        {
+            userList.Clear();
+
+            if (id > 0)
+            {
+                User? u = await _http.GetFromJsonAsync<User>($"api/User/{id}");
+
+                userList.Add(new UserRecord(u.UserName, u.Id));
+                model.userId = id;
+            }
+            else
+            {   
+                int module = permition.ModuleId;
+                List<User>? users = await _http.GetFromJsonAsync<List<User>>($"api/User/GetRest?moduleId={module}");
+
+
+                if(users is not null)
+                {
+                    foreach (var u in users)
+                    {
+                        userList.Add(new UserRecord(u.UserName,u.Id));
+                    }                  
+                }
+            }
+            StateHasChanged();
+        }
+    }
+
+    private void LoadPermition()
+    {
+        if(permition is not null)
+        {
+            @foreach (PermitionEnum pe in Enum.GetValues(typeof(PermitionEnum)))
+            {
+                if(permition.PermitionString.Length > (int)pe)
+                    switch (permition.PermitionString[((int)pe)])
+                    {
+                        case '1': accessList[pe].Access = AccessEnum.ReadOnly; break;
+                        case '2': accessList[pe].Access = AccessEnum.FullAccess; break;
+                        default: accessList[pe].Access = AccessEnum.NoAccess; break;
+                    }
+                else
+                    accessList[pe].Access = AccessEnum.NoAccess;
+            }
+        }
+    }
+    private void GetPermitionString()
+    {
+        if(permition is not null)
+        {            
+            int capacity = 50; // Setting the lenght of PermitionString 
+            var sb = new StringBuilder(capacity);
+            foreach (PermitionEnum pe in Enum.GetValues(typeof(PermitionEnum)))
+                sb.Append((char)accessList[pe].Access);
+
+            while (sb.Length < capacity)
+                sb.Append('0');
+
+            permition.PermitionString = sb.ToString();
+        }
+    }
 }

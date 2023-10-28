@@ -20,7 +20,7 @@ namespace Pobytne.Data.Tables
                 return await cnn.QueryAsync<Module>(sql,conditions);
             }
         }
-        public async Task<IEnumerable<Module>> Select(int id)
+        public async Task<Module?> GetById(int id)
         {
             using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
             {
@@ -28,12 +28,11 @@ namespace Pobytne.Data.Tables
                                from S_Moduly m
                                JOIN S_LoginUser c ON m.Kdo = c.IDLogin
                                WHERE m.IDModulu = @IDModulu;";
-                var condition = new{ IDModulu = id };
-                return await cnn.QueryAsync<Module>(sql,condition);
+                var condition = new { IDModulu = id };
+                var result = await cnn.QueryAsync<Module>(sql, condition);
+                return result.FirstOrDefault();
             }
         }
-
-
         public async Task<int?> Insert(Module item)
         {
             using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());

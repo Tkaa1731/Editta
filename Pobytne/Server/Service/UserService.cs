@@ -39,18 +39,22 @@ namespace Pobytne.Server.Service
         }
         public async Task<IEnumerable<User>> GetUsersByLicense(int licenseNumber)
         {
-                var users = await _userTable.GetAll(new{ LicenseNumber = licenseNumber});
-            //foreach (var u in users)
-            //{
-            //    var per = await _permitionTable.GetAll(u.Id);
-            //    u.AccessPermition = per.ToList(); //await PermitionTable.GetAll(new{ UserId = u.Id });
-            //}
+            var users = await _userTable.GetAll(new{ LicenseNumber = licenseNumber});
             return users;
+        }
+        public async Task<IEnumerable<User>> GetUsersExsModule(int moduleNumber)
+        {
+            return await  _userTable.GetByLicenseExsModule(moduleNumber);
         }
         public async Task<IEnumerable<User>> GetUsersByModule(int moduleId)
         {
             var users = await _userTable.GetWithPermitions(new { IDModulu = moduleId});
             return users;
+        }
+        public async Task<User?> GetUserById(int id)
+        {
+            var user = await _userTable.GetById(id);
+            return user;
         }
         public async Task<int> Update(User updateUser)
         {

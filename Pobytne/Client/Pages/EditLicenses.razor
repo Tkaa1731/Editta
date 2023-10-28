@@ -2,7 +2,7 @@
 @attribute [Authorize]
 @inject HttpClient HttpClient
 @inject IJSRuntime js
-
+<AuthorizeView Policy="PermitionPolicy" Resource=(PermitionEnum.Module,AccessEnum.NoAccess)></AuthorizeView>
 <PageTitle>EditLicense</PageTitle>
 <div class="row">
     <div class="col-lg-3" style="height: 800px">
@@ -60,16 +60,15 @@
             await formMessageBox.InsertForm();            
         }
     }
-    private async Task OnSuccessRequestHandler(IListItem newItem)
+    private async Task OnSuccessRequestHandler()
     {
         if (selectedDirectory is not null)
         {
-            selectedDirectory.AddNew(newItem);
+            await selectedDirectory.AddNew();
             await OnSelect(selectedDirectory);            
         }
         StateHasChanged();
     }
-    //TODO: After Update Insert I add instance to the driir but I need the DataBase one ...Update Insert request has to return an instance
     //TODO: Delete
     //TODO: Permition form
 }

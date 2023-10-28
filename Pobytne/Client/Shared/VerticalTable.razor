@@ -1,0 +1,42 @@
+﻿<div style="max-height:325px;overflow:auto;">
+    <table class="table table-hover">
+        <thead class="bg-dark text-white" style="position: sticky; top: 0px;">
+            <tr>
+                @foreach(var h in heads)
+                {
+                   <th scope="col">Id</th>
+                   <th scope="col">Name</th>
+                   <th scope="col">Short name</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var o in objects)
+            {
+                <tr @*@onclick="()=>ModuleDetail(i.Id)"*@>
+                    @foreach(var h in heads)
+                    {
+                      <th scope="row">@o.</th>
+@*                      <td>@o.Name</td>
+                      <td>@o.ShortName</td>  *@     
+                    }
+                </tr>      
+            }    
+        </tbody>
+    </table>
+</div>
+@code {
+    [Parameter]
+    public int[]? heads{ get; set; }
+    [Parameter]
+    public List<Object>? objects{ get; set; }
+    //private List<CustomAttributeData> properties { get; set; }
+    protected override void OnParametersSet()
+    {
+        if(objects is not null)
+        {
+            var type = objects.First().GetType();
+            var properties = type.CustomAttributes;
+        }
+    }
+}

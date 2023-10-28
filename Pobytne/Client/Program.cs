@@ -7,6 +7,7 @@ using Havit.Blazor.Components.Web;
 using Havit.Blazor.Components.Web.Bootstrap;
 using Pobytne.Client.Extensions;
 using Pobytne.Shared.Procedural;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Pobytne.Client
 {
@@ -16,9 +17,14 @@ namespace Pobytne.Client
         {
             // ...
             services.AddBlazoredLocalStorage();
-            services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
             services.AddHxServices();
+            services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
             services.AddAuthorizationCore();
+            services.AddScoped<IAuthorizationHandler, PermitionRequirementHandler>();
+            services.AddAuthorizationCore(config =>
+            {
+                config.AddPolicy("PermitionPolicy", policy => policy.AddRequirements(new PermitionRequirement()));
+            });
             // ...
         }
         public static async Task Main(string[] args)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Pobytne.Shared.Procedural;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -24,7 +25,7 @@ namespace Pobytne.Server.Controllers
 
         // POST api/<ItemsController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public void Post([FromBody] Permition updatePermition)
         {
         }
 

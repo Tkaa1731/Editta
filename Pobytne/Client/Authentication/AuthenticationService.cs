@@ -9,7 +9,7 @@ namespace Pobytne.Client.Authentication
 {
     internal class AuthenticationService
     {
-        private  readonly Blazored.LocalStorage.ILocalStorageService _storageService;
+        private  readonly ILocalStorageService _storageService;
         private  readonly HttpClient _httpClient;
 
         public AuthenticationService(ILocalStorageService storageService, HttpClient httpClient)
@@ -25,7 +25,6 @@ namespace Pobytne.Client.Authentication
                 var user = await logResponse.Content.ReadFromJsonAsync<UserAccount>();
                 var customAuthStateProvider = new CustomAuthenticationStateProvider(_storageService);
                 await customAuthStateProvider.UpdateAuthenticationState(user);
-            ;
             }
             else if (logResponse.StatusCode == HttpStatusCode.Unauthorized)
             {
