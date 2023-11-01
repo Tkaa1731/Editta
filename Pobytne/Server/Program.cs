@@ -1,6 +1,7 @@
 using Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Pobytne.Data;
 using Pobytne.Data.Tables;
 using Pobytne.Server;
@@ -18,11 +19,13 @@ namespace Pobytne
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
 
-            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyBlazor", Version = "v1" });
+            });
 
             builder.Services.AddAuthentication(o =>
             {
@@ -61,6 +64,12 @@ namespace Pobytne
             if (app.Environment.IsDevelopment())
             {
                 app.UseWebAssemblyDebugging();
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blazor api v1");
+                    c.RoutePrefix = string.Empty;
+                });
             }
             else
             {

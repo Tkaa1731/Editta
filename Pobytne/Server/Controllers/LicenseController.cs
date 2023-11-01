@@ -6,8 +6,9 @@ using System.Data;
 
 namespace Pobytne.Server.Controllers
 {
-    [Route("License")]
-    [Authorize]
+
+  [Route("License")]
+  [Authorize]
 	[ApiController]
 	public class LicenseController : ControllerBase
 	{

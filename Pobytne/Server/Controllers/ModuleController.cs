@@ -8,9 +8,10 @@ using System.Data;
 
 namespace Pobytne.Server.Controllers
 {
-    [Route("Module")]
-    [ApiController]
-    [Authorize]
+
+  [Route("Module")]
+  [ApiController]
+  [Authorize]
 	public class ModuleController : ControllerBase
 	{
 		private ModuleService _moduleService;
