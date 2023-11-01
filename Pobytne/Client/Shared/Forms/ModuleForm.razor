@@ -1,26 +1,26 @@
-﻿@if(module is not null)
+﻿@if(moduleCopy is not null && module is not null)
 {
-    <EditForm Model="@module" OnValidSubmit=OnValidSubmitHandler>
+    <EditForm Model="@moduleCopy" OnValidSubmit=OnValidSubmitHandler>
 	    <DataAnnotationsValidator />
 
         <div class="row align-items-start">
             <div class="col">
-                <HxInputText @bind-Value="module.ModuleName" Label="Name of module" Type="InputType.Text" />
+                <HxInputText @bind-Value="moduleCopy.ModuleName" Label="Name of module" Type="InputType.Text" InputCssClass=@((module.ModuleName!= moduleCopy.ModuleName)?"input_changed":"")/>
             </div>
             <div class="col">
-                <HxInputText @bind-Value="module.ModuleShortName" Label="ShortName" Type="InputType.Text" />
+                <HxInputText @bind-Value="moduleCopy.ModuleShortName" Label="ShortName" Type="InputType.Text" />
             </div>
         </div>
         <div class="row align-items-start">
             <div class="col">
-                <HxInputNumber Label="License Number" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="module.LicenseNumber" Enabled="false" />
+                <HxInputNumber Label="License Number" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="moduleCopy.LicenseNumber" Enabled="false" />
             </div>
             <div class="col">
-                <HxInputNumber Label="Evidence type" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="module.EvidenceType"/>
+                <HxInputNumber Label="Evidence type" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="moduleCopy.EvidenceType"/>
             </div>
         </div>
 
-        <HxSwitch Text="Only users by ID of module" @bind-Value="@module.OnlyUsersByIdOfModule" />
+        <HxSwitch Text="Only users by ID of module" @bind-Value="@moduleCopy.OnlyUsersByIdOfModule" />
 
         <div class="d-grid gap-2">
             <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
@@ -29,16 +29,17 @@
     </EditForm>
 }
 
-@code {
+@code {//TODO: ymena barvy pri zmene, pred updatem kontrola zmen
     [EditorRequired]
     [Parameter]
     public Module? module { get; set; }
+    private Module? moduleCopy;
     [EditorRequired]
     [Parameter]
     public FormEnum formType { get; set; }
     [EditorRequired]
     [Parameter]
-    public EventCallback<string> OnValidSubmit { get; set; }
+    public EventCallback<FormEnum> OnValidSubmit { get; set; }
     private string ButtonText
     {
         get
@@ -47,11 +48,10 @@
             return "Update";
         }
     }
-    private async Task OnValidSubmitHandler()
+    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
+    protected override void OnInitialized()
     {
-        if (formType == FormEnum.Insert)
-            await OnValidSubmit.InvokeAsync("Insert");
-        else if (formType == FormEnum.Update)
-            await OnValidSubmit.InvokeAsync("Update");
+        if(module is not null)
+            moduleCopy = module.Clone() as Module;
     }
 }

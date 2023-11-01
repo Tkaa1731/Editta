@@ -1,9 +1,9 @@
 ﻿@inject IJSRuntime js
-@inject HttpClient httpClient
+@inject PobytneService service
 
 
 <HxModal @ref="myModal" Backdrop="ModalBackdrop.Static" Size="ModalSize.Large" OnClosed="HandleHideClick">
-    <HeaderTemplate><p class=@headerStyle>@headerText</p></HeaderTemplate>
+    <HeaderTemplate><h2 class=@headerStyle>@headerText</h2></HeaderTemplate>
     <BodyTemplate>
         @switch (formItem)
         {
@@ -63,47 +63,67 @@
         if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated && formItem is not null)
         {
             formItem.CreationDate = DateTime.Now;
-            formItem.CreationUserId = 1; // TODO: v ramci dodelavani A&A vratit id prihlaseneho uzivatele
+            ClaimsPrincipal cp = authState.User;
+            string? id = cp.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
+            if (id is not null)
+                formItem.CreationUserId = Int32.Parse(id); 
+            else
+                Console.WriteLine("PRBLEM WITH AUTHORIZATION");
         }
     }
-    private async Task Request(string request)
+    private async Task  CompleteReq<T>(FormEnum e,T obj)
+    {
+        object? response = null;
+        if(e == FormEnum.Update)
+            response = await service.UpdateAsync(obj);
+        else if(e == FormEnum.Insert)
+            response = await service.InsertAsync(obj);
+
+        if (response is null || response is ErrorResponse)
+        {
+            headerText = "FAIL";
+            //ERROR occured
+        }
+        else
+        {
+            headerText = "SUCCESS";
+            headerStyle = "text-success";
+            await OnSuccessRequest.InvokeAsync();            
+        }
+        StateHasChanged();// rerender componennt
+        return;
+
+    }
+    private async Task Request(FormEnum request)
     {
         if(formItem is not null)
         {   
-            headerStyle = "h2 text-danger";
+            headerStyle = "text-danger";
             await GetAuthor();
-            HttpResponseMessage logResponse = new HttpResponseMessage();
+
             switch (formItem)
             {
                 case User user:
                     if (user.AccessPermition is null)
-                        logResponse = await httpClient.PostAsJsonAsync($"/api/User/{request}", user);
+                        await CompleteReq(request, user);
                     else
-                        logResponse = await httpClient.PostAsJsonAsync($"/api/Permition/{request}", user.AccessPermition.First());
+                        await CompleteReq(request, user.AccessPermition.First());// je jenom jedna, jedna konkretniho modulu
                     break;
                 case Module module:
-                    logResponse = await httpClient.PostAsJsonAsync($"/api/Module/{request}", module);
+                    await CompleteReq(request, module);
                     break;
                 case License license:
-                    logResponse = await httpClient.PostAsJsonAsync($"/api/License/{request}", license);
+                    await CompleteReq(request, license);
                     break;
                 default:
                     await js.InvokeVoidAsync("alert", "neni implementovano");
-                    break;//TODO: dodelat permitions
+                    break;
             }
-            if(logResponse.ReasonPhrase is not null)
-                headerText = logResponse.ReasonPhrase;
-            if (logResponse.IsSuccessStatusCode)
-            {
-                headerStyle = "h2 text-success";
-                await OnSuccessRequest.InvokeAsync();
-            }
-
-            StateHasChanged();// rerender componennt
 
             await Task.Delay(1000);
 
             await HandleHideClick();
         }
     }
+//TODO: pri failu obnovit hodnoty // kopie?
 }

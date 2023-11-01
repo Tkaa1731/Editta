@@ -50,7 +50,7 @@
     public FormEnum formType { get; set; }
     [EditorRequired]
     [Parameter]
-    public EventCallback<string> OnValidSubmit{ get; set; }
+    public EventCallback<FormEnum> OnValidSubmit{ get; set; }
     private string ButtonText
     {
         get
@@ -59,12 +59,6 @@
             return "Update";
         }
     }
-    private async Task OnValidSubmitHandler()
-    {
-        if(formType == FormEnum.Insert)
-            await OnValidSubmit.InvokeAsync("Insert");
-        else if (formType == FormEnum.Update)
-            await OnValidSubmit.InvokeAsync("Update");
-    }
+    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
 
 }

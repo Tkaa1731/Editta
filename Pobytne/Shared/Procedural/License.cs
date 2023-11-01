@@ -6,7 +6,7 @@ namespace Pobytne.Shared.Procedural
 {
     [Serializable]
     [Table("S_Licence")]
-    public class License : IContact, ICreation, IListItem
+    public class License : IContact, ICreation, IListItem, ICloneable
     {
         [Key]
         public int Id { get; set; }
@@ -47,6 +47,11 @@ namespace Pobytne.Shared.Procedural
         [Editable(false)]
         public string Name => NameOfOrganization;
         [Editable(false)]
-        public string Description => ICO.ToString(); 
+        public string Description => ICO.ToString();
+
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 }

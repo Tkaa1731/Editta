@@ -11,18 +11,40 @@ namespace Pobytne.Client.Authentication
     {
         private readonly ILocalStorageService _localStorageService;
         private ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
-        public CustomAuthenticationStateProvider(ILocalStorageService localStorageService)
-        {
-            _localStorageService = localStorageService;
-        }
+        public CustomAuthenticationStateProvider(ILocalStorageService localStorageService) => _localStorageService = localStorageService;
 
-        public override async Task<AuthenticationState> GetAuthenticationStateAsync()//TODO:GetToken()
+        private IEnumerable<Claim> MapClaims(IEnumerable<Claim> original)
+        {
+            var mappedClaims = new List<Claim>();
+
+            foreach (var claim in original)
+            {
+                switch (claim.Type)
+                {
+                    case "unique_name":
+                        mappedClaims.Add(new Claim(ClaimTypes.Name, claim.Value));
+                        break;
+                    case "email":
+                        mappedClaims.Add(new Claim(ClaimTypes.Email, claim.Value));
+                        break;
+                    case "given_name":
+                        mappedClaims.Add(new Claim(ClaimTypes.GivenName, claim.Value));
+                        break;
+                    default:
+                        mappedClaims.Add(claim); // Pokud se nerozpozná, ponechá se původní Claim
+                        break;
+                }
+            }
+
+            return mappedClaims;
+        }
+        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             try
             {
                 var user = await _localStorageService.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);// get entity of UserAccount from LS
                 if (user == null)
-                    return await Task.FromResult(new AuthenticationState(_anonymous));// no one is logged
+                    return new AuthenticationState(_anonymous);// neni nic v Local storage
 
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var identity = new ClaimsIdentity();
@@ -30,13 +52,12 @@ namespace Pobytne.Client.Authentication
                 if (tokenHandler.CanReadToken(user.Token))
                 {
                     var jwtSecurityToken = tokenHandler.ReadJwtToken(user.Token);
-                    identity = new ClaimsIdentity(jwtSecurityToken.Claims, "Permitions");
+                    identity = new ClaimsIdentity(MapClaims(jwtSecurityToken.Claims), "JwtAuth");
                 }
-                var principal = new ClaimsPrincipal(identity);
-                var authenticationState = new AuthenticationState(principal);
-                var authenticationTask = Task.FromResult(authenticationState);
+                var claimsPrincipal = new ClaimsPrincipal(identity);
+                var authenticationState = new AuthenticationState(claimsPrincipal);
 
-                return await authenticationTask;
+                return await Task.FromResult(authenticationState);
             }
             catch
             {
@@ -48,14 +69,16 @@ namespace Pobytne.Client.Authentication
             ClaimsPrincipal claimsPrincipal;
             if (user != null)
             {
-                claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
-                {
-                    new Claim("Id",user.User.Id.ToString()),
-                    new Claim(ClaimTypes.Name,user.User.UserName),
-                    new Claim("License",user.User.LicenseNumber.ToString()),
-                    new Claim("Permitions",user.User.AccessPermition.First().PermitionString),
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var identity = new ClaimsIdentity();
 
-                }));
+                if (tokenHandler.CanReadToken(user.Token))
+                {
+                    var jwtSecurityToken = tokenHandler.ReadJwtToken(user.Token);
+                    identity = new ClaimsIdentity(MapClaims(jwtSecurityToken.Claims), "JwtAuth");
+                }
+                claimsPrincipal = new ClaimsPrincipal(identity);
+
                 user.ExpiryTimeStamp = DateTime.Now.AddSeconds(user.ExpiresIn);
                 await _localStorageService.SaveItemEncrypted(LocalStorageService.USER_SESSION, user);
             }
@@ -65,21 +88,6 @@ namespace Pobytne.Client.Authentication
                 await _localStorageService.RemoveItemAsync(LocalStorageService.USER_SESSION);
             }
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
-        }
-        public async Task<string> GetToken()
-        {
-            var result = string.Empty;
-            try
-            {
-                var user = await _localStorageService.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
-                if (user != null && DateTime.Now < user.ExpiryTimeStamp)
-                    result = user.Token;
-            }
-            catch
-            {
-
-            }
-            return result;
         }
     }
 }

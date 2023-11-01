@@ -1,22 +1,22 @@
 ﻿using Havit.Blazor.Components.Web;
 using Havit.Blazor.Components.Web.Bootstrap;
+using Pobytne.Client.Services;
 using Pobytne.Shared.Procedural;
 using Pobytne.Shared.Struct;
-using System.Net.Http.Json;
-using static System.Net.WebRequestMethods;
+using System.Collections.Generic;
 
 namespace Pobytne.Client.Extensions.IDirectory
 {
-	public class Directory : IDirectory
+    internal class Directory : IDirectory
 	{
-		private readonly HttpClient _http;
+		private readonly PobytneService _service;
 		public string Name { get; set; }
 
 		public IconBase Icon => BootstrapIcon.Archive;
 		private List<LicenseDir> Licenses { get; set; } = new List<LicenseDir>();
 
-		public Directory(HttpClient httpClient, string dirName) { 
-			_http = httpClient;
+		public Directory(PobytneService service, string dirName) { 
+			_service = service;
 			Name = dirName;
 		}
 		public List<IDirectory> Subdirectories {
@@ -35,13 +35,19 @@ namespace Pobytne.Client.Extensions.IDirectory
 		public async Task AddNew() => await LoadData();
 		private async Task LoadData()
 		{
-			var licenses = await _http.GetFromJsonAsync<List<License>>("api/License");
+			var response = await _service.GetAllAsync<License>("");
+            List<License> licenses = new();
+
+			if(response is null)
+                Console.WriteLine($"NO RESPONSE");
+            else if (response is ErrorResponse response1)
+				Console.WriteLine($"{response1.ErrorMessage}");
+			else if(response is List<License> list)
+				licenses = list;
+
 			Licenses.Clear();
-			if (licenses is not null)
-				foreach (License l in licenses)
-				{
-					Licenses.Add(new LicenseDir(_http, l));
-				}
+			foreach (License l in licenses)
+				Licenses.Add(new LicenseDir(_service, l));
 		}
 		public async Task OnSelect()
 		{

@@ -1,6 +1,5 @@
 using Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Pobytne.Data;
@@ -8,11 +7,12 @@ using Pobytne.Data.Tables;
 using Pobytne.Server;
 using Pobytne.Server.Authentication;
 using Pobytne.Server.Service;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 namespace Pobytne
 {
-    public class Program
+	public class Program
     {
         public static void Main(string[] args)
         {
@@ -21,10 +21,12 @@ namespace Pobytne
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
+
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyBlazor", Version = "v1" });
             });
+
             builder.Services.AddAuthentication(o =>
             {
                 o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -38,7 +40,10 @@ namespace Pobytne
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(JwtAuthenticationManager.JWT_SECURITY_KEY)),
                     ValidateIssuer = false,
-                    ValidateAudience = false
+                    ValidateAudience = false,
+                    RequireExpirationTime = true,
+                    NameClaimType = "JwtAuth",
+                    ValidateLifetime = true,
                 };
             });
             builder.Services.AddScoped<UserService>();

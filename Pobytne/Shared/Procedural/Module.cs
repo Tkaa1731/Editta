@@ -7,7 +7,7 @@ namespace Pobytne.Shared.Procedural
 {
     [Serializable]
     [Table("S_Moduly")]
-    public class Module : IListItem
+    public class Module : IListItem, ICloneable
     {
         [Key]
         [Editable(false)]
@@ -29,5 +29,10 @@ namespace Pobytne.Shared.Procedural
         public string Name => ModuleName;
         [Editable(false)]
         public string Description => $"Type of evidence {EvidenceType}";
+
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 }

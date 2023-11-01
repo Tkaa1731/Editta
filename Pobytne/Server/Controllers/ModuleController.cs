@@ -8,8 +8,10 @@ using System.Data;
 
 namespace Pobytne.Server.Controllers
 {
-	[Route("[controller]/[action]")]
-	[ApiController]
+
+  [Route("Module")]
+  [ApiController]
+  [Authorize]
 	public class ModuleController : ControllerBase
 	{
 		private ModuleService _moduleService;
@@ -18,8 +20,6 @@ namespace Pobytne.Server.Controllers
 			_moduleService = moduleService;
 		}
 		[HttpGet]
-		[Route("ModulesList")]
-		//[Authorize(Roles = "Administrator")]
 		public ActionResult<IEnumerable<Module>> Get([FromQuery]int licenseNumber)
         { 
 			return _moduleService.GetModulesByLicense(licenseNumber).Result.ToList();

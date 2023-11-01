@@ -3,12 +3,19 @@
 @using Pobytne.Client.Shared.Forms
 @inject IJSRuntime js
 @inject ILocalStorageService localStorage
-@inject HttpClient Http
+@inject PobytneService service
+
 <PageTitle>Home</PageTitle>
 
 <AuthorizeView>
 	<Authorized>
-		<h1>Hello, @context.User.Identity?.Name !</h1>
+		<h1>NAME, @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.Name)?.Value !</h1>
+        <h1>SID, @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.Sid)?.Value!</h1>
+        <h1>EMAIL, @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.Email)?.Value !</h1>
+        <h1>GIVEN NAME, @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.GivenName)?.Value !</h1>
+        <h1>License, @context.User.Claims.FirstOrDefault(c=> c.Type == "License")?.Value !</h1>
+
+
 
 		<br /><br />
         @if(permitions is not null){
@@ -26,12 +33,14 @@
     </Authorized>
 </AuthorizeView>
 
+
 @code{
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
     [EditorRequired]
     private List<Permition>? permitions => _user?.AccessPermition;
     private User? _user;
+    private string ButtonText = "CLICK";
 
     protected async override Task OnInitializedAsync()
     {
@@ -45,5 +54,5 @@
 
         return;
     }
-    private void Submit(){}
+
 }

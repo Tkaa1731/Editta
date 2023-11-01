@@ -10,8 +10,9 @@ using System.Reflection;
 
 namespace Pobytne.Server.Controllers
 {
-    [Route("[controller]/[action]")]
+    [Route("User")]
     [ApiController]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private UserService _userService;
@@ -22,7 +23,7 @@ namespace Pobytne.Server.Controllers
         [HttpPost]
         [Route("Login")]
         [AllowAnonymous]
-        public ActionResult<UserAccount> LoginUser([FromBody]LoginRequest request)
+        public ActionResult<UserAccount> Login([FromBody]LoginRequest request)
         {
             UserAccount user;
             try
@@ -34,11 +35,8 @@ namespace Pobytne.Server.Controllers
             catch {
                 return Unauthorized();
             }
-
-            //User loginedUser = _userService.LoginUser(user).Result;
-            //if (loginedUser == null) { return null; }
-            //return loginedUser;
         }
+
         [HttpPost]
         [Route("Update")]
         public async Task<IActionResult> Update([FromBody]User updateUser) 
@@ -60,9 +58,9 @@ namespace Pobytne.Server.Controllers
                 return StatusCode(500, $"Internal Server Error :{ex.Message}");
             }
         }
+
         [HttpGet]
         [Route("UsersList")]
-        //[Authorize(Roles = "Administrator")]
         public ActionResult<IEnumerable<User>> GetByLicOrMod([FromQuery]int licenseNumber = -1, [FromQuery]int userOfModule = -1)
         {
             if(licenseNumber > 0)
@@ -72,17 +70,17 @@ namespace Pobytne.Server.Controllers
             else
                 return new List<User>();
         }
+
         [HttpGet]
-        [Route("GetRest")]
-        //[Authorize(Roles = "Administrator")] GetRest?moduleId={module}"
+        [Route("GetRest")]//GetRest?moduleId={module}"
         public ActionResult<IEnumerable<User>> GetRest([FromQuery] int moduleId)
         {
             return _userService.GetUsersExsModule(moduleId).Result.ToList();
         }
+
         [HttpGet]
         [Route("{id}")]
-        //[Authorize(Roles = "Administrator")]
-        public ActionResult<User> GetById(int id)
+        public ActionResult<User> Get(int id)
         {
             try
             {
