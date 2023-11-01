@@ -3,15 +3,17 @@ using Havit.Blazor.Components.Web;
 using Pobytne.Shared.Procedural;
 using Pobytne.Shared.Struct;
 using System.Net.Http.Json;
+using Pobytne.Client.Services;
+using System.ComponentModel;
 
 namespace Pobytne.Client.Extensions.IDirectory
 {
-    public class ModuleDir : IDirectory // add/update permition for user
+    internal class ModuleDir : IDirectory 
     {
-        private readonly HttpClient _http;
-        public ModuleDir(HttpClient httpClient, Module module)
+        private readonly PobytneService _service;
+        public ModuleDir(PobytneService service, Module module)
         {
-            _http = httpClient;
+            _service = service;
             Module = module;
         }
         public Module Module { get; set; }
@@ -22,7 +24,16 @@ namespace Pobytne.Client.Extensions.IDirectory
         public async Task AddNew() => await LoadData();
         private async Task LoadData()
         {
-            var users = await _http.GetFromJsonAsync<List<User>>($"api/User/UsersList?userOfModule={Module.Id}");
+            var response = await _service.GetAllAsync<User>($"UsersList?userOfModule={Module.Id}");
+            List<User> users = new();
+
+            if (response is null)
+                Console.WriteLine($"NO RESPONSE");
+            else if (response is ErrorResponse response1)
+                Console.WriteLine($"{response1.ErrorMessage}");
+            else if (response is List<User> list)
+                users = list;
+
             ItemsList.Clear();
             if (users is not null)
                 ItemsList = users.Select(u => u as IListItem).ToList();

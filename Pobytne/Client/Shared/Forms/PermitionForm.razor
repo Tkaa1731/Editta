@@ -54,7 +54,7 @@
     public FormEnum formType { get; set; }
     [EditorRequired]
     [Parameter]
-    public EventCallback<string> OnValidSubmit { get; set; }
+    public EventCallback<FormEnum> OnValidSubmit { get; set; }
     [EditorRequired]
     [Parameter]
     public Permition? permition{ get; set; }
@@ -89,7 +89,7 @@
         }
     }
 
-    private string pString;
+    private string pString = String.Empty;
     private async Task OnValidSubmitHandler()
     {
         if(permition is not null && model.userId.HasValue)
@@ -97,10 +97,9 @@
             permition.UserId = model.userId.Value;
             GetPermitionString();
             pString = permition.PermitionString;
-            // if (formType == FormEnum.Insert)
-            //     await OnValidSubmit.InvokeAsync("Insert");// TODO: dodelat update a insert pro permition
-            // else if (formType == FormEnum.Update)
-            //     await OnValidSubmit.InvokeAsync("Update");            
+
+            await OnValidSubmit.InvokeAsync(formType);// TODO: dodelat update a insert pro permition
+           
         }
     }
 

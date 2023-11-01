@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Pobytne.Shared.Procedural;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Pobytne.Server.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]/[action]")]
     [ApiController]
     public class ItemsController : ControllerBase
     {
@@ -39,6 +40,13 @@ namespace Pobytne.Server.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+        }
+        [Authorize]
+        [HttpGet]
+        [Route("Test")]
+        public string TestAPI()
+        {
+            return "You are Authentificated";
         }
     }
 }

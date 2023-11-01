@@ -5,7 +5,7 @@ using Pobytne.Shared.Struct;
 namespace Pobytne.Shared.Procedural
 {
     [Table("S_LoginUser")]
-    public class User : ICreation, IListItem
+    public class User : ICreation, IListItem, ICloneable
     {
         [Key]
         [Editable(false)]
@@ -39,5 +39,10 @@ namespace Pobytne.Shared.Procedural
         [Editable(false)]
         public string Description => UserName;
         public bool CheckPassword(string password) => _password == password;
+
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 }

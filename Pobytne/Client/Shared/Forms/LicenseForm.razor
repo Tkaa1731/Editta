@@ -29,7 +29,7 @@
             </div>
         </div>
         <div class="row align-items-start">
-            <div class="col">+
+            <div class="col">
                 <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidTo" MinDate="DateTime.Now.AddDays(1)" Label="Valid To" />
             </div>
             <div class="col">
@@ -74,7 +74,7 @@
     [Parameter]
     public FormEnum formType { get; set; }
     [Parameter]
-    public EventCallback<string> OnValidSubmit { get; set; }
+    public EventCallback<FormEnum> OnValidSubmit { get; set; }
     private string ButtonText
     {
         get
@@ -85,16 +85,18 @@
     }
     private async Task OnValidSubmitHandler()
     {
-        license.LicenseNumber = license.ICO;
-        if (formType == FormEnum.Insert)
-            await OnValidSubmit.InvokeAsync("Insert");
-        else if (formType == FormEnum.Update)
-            await OnValidSubmit.InvokeAsync("Update");
+        if(license is not null)
+        {            
+            license.LicenseNumber = license.ICO;
+
+            await OnValidSubmit.InvokeAsync(formType);
+        }
+
     }
 
     private void ICOChangedHandler(ChangeEventArgs e)
     {
-        if(e.Value is not null)
+        if(e.Value is not null && license is not null)
         {
             if (int.TryParse(e.Value.ToString(), out int newValue))
             {

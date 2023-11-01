@@ -4,10 +4,12 @@ using Blazored.LocalStorage;
 using Pobytne.Client.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Havit.Blazor.Components.Web;
-using Havit.Blazor.Components.Web.Bootstrap;
-using Pobytne.Client.Extensions;
-using Pobytne.Shared.Procedural;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http;
+using Pobytne.Shared.Procedural;
+using Pobytne.Client.Services;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Pobytne.Client
 {
@@ -19,12 +21,15 @@ namespace Pobytne.Client
             services.AddBlazoredLocalStorage();
             services.AddHxServices();
             services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
-            services.AddAuthorizationCore();
-            services.AddScoped<IAuthorizationHandler, PermitionRequirementHandler>();
+
+			services.AddScoped<IAuthorizationHandler, PermitionRequirementHandler>();
             services.AddAuthorizationCore(config =>
             {
                 config.AddPolicy("PermitionPolicy", policy => policy.AddRequirements(new PermitionRequirement()));
             });
+            services.AddTransient<TokenService>();
+            services.AddTransient<JwtTokenInterceptor>();
+            services.AddScoped<AuthenticationService>();
             // ...
         }
         public static async Task Main(string[] args)
@@ -33,7 +38,11 @@ namespace Pobytne.Client
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");
 
-            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services.AddHttpClient<PobytneService>(client =>
+            {    // Konfigurace HTTP klienta
+                client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
+            }).AddHttpMessageHandler<JwtTokenInterceptor>();
+
             ConfigureServices(builder.Services);
 
             await builder.Build().RunAsync();

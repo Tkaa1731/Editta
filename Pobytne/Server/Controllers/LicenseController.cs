@@ -6,7 +6,8 @@ using System.Data;
 
 namespace Pobytne.Server.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("License")]
+    [Authorize]
 	[ApiController]
 	public class LicenseController : ControllerBase
 	{
@@ -16,7 +17,6 @@ namespace Pobytne.Server.Controllers
 			_licenseService = licenseService;
 		}
 		[HttpGet]
-		//TODO:[Authorize(Roles = "Administrator")]
 		public ActionResult<IEnumerable<License>> Get()
 		{//TODO: Get by module
 			return _licenseService.GetLicenses().Result.ToList();

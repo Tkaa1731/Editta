@@ -1,22 +1,23 @@
 ﻿using Havit.Blazor.Components.Web;
 using Havit.Blazor.Components.Web.Bootstrap;
+using Pobytne.Client.Services;
 using Pobytne.Shared.Procedural;
 using Pobytne.Shared.Struct;
-using System.Net.Http.Json;
+using License = Pobytne.Shared.Procedural.License;
 
 namespace Pobytne.Client.Extensions.IDirectory
 {
-    public class LicenseDir : IDirectory // Add/update module
+    internal class LicenseDir : IDirectory // Add/update module
     {
-        private readonly HttpClient _http;
-        public LicenseDir(HttpClient httpClient, License license)
+        private readonly PobytneService _service;
+        public LicenseDir(PobytneService service, License license)
         {
             Modules = new List<IDirectory>() { };
-            _http = httpClient;
+            _service = service;
             License = license;
-            Users = new UserDir(httpClient, License.LicenseNumber);
+            Users = new UserDir(service, License.LicenseNumber);
         }
-        public License License { get; set; }
+        public Pobytne.Shared.Procedural.License License { get; set; }
         public List<IDirectory> Modules { get; set; }
         public IDirectory Users { get; set; }
         public List<IListItem> ItemsList { 
@@ -40,11 +41,18 @@ namespace Pobytne.Client.Extensions.IDirectory
         public async Task AddNew() => await LoadData();
         private async Task LoadData()
         {
-            var modules = await _http.GetFromJsonAsync<List<Module>>($"api/Module/ModulesList?licenseNumber={License.LicenseNumber}");
+            var response = await _service.GetAllAsync<Module>($"?licenseNumber={License.LicenseNumber}");
+            List<Module> modules = new(); 
+            if (response is null)
+                Console.WriteLine($"NO RESPONSE");
+            else if (response is ErrorResponse response1)
+                Console.WriteLine($"{response1.ErrorMessage}");
+            else if (response is List<Module> list)
+                modules = list;
+
             Modules.Clear();
-            if (modules is not null)
-                foreach (Module m in modules)
-                    Modules.Add(new ModuleDir(_http, m));
+            foreach (Module m in modules)
+                Modules.Add(new ModuleDir(_service, m));
         }
         public async Task OnSelect()
         {

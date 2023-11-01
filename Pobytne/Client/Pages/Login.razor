@@ -1,7 +1,6 @@
 ﻿@page "/login"
-@inject HttpClient httpClient
-@inject IJSRuntime js
-@inject AuthenticationStateProvider authStateProv
+@attribute [AllowAnonymous]
+@inject AuthenticationService authService
 @inject NavigationManager navManager
 
 
@@ -24,6 +23,9 @@
                                     <HxInputText @bind-Value="logRequest.Password" Label="Password" Type="InputType.Password" />
                                 </div>
                             </div>
+                            <div class="error-message">
+                                <p>@errorMessage</p>
+                            </div>
                             <div class="d-grid gap-2">
                                 <HxSubmit Color="ThemeColor.Success">Login</HxSubmit>
                             </div>
@@ -39,30 +41,22 @@
 
 @code {
     private LoginRequest logRequest = new();
+    private string errorMessage = String.Empty;
     private async Task Authenticate()
     {
-        //try
-        //{
-        //    await AuthenticationService.Login(logRequest);
-        //    navManager.NavigateTo("/", true);
-        //}
-        //catch(Exception ex)
-        //{
-        //    await js.InvokeVoidAsync("alert", ex.Message);
-        //    return;
-        //}
-        var logResponse = await httpClient.PostAsJsonAsync<LoginRequest>("/api/User/Login",logRequest);
-        if (logResponse.IsSuccessStatusCode)
+        var logResponse = await authService.Login(logRequest);
+        if (logResponse.IsCompleted)
         {
-            var user = await logResponse.Content.ReadFromJsonAsync<UserAccount>();
-            var customAuthStateProvider =(CustomAuthenticationStateProvider) authStateProv;
-            await customAuthStateProvider.UpdateAuthenticationState(user);
-            await js.InvokeVoidAsync("alert", user.ToString());
             navManager.NavigateTo("/", true);
         }
-        else if(logResponse.StatusCode == HttpStatusCode.Unauthorized)
+        else 
         {
-            await js.InvokeVoidAsync("alert", "invalid Username or Password");
+            var errorResponse = logResponse.AsyncState as ErrorResponse;
+            if (errorResponse is not null)
+                errorMessage = errorResponse.ErrorMessage;
+            else
+                errorMessage = "Unknow error occured";
+            logRequest = new();
             return;
         }
     }

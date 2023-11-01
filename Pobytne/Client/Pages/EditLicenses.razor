@@ -1,24 +1,33 @@
 ﻿@page "/EditLicenses"
-@attribute [Authorize]
-@inject HttpClient HttpClient
+@* @attribute [Authorize(Policy = "PermitionPolicy", AuthenticationSchemes = "a")] *@
+@inject PobytneService service
 @inject IJSRuntime js
-<AuthorizeView Policy="PermitionPolicy" Resource=(PermitionEnum.Module,AccessEnum.NoAccess)></AuthorizeView>
+
 <PageTitle>EditLicense</PageTitle>
-<div class="row">
-    <div class="col-lg-3" style="height: 800px">
-        <HxTreeView TItem="IDirectory"
-                    SelectedItemChanged="OnSelect"
-                    Items="@fileSystem"
-                    CssClass="border rounded p-2"
-                    ItemTitleSelector="@(p => p.Name)"
-                    ItemIconSelector="@(p => p.Icon)"
-                    ItemChildrenSelector="@(p => p.Subdirectories)" />
+<AuthorizeView Policy="PermitionPolicy" Resource=(PermitionEnum.Aplication,AccessEnum.ReadOnly)>
+    <Authorized>
+        JSTE V MODU READONLY PRO PRISTUP - APLICATION
+
+    <div class="row">
+        <div class="col-lg-3" style="height: 800px">
+            <HxTreeView TItem="IDirectory"
+                        SelectedItemChanged="OnSelect"
+                        Items="@fileSystem"
+                        CssClass="border rounded p-2"
+                        ItemTitleSelector="@(p => p.Name)"
+                        ItemIconSelector="@(p => p.Icon)"
+                        ItemChildrenSelector="@(p => p.Subdirectories)" />
+        </div>
+        <div class="col-lg-9">
+            <ListCustom ListItems=@listOfItems currentItem=selectedItem selectedItemChanged=OnItemSelect EventNewItem="OnNewItem"></ListCustom>
+        </div>
     </div>
-    <div class="col-lg-9">
-        <ListCustom ListItems=@listOfItems currentItem=selectedItem selectedItemChanged=OnItemSelect EventNewItem="OnNewItem"></ListCustom>
-    </div>
-</div>
-<FormMessageBox formItem="formItem" @ref=formMessageBox OnSuccessRequest="OnSuccessRequestHandler"></FormMessageBox>
+		    <FormMessageBox formItem="formItem" @ref=formMessageBox OnSuccessRequest="OnSuccessRequestHandler"></FormMessageBox>
+	    </Authorized>
+	<NotAuthorized>
+		JSTE V NOACCESS MODU PRO  PRISTUP - APLICATION
+	</NotAuthorized>
+</AuthorizeView>
 @code {
 
     private IDirectory? selectedDirectory;
@@ -49,7 +58,7 @@
     }
     protected override async Task OnInitializedAsync()
     {
-        fileSystem = new List<Directory>() { new Directory(HttpClient, "Pobytne licence") };
+        fileSystem = new List<Directory>() { new Directory(service, "Pobytne licence") };
         await fileSystem[0].OnSelect();
     }
     private async Task OnNewItem()
@@ -70,5 +79,4 @@
         StateHasChanged();
     }
     //TODO: Delete
-    //TODO: Permition form
 }
