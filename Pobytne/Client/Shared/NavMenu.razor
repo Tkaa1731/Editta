@@ -1,39 +1,55 @@
-﻿6
-<div class="top-row ps-3 navbar navbar-dark ">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Pobytne</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
+﻿@inject AuthenticationStateProvider authStateProv
+@inject NavigationManager navManager
 
-<div class="navmenu" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house fs-3" aria-hidden="true"></span>
-            </NavLink>
-        </div>
-        <AuthorizeView>
-            <Authorized>
-                <div class="nav-item">
-                    <NavLink class="nav-link" href="EditLicenses">
-                        <span class="bi bi-pencil-square fs-3" aria-hidden="true"></span>
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-    </nav>
+
+
+<div @onmouseenter="() => Collapsed = false" @onmouseleave="() => Collapsed = true" class="h-100">
+    <HxSidebar @bind-Collapsed="Collapsed" CssClass="h-100">
+
+        <HeaderTemplate>
+            <HxSidebarBrand BrandName="Pobytne">
+                <LogoTemplate>
+                    <img src="/P.png" width="40" height="40" />
+                </LogoTemplate>
+            </HxSidebarBrand>
+        </HeaderTemplate>
+
+        <ItemsTemplate>
+            <HxSidebarItem Text="Nástěnka" Href="/" Icon="BootstrapIcon.HouseDoor"/>
+            <HxSidebarItem Text="Administrace" Href="/EditLicenses" Icon="BootstrapIcon.Gear"/>
+            <HxSidebarItem Text="Můj účet" Href="/Account" Icon="BootstrapIcon.Person"/>
+        </ItemsTemplate>
+
+        <TogglerTemplate/>
+
+        <FooterTemplate>
+            <a @onclick="Logout">
+				<HxSidebarFooter  Icon="BootstrapIcon.PersonLock" Text="@(context.SidebarCollapsed ? null : "Odhlásit se")" />
+            </a>
+        </FooterTemplate>
+    </HxSidebar>
+
 </div>
+<style>
+    :root{
+
+        --hx-sidebar-item-icon-color: white;
+        --hx-sidebar-item-color: white;
+        --hx-sidebar-brand-name-color: white;
+        --hx-sidebar-footer-item-color: white;
+        --hx-sidebar-footer-item-hover-color : #AAA;
+    }
+</style>
 
 @code {
-    private bool collapseNavMenu = true;
+    [Parameter]
+    [EditorRequired]
+    public EventCallback OnLogout { get; set; }
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private bool Collapsed { get; set; } = true;
 
-    private void ToggleNavMenu()
+    private async Task Logout()
     {
-        collapseNavMenu = !collapseNavMenu;
+        await OnLogout.InvokeAsync();
     }
 }

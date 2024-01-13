@@ -1,0 +1,63 @@
+﻿@using Pobytne.Client.Shared.Records
+		
+@if(Source is not null)
+{	
+	<a @onclick=OnClickHandler>
+		<div class="w-100 row pt-2 m-2" style="border-top:2px solid @color;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); font-size:1rem;">
+			@switch (Source.Record.RecordType)
+			{
+				case ERecordType.Folder:
+					<RecordFolder folder="Source.Record as IFolder_Record"></RecordFolder>
+					break;
+				case ERecordType.Ware:
+					<RecordWare ware="Source.Record as IWare_Record"></RecordWare>
+					break;
+				case ERecordType.Activity:
+					<RecordActivity activity="Source.Record as IActivity_Record"></RecordActivity>
+					break;
+				case ERecordType.EmployeeTasks:
+					<HxIcon Icon="BootstrapIcon.People"></HxIcon>
+					break;
+			}
+		</div>
+	</a>
+}
+@code {
+	[EditorRequired]
+	[Parameter]
+	public RecordTreeView? Source { get; set; }
+	[EditorRequired]
+	[Parameter]
+	public EventCallback<RecordTreeView> OnClick { get; set; }
+
+	private string color
+	{
+		get
+		{
+			string c = "black";
+			if (Source is null)
+				return c;
+			switch (Source.Record.RecordType)
+			{
+				case ERecordType.Folder:
+					c = "orange"; 
+					break;
+				case ERecordType.Ware:
+					c = "lightblue";
+					break;
+				case ERecordType.Activity:
+					c = "#b576d5";
+					break;
+				case ERecordType.EmployeeTasks:
+					c = "lightgreen";
+					break;
+			}
+			return c;
+		}
+	}
+
+	private async Task OnClickHandler()
+	{
+		await OnClick.InvokeAsync(Source);
+	}
+}

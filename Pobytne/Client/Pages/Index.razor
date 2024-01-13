@@ -1,43 +1,43 @@
 ﻿@page "/"
-@using Blazored.LocalStorage;
-@using Pobytne.Client.Shared.Forms
 @inject IJSRuntime js
 @inject ILocalStorageService localStorage
 @inject PobytneService service
+@inject NavigationManager navManager
+
 
 <PageTitle>Home</PageTitle>
-
 <AuthorizeView>
+    <NotAuthorized>
+
+    <p>Pravdepodobne nejste prihlasen</p>
+    </NotAuthorized>
 	<Authorized>
-		<h1>NAME, @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.Name)?.Value !</h1>
-        <h1>SID, @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.Sid)?.Value!</h1>
-        <h1>EMAIL, @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.Email)?.Value !</h1>
-        <h1>GIVEN NAME, @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.GivenName)?.Value !</h1>
-        <h1>License, @context.User.Claims.FirstOrDefault(c=> c.Type == "License")?.Value !</h1>
-
-
-
-		<br /><br />
-        @if(permitions is not null){
-            @foreach(var module in permitions)
-            {
-                <span class="card w-25">
-                    <div class="card-body">
-                        <h5>Permition id : @module.Id</h5>
-                        <h5 class="card-title">Module name : @module.ModuleName</h5>
-                        <p>permition string : @module.PermitionString</p>
-                    </div>
-                </span>
-            }
-        }
+        <div class="container mt-5">
+            <div class="row">
+                @if(permitions is not null){
+                    @foreach(var module in permitions)
+                    {
+                        <div class="col">
+                            <a href="/@module.Id/">
+                                <div class="card" style="height:130px">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@module.ModuleName</h5>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
     </Authorized>
+    
 </AuthorizeView>
-
 
 @code{
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
-    [EditorRequired]
+
     private List<Permition>? permitions => _user?.AccessPermition;
     private User? _user;
     private string ButtonText = "CLICK";
@@ -51,8 +51,11 @@
             if(user is not null)
                 _user = user.User;
         }
+        // else
+        // {
+        //     navManager.NavigateTo("/Login", true);
+        // }
 
         return;
     }
-
 }

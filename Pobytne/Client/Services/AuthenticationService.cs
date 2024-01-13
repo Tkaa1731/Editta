@@ -1,10 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using Pobytne.Client.Authentication;
 using Pobytne.Shared.Authentication;
-using Pobytne.Shared.Procedural;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
 
 namespace Pobytne.Client.Services
 {

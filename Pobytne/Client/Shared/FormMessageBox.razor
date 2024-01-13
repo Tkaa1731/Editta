@@ -1,9 +1,10 @@
 ﻿@inject IJSRuntime js
 @inject PobytneService service
 
-
 <HxModal @ref="myModal" Backdrop="ModalBackdrop.Static" Size="ModalSize.Large" OnClosed="HandleHideClick">
-    <HeaderTemplate><h2 class=@headerStyle>@headerText</h2></HeaderTemplate>
+    <HeaderTemplate><h2 class=@headerStyle>@headerText</h2>
+        <h1>HELLO</h1>
+        </HeaderTemplate>
     <BodyTemplate>
         @switch (formItem)
         {

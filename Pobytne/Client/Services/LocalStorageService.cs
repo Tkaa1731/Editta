@@ -2,9 +2,9 @@
 using System.Text;
 using System.Text.Json;
 
-namespace Pobytne.Client.Extensions
+namespace Pobytne.Client.Services
 {
-    public static class LocalStorageService 
+    public static class LocalStorageService
     {
         public const string USER_SESSION = "UserSession";
         public const string MODULE_SESSION = "ActiveModule";
@@ -19,7 +19,7 @@ namespace Pobytne.Client.Extensions
         {
             var base64Json = await localStorageService.GetItemAsync<string>(key);
             var itemJsonBytes = Convert.FromBase64String(base64Json);
-            var itemJson = Encoding.ASCII.GetString(itemJsonBytes); 
+            var itemJson = Encoding.ASCII.GetString(itemJsonBytes);
             var item = JsonSerializer.Deserialize<T>(itemJson);
             return item;
         }

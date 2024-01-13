@@ -1,0 +1,120 @@
+﻿@page "/{idModule}/Records"
+@inject PobytneService service
+
+<h3>Evidence</h3>
+<div class="row">
+    @if(maxDepth > 0)
+    {        
+        @for (int i = 0; i < maxDepth; i++)
+        {
+            <div class="col container custom-scrollbar" style="overflow-y: scroll;max-height:90vh; ">
+                @for(int j = 0; j < records[i].Count; j++)
+                {
+                    <RecordComponent Source=@records[i][j] OnClick=OnSelect></RecordComponent>
+                }
+            </div>
+        }
+        <div class="col m-2 p-2" style="background:#06172621;height:90vh;">
+            <div>
+                @foreach (var sr  in selectedRecord)
+                {
+                    <p>@sr.Name<span style="text-align:right;">@sr.Price,-</span></p>
+                }
+            </div>
+            <div style="align-self:baseline;">
+                SUM: @sum
+            </div>
+        </div>
+    }
+</div>
+<style>
+        /* custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 20px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background-color: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #d6dee1;
+      border-radius: 20px;
+      border: 6px solid transparent;
+      background-clip: content-box;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: #a8bbbf;
+    }
+</style>
+
+@code {
+    [EditorRequired]
+    [Parameter]
+    public string idModule { get; set; } = "-1";
+    private int maxDepth = 0;
+    private Dictionary<int,List<RecordTreeView>> records = new();
+
+    private List<Record> selectedRecord = [];
+    private int sum
+    {
+        get
+        {
+            return selectedRecord.Sum(sr => sr.Price);
+        }
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        var depth = await service.GetInfoAsync<Record,int>($"RecordsMaxDepth?moduleId={idModule}");
+        if (ServiceRequest<int>(depth) && depth is int d)
+        {
+            maxDepth = d+1;
+            for (int i = 0; i < maxDepth; i++)
+                records[i] = new();
+
+            var root = await service.GetAllAsync<Record>($"RecordsRoot?moduleId={idModule}");
+            if (ServiceRequest<List<Record>>(root) && root is List<Record> r)
+            {
+                List<RecordTreeView> rootTV = [];
+                foreach (var rtv in r)
+                {
+                    var tv = new RecordTreeView(service) { Record = rtv };
+                    if (tv.Active)
+                        rootTV.Add(tv);
+                }
+                records[0] = rootTV;
+            }
+        }
+    }
+    private bool ServiceRequest<T>(object? response)
+    {
+        if(response is T)
+            return true;
+        else if (response is null)
+            Console.WriteLine($"NO RESPONSE");
+        else if (response is ErrorResponse error)
+            Console.WriteLine($"{error.ErrorMessage}");
+        return false;
+    }
+    private async Task OnSelect(RecordTreeView rtv)
+    {
+        switch(rtv.Record.RecordType){
+            case ERecordType.Folder:
+                await rtv.LoadData();
+                var selectedActive = rtv.SubRecords.Where(r => r.Active).ToList();
+
+                if(selectedActive  is not null)
+                    records[rtv.Depth + 1] = selectedActive;
+
+                for (int i = rtv.Depth + 2; i < maxDepth; i++)
+                    records[i].Clear();
+                break;
+            default:
+                selectedRecord.Add(rtv.Record);
+                break;
+
+        }
+    }
+}

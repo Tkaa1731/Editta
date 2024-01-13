@@ -1,0 +1,29 @@
+﻿@page "/{idModule}/Clients"
+@inject PobytneService _service
+
+<h3>ModuleClients</h3>
+
+<ListCustom ListItems="AllClients"/>
+
+@code {
+    [EditorRequired]
+    [Parameter]
+    public string idModule { get; set; } = "-1";
+
+    private List<IListItem> AllClients = new List<IListItem>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await _service.GetAllAsync<Client>($"ClientsList?moduleNumber={idModule}");
+        List<Client> clients = new();
+        if (response is null)
+            Console.WriteLine($"NO RESPONSE");
+        else if (response is ErrorResponse response1)
+            Console.WriteLine($"{response1.ErrorMessage}");
+        else if (response is List<Client> list)
+            clients = list;
+
+        if (clients is not null)
+            AllClients = clients.Select(c => c as IListItem).ToList();
+    }
+}

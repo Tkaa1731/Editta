@@ -11,7 +11,7 @@ namespace Pobytne.Server.Authentication
 	public class JwtAuthenticationManager
 	{
 		public const string JWT_SECURITY_KEY = "yPkCqn4kSWLtaJwXvN2jGzpQRyTZ3gdXkt7FeBJP";
-		private const int JWT_TOKEN_VALIDITY_MINS = 1;
+		private const int JWT_TOKEN_VALIDITY_MINS = 30;
 
 		private UserService _userService;
 

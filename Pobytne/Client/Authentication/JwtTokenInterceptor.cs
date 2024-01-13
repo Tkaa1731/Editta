@@ -24,9 +24,8 @@ namespace Pobytne.Client.Authentication
                 Token = "";
             else
                 Token = token;
-                // Add the JWT token to the Authorization header
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", Token);
-            //}
+
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", Token);
 
             return await base.SendAsync(request, cancellationToken);
         }

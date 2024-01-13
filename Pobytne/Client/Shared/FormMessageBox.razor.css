@@ -1,0 +1,10 @@
+﻿::deep .input_changed{
+    border-block-color:blue;
+}
+
+::deep button{
+    background-color: red;
+}
+h1{
+    color:red;
+}

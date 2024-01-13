@@ -1,6 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
-using Pobytne.Client.Extensions;
+using Pobytne.Client.Services;
 using Pobytne.Shared.Authentication;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

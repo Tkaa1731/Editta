@@ -2,9 +2,9 @@
 
 namespace Pobytne.Data
 {
-    internal static class Tools // TODO: Local a Test nejsou stejne ... jine columns napr v Modulech
+    internal static class Tools // TODO: Local a Test nejsou stejne ... jine columns napr v Modulech, Uzivatel
     {
-        public static string GetConnectionString(string name = "PobytneLocal")
+        public static string GetConnectionString(string name = "PobytneTest")
         {
             return ConfigurationManager.ConnectionStrings[name].ConnectionString;
         }

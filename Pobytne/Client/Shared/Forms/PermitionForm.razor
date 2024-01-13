@@ -1,5 +1,6 @@
-﻿@inject HttpClient _http
-@inject IJSRuntime js
+﻿@inject IJSRuntime js
+@inject PobytneService service
+
 @if(permition is not null)
 {
     <h3>Module name: @permition.ModuleName</h3>
@@ -99,7 +100,7 @@
             pString = permition.PermitionString;
 
             await OnValidSubmit.InvokeAsync(formType);// TODO: dodelat update a insert pro permition
-           
+
         }
     }
 
@@ -107,7 +108,7 @@
     {
         accessList = new Dictionary<PermitionEnum, PermitionRecord>();
         accessList[PermitionEnum.Aplication] = new PermitionRecord("Nastavení aplikace");
-        accessList[PermitionEnum.License] = new PermitionRecord("Seznam licencí");
+        accessList[PermitionEnum.License] = new PermitionRecord("Seznam licencí");//TOTO: kdo eviduje liccence
         accessList[PermitionEnum.LoginUser] = new PermitionRecord("Seznam uživatelů aplikace");
         accessList[PermitionEnum.Module] = new PermitionRecord("Seznam modulů");
         accessList[PermitionEnum.Permition] = new PermitionRecord("Seznam oprávnění");
@@ -157,7 +158,7 @@
 
             if (id > 0)
             {
-                User? u = await _http.GetFromJsonAsync<User>($"api/User/{id}");
+                User? u = await service.GetByIdAsync<User>(id) as User;
 
                 userList.Add(new UserRecord(u.UserName, u.Id));
                 model.userId = id;
@@ -165,7 +166,7 @@
             else
             {   
                 int module = permition.ModuleId;
-                List<User>? users = await _http.GetFromJsonAsync<List<User>>($"api/User/GetRest?moduleId={module}");
+                List<User>? users = await service.GetAllAsync<User>($"GetRest?moduleId={module}") as List<User>;// TODO: dodelat ErrorResult handlery
 
 
                 if(users is not null)

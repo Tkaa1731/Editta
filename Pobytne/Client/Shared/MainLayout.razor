@@ -5,34 +5,28 @@
     <AuthorizeView>
         <Authorized>
             <div class="sidebar  w-auto" style="background-color:#061726">
-                <NavMenu />
+                <NavMenu OnLogout="Logout" />
             </div>
         </Authorized>
     </AuthorizeView>
 
     <main>
-        <div class="top-row px-4">
-            <AuthorizeView>
-                <Authorized>
-                    <a @onclick="Logout" href="javascript:void(0)">Logout</a>
-                </Authorized>
-                <NotAuthorized>
-                    <a href="/Login">Login</a>
-                </NotAuthorized>
-            </AuthorizeView>
-        </div>
+        <AuthorizeView>
+            <NotAuthorized>
+                <a href="/Login">Login</a>
+            </NotAuthorized>
 
+		</AuthorizeView>               
         <article class="content px-4">
-            @Body
-        </article>
+			@Body
+		</article>
     </main>
 </div>
 
-@code{
+@code {
     private async Task Logout()
     {
         var customAuthStateProv = (CustomAuthenticationStateProvider)authStateProv;
         await customAuthStateProv.UpdateAuthenticationState(null);
-        navManager.NavigateTo("/Login", true);
     }
 }

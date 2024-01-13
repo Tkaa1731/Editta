@@ -5,11 +5,7 @@ using Pobytne.Client.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Havit.Blazor.Components.Web;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.DependencyInjection;
-using System.Net.Http;
-using Pobytne.Shared.Procedural;
 using Pobytne.Client.Services;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace Pobytne.Client
 {

@@ -1,0 +1,97 @@
+﻿@page "/{idModule}/"
+@inject ILocalStorageService localStorage
+@inject PobytneService service
+
+<h3>@modulePermition.ModuleName</h3>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <a href="@idModule/Records">
+                <div class="card">
+                    <div class="card-body">
+                        <HxIcon Icon="@BootstrapIcon.Book" />
+                        <h5 class="card-title">Evidence</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col">
+            <a href="@idModule/Clients">
+                <div class="card">
+                    <div class="card-body">
+                        <HxIcon Icon="@BootstrapIcon.People" />
+                        <h5 class="card-title">Klienti</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col">
+            <a href="@idModule/Contracts">
+                <div class="card">
+                    <div class="card-body">
+                        <HxIcon Icon="@BootstrapIcon.Clipboard2Check"/>
+                        <h5 class="card-title">Smlouvy</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="row mt-5">
+        <div class="col">
+            <a href="@idModule/CashRegister">
+                <div class="card">
+                    <div class="card-body">
+                        <HxIcon Icon="@BootstrapIcon.Wallet" />
+                        <h5 class="card-title">Pokladna</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col">
+            <a href="@idModule/Settings">
+                <div class="card">
+                    <div class="card-body">
+                        <HxIcon Icon="@BootstrapIcon.Gear" />
+                        <h5 class="card-title">Nastavení</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col">
+            <a href="@idModule/Reports">
+                <div class="card">
+                    <div class="card-body">
+                        <HxIcon Icon="@BootstrapIcon.CalculatorFill" />
+                        <h5 class="card-title">Souhrny</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+@code {
+    [EditorRequired]
+    [Parameter]
+    public string idModule { get; set; } = "-1";
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; } = default!;
+    private Permition modulePermition = new Permition();
+
+    protected async override Task OnInitializedAsync()
+    {
+        var authState = await authenticationState;
+        if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
+        {
+            var user = await localStorage.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
+            if (user is not null)
+            {
+                var p = user.User.AccessPermition?.FirstOrDefault(m => m.Id.ToString() == idModule);
+                if (p is not null)
+                    modulePermition = p;
+            }
+
+        }
+
+        return;
+    }
+}

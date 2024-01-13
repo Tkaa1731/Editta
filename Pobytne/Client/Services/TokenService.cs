@@ -1,5 +1,4 @@
 ﻿using Blazored.LocalStorage;
-using Pobytne.Client.Extensions;
 using Pobytne.Shared.Authentication;
 
 namespace Pobytne.Client.Services
