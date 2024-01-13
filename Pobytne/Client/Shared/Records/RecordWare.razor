@@ -1,0 +1,17 @@
+﻿@if (ware is not null)
+{
+		<div class="col-1">
+			<HxIcon Icon="icon"></HxIcon>
+		</div>
+		<div class="col">
+			<p>@ware.Name</p>
+		</div>
+		<div class="col-1 pr-1" style="color:grey;">@ware.Stock</div>
+}
+@code {
+	[EditorRequired]
+	[Parameter]
+	public IWare_Record? ware { get; set; }
+	private IconBase icon = BootstrapIcon.Cart;
+
+}

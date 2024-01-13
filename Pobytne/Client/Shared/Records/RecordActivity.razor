@@ -1,0 +1,16 @@
+﻿@if (activity is not null)
+{
+		<div class="col-1">
+			<HxIcon Icon="icon"></HxIcon>
+		</div>
+		<div class="col">
+			<p>@activity.Name</p>
+		</div>
+}
+@code {
+	[EditorRequired]
+	[Parameter]
+	public IActivity_Record? activity { get; set; }
+	private IconBase icon = BootstrapIcon.CalendarEvent;
+
+}

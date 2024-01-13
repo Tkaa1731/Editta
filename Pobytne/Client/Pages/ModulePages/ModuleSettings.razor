@@ -1,0 +1,8 @@
+﻿@page "/{idModule}/Settings"
+<h3>ModuleSettings</h3>
+
+@code {
+    [EditorRequired]
+    [Parameter]
+    public string idModule { get; set; } = "-1";
+}

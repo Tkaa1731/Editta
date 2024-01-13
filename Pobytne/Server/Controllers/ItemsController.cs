@@ -1,15 +1,20 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Pobytne.Server.Service;
 using Pobytne.Shared.Procedural;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Pobytne.Server.Controllers
 {
-    [Route("[controller]/[action]")]
-    [ApiController]
+
     public class ItemsController : ControllerBase
     {
+        private readonly ClientService _clientService;
+        public ItemsController(ClientService clientService)
+        {
+            _clientService = clientService;
+        }
         // GET: api/<ItemsController>
         [HttpGet]
         public IEnumerable<string> Get()
@@ -43,10 +48,10 @@ namespace Pobytne.Server.Controllers
         }
         [Authorize]
         [HttpGet]
-        [Route("Test")]
-        public string TestAPI()
+        [Route("ClientsList")]
+        public Task<IEnumerable<Shared.Procedural.Client>> GetClients(int moduleNumber)
         {
-            return "You are Authentificated";
+            return _clientService.GetClientsByModule(moduleNumber);
         }
     }
 }

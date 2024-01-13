@@ -10,13 +10,11 @@ namespace Pobytne.Server.Service
         private readonly UserTable _userTable;
         private readonly LicenseTable _licenseTable;
         private readonly PermitionTable _permitionTable;
-        private readonly ModuleTable _moduleTable;
-        public UserService(UserTable user,LicenseTable license, PermitionTable permition, ModuleTable module) 
+        public UserService(UserTable user,LicenseTable license, PermitionTable permition) 
         {
             _userTable = user;
             _licenseTable = license;
             _permitionTable = permition;
-            _moduleTable = module;
         }
 
         public async Task<UserAccount> GetAccount(LoginRequest userAccount)

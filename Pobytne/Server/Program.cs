@@ -7,12 +7,11 @@ using Pobytne.Data.Tables;
 using Pobytne.Server;
 using Pobytne.Server.Authentication;
 using Pobytne.Server.Service;
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 namespace Pobytne
 {
-	public class Program
+    public class Program
     {
         public static void Main(string[] args)
         {
@@ -24,7 +23,7 @@ namespace Pobytne
 
             builder.Services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyBlazor", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "PobytneAPI", Version = "v1" });
             });
 
             builder.Services.AddAuthentication(o =>
@@ -49,11 +48,17 @@ namespace Pobytne
             builder.Services.AddScoped<UserService>();
 			builder.Services.AddScoped<ModuleService>();
             builder.Services.AddScoped<LicenseService>();
+            builder.Services.AddScoped<ClientService>();
+            builder.Services.AddScoped<RecordService>();
+
 
             builder.Services.AddScoped<UserTable>();
             builder.Services.AddScoped<LicenseTable>();
             builder.Services.AddScoped<ModuleTable>();
             builder.Services.AddScoped<PermitionTable>();
+            builder.Services.AddScoped<ClientTable>();
+            builder.Services.AddScoped<RecordTable>();
+
 
             Database.OnInitialize();
             SimpleCRUD.SetColumnNameResolver(new MyFluentMapperNameResolver());
@@ -68,7 +73,7 @@ namespace Pobytne
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blazor api v1");
-                    c.RoutePrefix = string.Empty;
+                    c.RoutePrefix = "swagger";
                 });
             }
             else

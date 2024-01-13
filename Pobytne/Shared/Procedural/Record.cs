@@ -1,0 +1,42 @@
+﻿using Pobytne.Shared.Struct;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Pobytne.Shared.Procedural
+{
+    [Table("S_Zaznamy")]
+    public class Record : IActivity_Record, IFolder_Record, IWare_Record
+    {
+        [Key]
+        [Editable(false)]
+        public int Id { get; set; }
+        public int ModuleId { get; set; }
+        public int Order {  get; set; }
+        public string Name { get; set; } = string.Empty;
+        public ERecordType RecordType { get; set; }
+        // S_ZaznamyVlastnosti
+        public int RecordPropertiesId {  get; set; }
+        public string RecordPropertiesName { get; set; } = string.Empty;
+        public int Quantity { get; set; }
+        public int Adult {  get; set; }
+        public int Child {  get; set; }
+        public int Price {  get; set; }
+        public int Stock {  get; set; }
+        public bool IsCustomerRequired { get; set; }
+        public bool IsPriceRequired {  get; set; }
+        public bool IsBalanceCheck { get; set; }
+        public bool IsSeasonTicket{  get; set; }
+        public int GroupQuantity { get; set; }
+        public int GroupPrice { get; set; }
+        public string Note {  get; set; } = string.Empty;
+        public int StructDepth { get; set; }
+        // ICREATION
+        public DateTime ValidFrom { get; set; } = DateTime.Now;
+        [Required(ErrorMessage = "Enter date of the end of validation")]
+        public DateTime ValidTo { get; set; } = DateTime.Now.AddYears(1);
+        public int CreationUserId { get; set; }
+        public DateTime CreationDate { get; set; }
+        [Editable(false)]
+        public string CreationUserName { get; set; } = string.Empty;
+    }
+}

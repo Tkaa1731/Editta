@@ -13,6 +13,9 @@ namespace Pobytne.Data
                 configure.AddMap(new ModuleMapper());
                 configure.AddMap(new LicenseMapper());
                 configure.AddMap(new PermitionMapper());
+                configure.AddMap(new ClientMapper());
+                configure.AddMap(new RecordMapper());
+
             });
         }
 

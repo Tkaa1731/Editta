@@ -1,0 +1,17 @@
+﻿
+@if(folder is not null)
+{
+		<div class="col-1">
+			<HxIcon Icon="icon"></HxIcon>
+		</div>
+		<div class="col">
+			<p>@folder.Name</p>
+		</div>
+}
+@code {
+	[EditorRequired]
+	[Parameter]
+	public IFolder_Record? folder { get; set; }
+	private IconBase icon = BootstrapIcon.Folder;
+
+}

@@ -14,11 +14,10 @@ namespace Pobytne.Client.Services
         public string ErrorMessage { get; set; } = string.Empty;
     }
 
-    internal class PobytneService
+    public class PobytneService
     {
 
         private readonly HttpClient _httpClient;
-        private readonly string api = "/api";
         private static string GetControler(Type obj)
         {
             return obj.Name;
@@ -108,6 +107,28 @@ namespace Pobytne.Client.Services
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
                 return JsonConvert.DeserializeObject<T>(responseBody);
+            }
+            //else
+            var errorResponse = new ErrorResponse
+            {
+                StatusCode = (int)responseStatusCode,
+                ErrorMessage = "HTTP request failed with status code " + responseStatusCode
+            };
+            return errorResponse;
+        }
+        public async Task<object?> GetInfoAsync<T,R>(string requestUri)
+        {
+            var request = $"/{GetControler(typeof(T))}/{requestUri}";
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, request);
+
+            var response = await _httpClient.SendAsync(requestMessage);
+
+            var responseStatusCode = response.StatusCode;
+
+            if (responseStatusCode.ToString() == "OK")
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<R>(responseBody);
             }
             //else
             var errorResponse = new ErrorResponse

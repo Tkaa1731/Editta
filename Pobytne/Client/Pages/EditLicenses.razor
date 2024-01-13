@@ -4,12 +4,11 @@
 @inject IJSRuntime js
 
 <PageTitle>EditLicense</PageTitle>
-<AuthorizeView Policy="PermitionPolicy" Resource=(PermitionEnum.Aplication,AccessEnum.ReadOnly)>
+<AuthorizeView Policy="PermitionPolicy" Resource=(PermitionEnum.Aplication,AccessEnum.ReadOnly,String.Empty)>
     <Authorized>
-        JSTE V MODU READONLY PRO PRISTUP - APLICATION
 
     <div class="row">
-        <div class="col-lg-3" style="height: 800px">
+        <div class="col-lg-3">
             <HxTreeView TItem="IDirectory"
                         SelectedItemChanged="OnSelect"
                         Items="@fileSystem"
@@ -29,7 +28,6 @@
 	</NotAuthorized>
 </AuthorizeView>
 @code {
-
     private IDirectory? selectedDirectory;
     private IListItem? selectedItem;
     private IListItem? formItem;
@@ -79,4 +77,5 @@
         StateHasChanged();
     }
     //TODO: Delete
+    //TODO: Opraveneni k editu licenci
 }

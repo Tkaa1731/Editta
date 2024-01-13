@@ -4,7 +4,6 @@ using Pobytne.Server.Service;
 using Pobytne.Server.Authentication;
 using Pobytne.Shared.Authentication;
 using Pobytne.Shared.Procedural;
-using System.Reflection;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
