@@ -16,7 +16,7 @@ namespace Pobytne.Shared.Struct
         int Child {  get; }
         int Quantity { get; }
         int Price { get; }
-        bool IsCustomerRequired { get; }
+        bool IsClientRequired { get; }
         bool IsPriceRequired { get; }
         bool IsSeasonTicket { get; }
         int GroupQuantity { get; }

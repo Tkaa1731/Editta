@@ -20,7 +20,7 @@ namespace Pobytne.Client.Extensions.IDirectory
         public string Name => "Users";
         public IconBase Icon => BootstrapIcon.People;
         public List<IListItem> ItemsList { get; set; } = new List<IListItem>() { };
-        public List<IDirectory> Subdirectories => new List<IDirectory>();
+        public List<IDirectory> SubDirectories => new List<IDirectory>();
         public async Task AddNew() => await LoadData();
         private async Task LoadData()
         {
@@ -45,5 +45,10 @@ namespace Pobytne.Client.Extensions.IDirectory
         }
 
         public IListItem GetNew() => new User() { LicenseNumber = _licenseNumber };
+
+        public Task OnExpanded()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

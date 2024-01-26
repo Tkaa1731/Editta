@@ -15,7 +15,7 @@ namespace Pobytne.Shared.Struct
         string RecordPropertiesName { get; }
         int Quantity { get; }
         int Price { get; }
-        bool IsCustomerRequired { get; }
+        bool IsClientRequired { get; }
         bool IsPriceRequired { get; }
         bool IsBalanceCheck {  get; }
         string Note { get; }

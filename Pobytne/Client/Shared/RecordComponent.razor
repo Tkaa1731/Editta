@@ -1,9 +1,9 @@
 ﻿@using Pobytne.Client.Shared.Records
 		
 @if(Source is not null)
-{	
-	<a @onclick=OnClickHandler>
-		<div class="w-100 row pt-2 m-2" style="border-top:2px solid @color;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); font-size:1rem;">
+{
+	<div @onclick=OnClickHandler class="p-3 mb-2 record-container @color">
+		<div class="row align-items-center">
 			@switch (Source.Record.RecordType)
 			{
 				case ERecordType.Folder:
@@ -16,12 +16,13 @@
 					<RecordActivity activity="Source.Record as IActivity_Record"></RecordActivity>
 					break;
 				case ERecordType.EmployeeTasks:
-					<HxIcon Icon="BootstrapIcon.People"></HxIcon>
+					<RecordEmployeeTasks task="Source.Record as IEmployeeTask_Record"></RecordEmployeeTasks>
 					break;
 			}
 		</div>
-	</a>
+	</div>
 }
+
 @code {
 	[EditorRequired]
 	[Parameter]
@@ -34,7 +35,7 @@
 	{
 		get
 		{
-			string c = "black";
+			string c = "";
 			if (Source is null)
 				return c;
 			switch (Source.Record.RecordType)
@@ -43,13 +44,13 @@
 					c = "orange"; 
 					break;
 				case ERecordType.Ware:
-					c = "lightblue";
+					c = "blue";
 					break;
 				case ERecordType.Activity:
-					c = "#b576d5";
+					c = "purple";
 					break;
 				case ERecordType.EmployeeTasks:
-					c = "lightgreen";
+					c = "green";
 					break;
 			}
 			return c;

@@ -18,9 +18,9 @@ namespace Pobytne.Server.Controllers
 			_licenseService = licenseService;
 		}
 		[HttpGet]
-		public ActionResult<IEnumerable<License>> Get()
+		public async Task<IEnumerable<License>> Get()
 		{//TODO: Get by module
-			return _licenseService.GetLicenses().Result.ToList();
+			return await _licenseService.GetLicenses();
 		}
         [HttpPost]
         [Route("Update")]

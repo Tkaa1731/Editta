@@ -38,6 +38,9 @@ namespace Pobytne.Shared.Procedural
         public string Name => UserLogin;
         [Editable(false)]
         public string Description => UserName;
+
+        public bool Active => Valid && ValidTo >= DateTime.Now;
+
         public bool CheckPassword(string password) => _password == password;
 
         public object Clone()

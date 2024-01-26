@@ -18,23 +18,23 @@ namespace Pobytne.Server.Controllers
         [Authorize]
         [HttpGet]
         [Route("RecordsBranch")]
-        public Task<IEnumerable<Record>> GetBranch(int parentId)
+        public async Task<IEnumerable<Record>> GetBranch(int parentId)
         {
-            return _service.GetRecords(parentId);
+            return await _service.GetRecords(parentId);
         }
         [Authorize]
         [HttpGet]
         [Route("RecordsRoot")]
-        public Task<IEnumerable<Record>> GetRoot(int moduleId)
+        public async Task<IEnumerable<Record>> GetRoot(int moduleId)
         {
-            return _service.GetRoot(moduleId);
+            return await _service.GetRoot(moduleId);
         }
         [Authorize]
         [HttpGet]
         [Route("RecordsMaxDepth")]
-        public Task<int> GetMaxDepth(int moduleId)
+        public async Task<int> GetMaxDepth(int moduleId)
         {
-            return _service.GetMaxDepth(moduleId);
+            return await _service.GetMaxDepth(moduleId);
         }
     }
 }

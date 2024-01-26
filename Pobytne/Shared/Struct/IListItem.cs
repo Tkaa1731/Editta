@@ -13,5 +13,6 @@ namespace Pobytne.Shared.Struct
         string Description{  get; }
         DateTime CreationDate { get; set; }
         int CreationUserId { get; set; }
+        bool Active { get; }
     }
 }

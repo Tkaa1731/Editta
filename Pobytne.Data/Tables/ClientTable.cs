@@ -9,9 +9,9 @@ namespace Pobytne.Data.Tables
     {
         public async Task<IEnumerable<Client>> GetAll(object conditions)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString())) // TODO: odstranit omezeni TOP 15
             {
-                string sql = @"select cl.*, cr.JmenoUser AS CreationClientName
+                string sql = @"select TOP 15 cl.*, cr.JmenoUser AS CreationClientName
                                from S_Uzivatele cl
                                JOIN S_LoginUser cr ON cl.Kdo = cr.IDLogin
                                where cl.IDModulu = @ModuleNumber;";

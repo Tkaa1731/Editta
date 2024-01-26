@@ -26,7 +26,7 @@ namespace Pobytne.Client.Extensions.IDirectory
                 return modules.Select(m => m.Module as IListItem).ToList();
             } 
         }
-        public List<IDirectory> Subdirectories
+        public List<IDirectory> SubDirectories
         {
             get
             {
@@ -61,5 +61,10 @@ namespace Pobytne.Client.Extensions.IDirectory
         }
 
         public IListItem GetNew() => new Module() { LicenseNumber = License.LicenseNumber };
+
+        public Task OnExpanded()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

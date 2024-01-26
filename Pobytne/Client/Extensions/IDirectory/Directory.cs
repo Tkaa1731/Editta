@@ -19,7 +19,7 @@ namespace Pobytne.Client.Extensions.IDirectory
 			_service = service;
 			Name = dirName;
 		}
-		public List<IDirectory> Subdirectories {
+		public List<IDirectory> SubDirectories {
 			get { 
 				return Licenses.Select(l => l as IDirectory).ToList();
 			} 
@@ -63,5 +63,10 @@ namespace Pobytne.Client.Extensions.IDirectory
         }
 
 		public IListItem GetNew() => new License();
+
+        public Task OnExpanded()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

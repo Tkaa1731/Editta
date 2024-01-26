@@ -6,7 +6,7 @@ using Pobytne.Client.Services;
 
 namespace Pobytne.Client.Extensions.IDirectory
 {
-    internal class ModuleDir : IDirectory 
+    internal class ModuleDir : IDirectory
     {
         private readonly PobytneService _service;
         public ModuleDir(PobytneService service, Module module)
@@ -18,7 +18,7 @@ namespace Pobytne.Client.Extensions.IDirectory
         public string Name =>  Module.ModuleName;
         public IconBase Icon => BootstrapIcon.FolderPlus;
         public List<IListItem> ItemsList { get; set; } = new();
-        public List<IDirectory> Subdirectories => new();
+        public List<IDirectory> SubDirectories => new();
         public async Task AddNew() => await LoadData();
         private async Task LoadData()
         {
@@ -53,5 +53,9 @@ namespace Pobytne.Client.Extensions.IDirectory
             LicenseNumber = Module.LicenseNumber
         };
 
+        public Task OnExpanded()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -49,6 +49,8 @@ namespace Pobytne.Shared.Procedural
         [Editable(false)]
         public string Description => ICO.ToString();
 
+        public bool Active => ValidTo >= DateTime.Now;
+
         public object Clone()
         {
             return MemberwiseClone();

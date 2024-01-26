@@ -1,5 +1,6 @@
 ﻿using Dapper.FluentMap;
 using Pobytne.Data.Mappers;
+using System.Data.SqlClient;
 
 namespace Pobytne.Data
 {
@@ -15,8 +16,13 @@ namespace Pobytne.Data
                 configure.AddMap(new PermitionMapper());
                 configure.AddMap(new ClientMapper());
                 configure.AddMap(new RecordMapper());
+                configure.AddMap(new PaymentMapper());
 
             });
+        }
+        public static SqlConnection CreateConnection()
+        {
+            return new SqlConnection(Tools.GetConnectionString());
         }
 
     }

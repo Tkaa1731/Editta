@@ -1,0 +1,18 @@
+﻿<HxNavbar>
+	<HxNavbarCollapse>
+		<HxNav CssClass="me-auto mb-2 mb-lg-0">
+			<HxNavLink Href=@($"{idModule}/Records")>Evidence</HxNavLink>
+			<HxNavLink Href=@($"{idModule}/Clients")>Klienti</HxNavLink>
+			<HxNavLink Href=@($"{idModule}/Contracts")>Smlouvy</HxNavLink>
+			<HxNavLink Href=@($"{idModule}/CashRegister")>Pokladna</HxNavLink>
+			<HxNavLink Href=@($"{idModule}/Settings")>Nastavení</HxNavLink>
+			<HxNavLink Href=@($"{idModule}/Reports")>Souhrny</HxNavLink>
+		</HxNav>
+	</HxNavbarCollapse>
+</HxNavbar>
+@code {
+	[Parameter]
+	[EditorRequired]
+	public string idModule { get; set; } = "-1";
+
+}

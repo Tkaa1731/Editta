@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Pobytne.Shared.Procedural
 {
     [Table("S_Zaznamy")]
-    public class Record : IActivity_Record, IFolder_Record, IWare_Record
+    public class Record : IActivity_Record, IFolder_Record, IWare_Record, IEmployeeTask_Record, IListItem
     {
         [Key]
         [Editable(false)]
@@ -22,7 +22,7 @@ namespace Pobytne.Shared.Procedural
         public int Child {  get; set; }
         public int Price {  get; set; }
         public int Stock {  get; set; }
-        public bool IsCustomerRequired { get; set; }
+        public bool IsClientRequired { get; set; }
         public bool IsPriceRequired {  get; set; }
         public bool IsBalanceCheck { get; set; }
         public bool IsSeasonTicket{  get; set; }
@@ -38,5 +38,9 @@ namespace Pobytne.Shared.Procedural
         public DateTime CreationDate { get; set; }
         [Editable(false)]
         public string CreationUserName { get; set; } = string.Empty;
+        // IListItem
+        public string Description => Note;
+
+        public bool Active => ValidTo >= DateTime.Now;
     }
 }

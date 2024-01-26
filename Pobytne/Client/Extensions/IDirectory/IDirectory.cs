@@ -7,9 +7,10 @@ namespace Pobytne.Client.Extensions.IDirectory
     {
         string Name { get; }
         IconBase Icon { get; }
-        List<IDirectory> Subdirectories { get; }
+        List<IDirectory> SubDirectories { get; }
         List<IListItem> ItemsList { get; }
         Task OnSelect();
+        Task OnExpanded();
         Task AddNew();
         IListItem GetNew();
     }
