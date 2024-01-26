@@ -1,12 +1,14 @@
 ﻿@if (ware is not null)
 {
-		<div class="col-1">
+		<div class="col-2">
 			<HxIcon Icon="icon"></HxIcon>
 		</div>
 		<div class="col">
-			<p>@ware.Name</p>
+			<span>@ware.Name</span>
 		</div>
-		<div class="col-1 pr-1" style="color:grey;">@ware.Stock</div>
+		<div class="col-2" style="color:grey; text-align:right;">
+			<span>@ware.Stock</span>
+		</div>
 }
 @code {
 	[EditorRequired]

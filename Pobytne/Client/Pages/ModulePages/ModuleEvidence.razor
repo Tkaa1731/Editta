@@ -1,34 +1,84 @@
 ﻿@page "/{idModule}/Records"
-@inject PobytneService service
+@inject PobytneService _service
+@inject IJSRuntime js
 
+<ModuleNav idModule="@idModule"></ModuleNav>
 <h3>Evidence</h3>
-<div class="row">
-    @if(maxDepth > 0)
-    {        
-        @for (int i = 0; i < maxDepth; i++)
-        {
-            <div class="col container custom-scrollbar" style="overflow-y: scroll;max-height:90vh; ">
-                @for(int j = 0; j < records[i].Count; j++)
-                {
-                    <RecordComponent Source=@records[i][j] OnClick=OnSelect></RecordComponent>
-                }
+<div class="container-fluid">
+    <div class="row">
+        @if(maxDepth > 0)
+        {   
+            @for (int i = 0; i < maxDepth; i++)
+            {
+                <div class="col custom-scrollbar" style="overflow-y: scroll;max-height:90vh; min-width:14rem; "> 
+                    @for(int j = 0; j < records[i].Count; j++)
+                    {
+                        <RecordComponent Source=@records[i][j] OnClick=OnSelect></RecordComponent>
+                    }
+                </div>
+            }
+            //interakce komponenta
+            <div class="col">
+                <div class="p-3 border-top" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                    <!-- Seznam položek -->
+                    <div class="row" style="z-index:1021; position:relative;">
+                        <!--Kalendar-->
+                        <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="interaction.InteractionDate" InputSize="InputSize.Large"/>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <InteractionComponent @bind-Records="interaction.Records"></InteractionComponent>
+                        </div>
+                    </div>
+                    <div style="background-color:azure">
+                        <div class="row">
+                            <div class="col-5">
+                                <b>CELKEM: </b>@sum ,-
+                            </div>
+                            <div class="col">
+                                <HxInputTextArea Placeholder="Poznamka" @bind-Value="interaction.InteractionName"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col" style="display:flex; flex-direction:column;">
+                                <HxButton CssClass="row-cols-1 mb-1" Text="Potvrdit" Color=ThemeColor.Success OnClick="SubmitHandler" Enabled="(interaction.Records.Count>0)"></HxButton>
+                                <HxButton CssClass="row-cols-1" Text="Smazat vse" Color=ThemeColor.Danger OnClick="()=>{interaction.Records.Clear();interaction.InteractionName = string.Empty;}"></HxButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
         }
-        <div class="col m-2 p-2" style="background:#06172621;height:90vh;">
-            <div>
-                @foreach (var sr  in selectedRecord)
+    </div>
+</div>
+<HxModal @ref="clientsModal" Centered=true Title="Klienti"  Backdrop="ModalBackdrop.Static" Size="ModalSize.Large" OnClosed="async()=>await clientsModal.HideAsync()">
+	<BodyTemplate>
+		    <ListCustom ListItems="AllClients" @bind-selectedItem="selectedClient" PageSize="10" Editable=false />
+	</BodyTemplate>
+	<FooterTemplate>
+        <HxButton Text="Potvrdit" OnClick="HandleModalSubmit" Color="ThemeColor.Primary" />
+	</FooterTemplate>
+</HxModal>
+<HxModal @ref="paymentsModal" Centered=true Title="Typ platby"  Backdrop="ModalBackdrop.Static" Size="ModalSize.Large" OnClosed="async()=>await paymentsModal.HideAsync()">
+	<BodyTemplate>
+        <div class="container">
+		    <div class="row justify-content-center">
+                @for (int i = 0; i < AllPayments.Count; i++)
                 {
-                    <p>@sr.Name<span style="text-align:right;">@sr.Price,-</span></p>
+                    Payment localPayment = @AllPayments[i];
+                    <a class="col m-3 no-link" @onclick="()=>PaymentSelectedHandler(localPayment.Id)">
+                        <div class="p-3 row align-items-center" style="min-width: 18rem;background:@cardColor[(int)localPayment.Type]" >
+                            <HxIcon Icon="@cardIcon[(int)localPayment.Type]" CssClass="h1 col-4"></HxIcon>
+                            <span class="col">@AllPayments[i].Name</span>
+                        </div>
+                    </a>
                 }
-            </div>
-            <div style="align-self:baseline;">
-                SUM: @sum
             </div>
         </div>
-    }
-</div>
+	</BodyTemplate>
+</HxModal>
 <style>
-        /* custom scrollbar */
     ::-webkit-scrollbar {
       width: 20px;
     }
@@ -47,6 +97,35 @@
     ::-webkit-scrollbar-thumb:hover {
       background-color: #a8bbbf;
     }
+    .record-container:hover{
+        background: #f3f3f3;
+    }
+    .record-container{
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+        
+    }
+    .blue{
+        border-top:2px solid lightblue;
+    }
+    .green{
+        border-top:2px solid #97D85A;
+    }
+    .purple{
+        border-top:2px solid #b576d5;
+    }
+    .orange{
+        border-top:2px solid orange;
+    }
+    .virtualized-table-container {
+		height: 400px;
+		overflow: auto;
+	}
+    .center{
+        text-align:center;
+    }
+    .p-0{
+        padding:0;
+    }
 </style>
 
 @code {
@@ -54,33 +133,42 @@
     [Parameter]
     public string idModule { get; set; } = "-1";
     private int maxDepth = 0;
+    private Interaction interaction = new();
     private Dictionary<int,List<RecordTreeView>> records = new();
 
-    private List<Record> selectedRecord = [];
-    private int sum
+    private IListItem? selectedClient;
+    private List<IListItem> AllClients = [];
+    private List<Payment> AllPayments = [];
+
+    private HxModal clientsModal = new();
+    private HxModal paymentsModal = new();
+
+    private float sum
     {
         get
         {
-            return selectedRecord.Sum(sr => sr.Price);
+            return interaction.Records.Sum(sr => sr.PriceAmount);
         }
     }
+    private string[] cardColor = {"#ADD8E6","#FFA500","#B576D5","#97D85A"};
+    private IconBase[] cardIcon = { BootstrapIcon.CashCoin, BootstrapIcon.CreditCard, BootstrapIcon.Bank, BootstrapIcon.TicketPerforated };
 
     protected async override Task OnInitializedAsync()
     {
-        var depth = await service.GetInfoAsync<Record,int>($"RecordsMaxDepth?moduleId={idModule}");
+        var depth = await _service.GetInfoAsync<Record,int>($"RecordsMaxDepth?moduleId={idModule}");
         if (ServiceRequest<int>(depth) && depth is int d)
         {
             maxDepth = d+1;
             for (int i = 0; i < maxDepth; i++)
                 records[i] = new();
 
-            var root = await service.GetAllAsync<Record>($"RecordsRoot?moduleId={idModule}");
+            var root = await _service.GetAllAsync<Record>($"RecordsRoot?moduleId={idModule}");
             if (ServiceRequest<List<Record>>(root) && root is List<Record> r)
             {
                 List<RecordTreeView> rootTV = [];
                 foreach (var rtv in r)
                 {
-                    var tv = new RecordTreeView(service) { Record = rtv };
+                    var tv = new RecordTreeView(_service) { Record = rtv };
                     if (tv.Active)
                         rootTV.Add(tv);
                 }
@@ -100,21 +188,112 @@
     }
     private async Task OnSelect(RecordTreeView rtv)
     {
-        switch(rtv.Record.RecordType){
-            case ERecordType.Folder:
-                await rtv.LoadData();
-                var selectedActive = rtv.SubRecords.Where(r => r.Active).ToList();
+        if(rtv.Record.RecordType == ERecordType.Folder)
+        {
+            await rtv.LoadData();
+            var selectedActive = rtv.SubRecords.Where(r => r.Active).ToList();
 
-                if(selectedActive  is not null)
-                    records[rtv.Depth + 1] = selectedActive;
+            if(selectedActive  is not null)
+                records[rtv.Depth + 1] = selectedActive;
 
-                for (int i = rtv.Depth + 2; i < maxDepth; i++)
-                    records[i].Clear();
-                break;
-            default:
-                selectedRecord.Add(rtv.Record);
-                break;
-
+            for (int i = rtv.Depth + 2; i < maxDepth; i++)
+                records[i].Clear();
         }
+        else
+        {
+            var r = rtv.Record;
+            //TODO: Doresit pernamentky
+            interaction.Records.Add(
+                new() {
+                        RecordId = r.Id,
+                        Name = r.Name,
+                        Quantity = r.Quantity,
+                        Price = r.Price,
+                        Adult = r.Adult,
+                        Child = r.Child,
+                        Order = interaction.Records.Count,
+                        IsBalanceCheck = r.IsBalanceCheck,
+                        IsClientRequired = r.IsClientRequired,
+                        RecordType = r.RecordType
+                });
+        }
+    }
+    private async Task SubmitHandler()// submit po zadani cele objednavky
+    {     
+        bool customerRequired = interaction.Records.Exists(r => r.IsClientRequired);
+        if (customerRequired)
+        {
+            var response = await _service.GetAllAsync<Client>($"ClientsList?moduleNumber={idModule}");
+            List<Client> clients = new();
+            if (response is null)
+                Console.WriteLine($"NO RESPONSE");
+            else if (response is ErrorResponse response1)
+                Console.WriteLine($"{response1.ErrorMessage}");
+            else if (response is List<Client> list)
+                clients = list;
+
+            if (clients.Count > 0)
+                AllClients = clients.Where(c => c.Id != 0).Select(c => c as IListItem).ToList();
+            // modal
+            await clientsModal.ShowAsync();
+            return;
+        }
+        await LoadPayments();
+        await paymentsModal.ShowAsync();
+    }
+    private async Task HandleModalSubmit()
+    {
+        if(selectedClient is not null)
+        {
+            await clientsModal.HideAsync();
+            //payment
+            await LoadPayments();
+            await paymentsModal.ShowAsync();
+        }
+        return;
+    }
+    private async Task InsertInteraction()
+    {
+        var response = await _service.InsertAsync<Interaction>(interaction);
+
+        if (response is null)
+            await js.InvokeAsync<string>("alert",$"NO RESPONSE");
+        else if (response is ErrorResponse error)
+            await js.InvokeAsync<string>("alert",$"{error.ErrorMessage}");
+        else
+        {
+            await js.InvokeAsync<string>("alert",$"Successfully inserted");
+            //clear
+            interaction = new();
+            for (int i = 1; i < maxDepth; i++)
+                records[i].Clear();
+        }
+    }
+    private async Task PaymentSelectedHandler(int paymentId)
+    {
+        await paymentsModal.HideAsync();
+
+        interaction.Id = 0;
+        interaction.ModuleId = int.Parse(idModule);
+        interaction.ClientId = (selectedClient is null)? 0 : selectedClient.Id;
+        interaction.TimeStamp = DateTime.Now;
+        interaction.CreationUserId = 1;//TODO:AuthState UserID
+        interaction.PaymentId = paymentId;
+
+        await InsertInteraction();
+    }
+    private async Task LoadPayments()
+    {
+        var response = await _service.GetAllAsync<Payment>($"?moduleNumber={idModule}");
+        List<Payment> payments = new();
+        if (response is null)
+            Console.WriteLine($"NO RESPONSE");
+        else if (response is ErrorResponse response1)
+            Console.WriteLine($"{response1.ErrorMessage}");
+        else if (response is List<Payment> list)
+            payments = list;
+        
+        if (payments.Count > 0)
+            AllPayments = payments.Where(p => p.ValidTo >= DateTime.Now ).ToList();
     }
 }

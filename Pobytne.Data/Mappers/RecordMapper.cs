@@ -23,7 +23,7 @@ namespace Pobytne.Data.Mappers
             Map(r => r.GroupPrice).ToColumn("CastkaCelkem");
             Map(r => r.Stock).ToColumn("Zustatek");
 
-            Map(r => r.IsCustomerRequired).ToColumn("JeVyzadovanUzivatel");
+            Map(r => r.IsClientRequired).ToColumn("JeVyzadovanUzivatel");
             Map(r => r.IsPriceRequired).ToColumn("JeVyzadovanaCastka");
             Map(r => r.IsBalanceCheck).ToColumn("JeKontrolaNaZustatek");
             Map(r => r.IsSeasonTicket).ToColumn("JePermanentka");

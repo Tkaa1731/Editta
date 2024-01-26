@@ -1,8 +1,110 @@
 ﻿@page "/{idModule}/Settings"
-<h3>ModuleSettings</h3>
+@inject PobytneService service
+
+<ModuleNav idModule="@idModule"></ModuleNav>
+<PageTitle>EditRecords</PageTitle>
+<AuthorizeView Policy="PermitionPolicy" Resource=(PermitionEnum.Aplication,AccessEnum.ReadOnly,String.Empty)>
+    <Authorized>
+
+        <div class="row">
+            <div class="col-lg-3">
+                <HxTreeView TItem="IDirectory"
+                            SelectedItemChanged="OnSelect"
+                            OnItemExpanded="OnExpanded"
+                            Items="@fileSystem"
+                            CssClass="border rounded p-2"
+                            ItemTitleSelector="@(p => p.Name)"
+                            ItemIconSelector="@(p => p.Icon)"
+                            ItemChildrenSelector="@(p => p.SubDirectories)" />
+            </div>
+            <div class="col-lg-9">
+                <ListCustom ListItems=@listOfItems selectedItem=selectedItem selectedItemChanged=OnItemSelect EventNewItem="OnNewItem" PageSize="20"></ListCustom>
+            </div>
+        </div>
+        <FormMessageBox formItem="formItem" @ref=formMessageBox OnSuccessRequest="OnSuccessRequestHandler"></FormMessageBox>
+    </Authorized>
+    <NotAuthorized>
+        JSTE V NOACCESS MODU PRO  PRISTUP - APLICATION
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     [EditorRequired]
     [Parameter]
     public string idModule { get; set; } = "-1";
+
+    private IDirectory? selectedDirectory;
+    private IListItem? selectedItem;
+    private IListItem? formItem;
+    private List<IListItem>? listOfItems;
+    private List<RecordDir> fileSystem = [];
+
+    private FormMessageBox formMessageBox = new();
+
+
+    private async Task OnSelect(IDirectory e)
+    {
+        this.selectedDirectory = e;
+        if (selectedDirectory is not null)
+        {
+            await selectedDirectory.OnSelect();
+            listOfItems = selectedDirectory.ItemsList;
+        }
+    }
+    private async Task OnExpanded(IDirectory e)
+    {
+        if (e is not null)
+        {
+            await e.OnExpanded();
+            StateHasChanged();
+        }
+
+    }
+    private void ItemsChangedHandler(List<RecordDir> dir)
+    {
+        fileSystem = dir;
+    }
+    private async Task OnItemSelect(IListItem i)
+    {
+        if (i is not null)
+        {
+            formItem = i;
+            await formMessageBox.UpdateForm();
+        }
+        selectedItem = null;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        fileSystem.Add(
+            new RecordDir(
+                service,
+                new Record
+                    {
+                        Name = "Pobytne",
+                        Id = 0,
+                        ModuleId = int.Parse(idModule),
+                    }
+            )
+        );
+        await fileSystem[0].OnSelect();
+    }
+    private async Task OnNewItem()
+    {
+        if (selectedDirectory is not null)
+        {
+            formItem = selectedDirectory.GetNew();
+            await formMessageBox.InsertForm();
+        }
+    }
+    private async Task OnSuccessRequestHandler()
+    {
+        if (selectedDirectory is not null)
+        {
+            await selectedDirectory.AddNew();
+            await OnSelect(selectedDirectory);
+        }
+        StateHasChanged();
+    }
+    //TODO: form
 }
+

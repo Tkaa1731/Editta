@@ -20,9 +20,9 @@ namespace Pobytne.Server.Controllers
 			_moduleService = moduleService;
 		}
 		[HttpGet]
-		public ActionResult<IEnumerable<Module>> Get([FromQuery]int licenseNumber)
+		public async Task<IEnumerable<Module>> Get([FromQuery]int licenseNumber)
         { 
-			return _moduleService.GetModulesByLicense(licenseNumber).Result.ToList();
+			return await _moduleService.GetModulesByLicense(licenseNumber);
 		}
         [HttpPost]
         [Route("Update")]

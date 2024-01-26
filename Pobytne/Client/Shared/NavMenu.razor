@@ -1,8 +1,4 @@
-﻿@inject AuthenticationStateProvider authStateProv
-@inject NavigationManager navManager
-
-
-
+﻿
 <div @onmouseenter="() => Collapsed = false" @onmouseleave="() => Collapsed = true" class="h-100">
     <HxSidebar @bind-Collapsed="Collapsed" CssClass="h-100">
 
@@ -16,7 +12,7 @@
 
         <ItemsTemplate>
             <HxSidebarItem Text="Nástěnka" Href="/" Icon="BootstrapIcon.HouseDoor"/>
-            <HxSidebarItem Text="Administrace" Href="/EditLicenses" Icon="BootstrapIcon.Gear"/>
+            <HxSidebarItem Text="Administrace" Href="/EditLicenses" Icon="BootstrapIcon.Gear" />
             <HxSidebarItem Text="Můj účet" Href="/Account" Icon="BootstrapIcon.Person"/>
         </ItemsTemplate>
 

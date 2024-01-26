@@ -30,6 +30,8 @@ namespace Pobytne.Shared.Procedural
         [Editable(false)]
         public string Description => $"Type of evidence {EvidenceType}";
 
+        public bool Active => true;
+
         public object Clone()
         {
             return MemberwiseClone();

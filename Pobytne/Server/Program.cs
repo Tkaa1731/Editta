@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Pobytne.Data;
 using Pobytne.Data.Tables;
+using Pobytne.Data.Tables.InteractionTables;
 using Pobytne.Server;
 using Pobytne.Server.Authentication;
 using Pobytne.Server.Service;
@@ -50,6 +51,8 @@ namespace Pobytne
             builder.Services.AddScoped<LicenseService>();
             builder.Services.AddScoped<ClientService>();
             builder.Services.AddScoped<RecordService>();
+            builder.Services.AddScoped<InteractionService>();
+            builder.Services.AddScoped<PaymentService>();
 
 
             builder.Services.AddScoped<UserTable>();
@@ -58,6 +61,10 @@ namespace Pobytne
             builder.Services.AddScoped<PermitionTable>();
             builder.Services.AddScoped<ClientTable>();
             builder.Services.AddScoped<RecordTable>();
+            builder.Services.AddScoped<InteractionTable>();
+            builder.Services.AddScoped<EvidenceTable>();
+            builder.Services.AddScoped<CashRegisterTable>();
+            builder.Services.AddScoped<PaymentTable>();
 
 
             Database.OnInitialize();

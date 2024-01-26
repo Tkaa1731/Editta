@@ -26,6 +26,8 @@ namespace Pobytne.Shared.Procedural
 
         public string Description => PermitionString;
 
+        public bool Active => ValidTo >= DateTime.Now;
+
         public bool CheckPemition(string quaery)
         {
             return true;

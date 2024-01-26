@@ -1,0 +1,123 @@
+﻿@inherits ComponentBase
+<HxGrid @ref="grid"
+            TItem="InteractionRecordItem"
+            Responsive="true"
+            DataProvider="LoadDataItems"
+            ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
+            PageSize="15"
+            ItemRowHeight="41"
+            TableContainerCssClass="virtualized-table-container"
+            HeaderRowCssClass="sticky-top"
+            SelectedDataItem="selectedItem"
+            SelectedDataItemChanged="HandleSelectedItemChanged">
+        <Columns>
+            <HxGridColumn HeaderText="Název" ItemTextSelector="@(item => item.Name)" />
+            <HxGridColumn HeaderText="Cena" ItemCssClass="center">
+                <ItemTemplate Context="item">
+                    @if (selectedItem is not null && selectedItem == item)
+                    {
+                    <HxInputNumber @bind-Value:get="item.Price" @bind-Value:set="(float value)=>
+                        {
+                            item.Price = value;
+                            RecordsChanged.InvokeAsync(records);
+                            selectedItem = null;
+                        }" InputCssClass="p-0 center" Decimals="2" TValue="float" />
+                    }
+                    else
+                    {
+                        <div>@item.Price</div>
+                    }
+                </ItemTemplate>
+            </HxGridColumn>
+            <HxGridColumn HeaderText="Množ." ItemCssClass="center">
+                <ItemTemplate Context="item">
+                    @if (selectedItem is not null && selectedItem == item)
+                    {
+                    <HxInputNumber @bind-Value:get="item.Quantity" @bind-Value:set="(int value)=>
+                        {
+                            item.Quantity = value;
+                            RecordsChanged.InvokeAsync(records);
+                            selectedItem = null;
+                        }" InputCssClass="p-0 center" @onfocusout="()=>{selectedItem = null;}" />
+                    }
+                    else
+                    {
+                        <div>@item.Quantity</div>
+                    }
+                </ItemTemplate>
+            </HxGridColumn>
+            <HxGridColumn HeaderText="Dosp." ItemCssClass="center">
+                <ItemTemplate Context="item">
+                    @if (selectedItem is not null && selectedItem == item)
+                    {
+                    <HxInputNumber @bind-Value:get="item.Adult" @bind-Value:set="(int value)=>
+                        {
+                            item.Adult = value;
+                            RecordsChanged.InvokeAsync(records);
+                            selectedItem = null;
+                        }" InputCssClass="p-0 center" @onfocusout="()=>{selectedItem = null;}" />
+                    }
+                    else
+                    {
+                        <div>@item.Adult</div>
+                    }
+                </ItemTemplate>
+            </HxGridColumn>
+            <HxGridColumn HeaderText="Děti" ItemCssClass="center">
+                <ItemTemplate Context="item">
+                    @if (selectedItem is not null && selectedItem == item)
+                    {
+                    <HxInputNumber @bind-Value:get="item.Child" @bind-Value:set="(int value)=>
+                        {
+                            item.Child = value;
+                            RecordsChanged.InvokeAsync(records);
+                            selectedItem = null;
+                        }" InputCssClass="p-0 center" @onfocusout="()=>{selectedItem = null;}" />
+                    }
+                    else
+                    {
+                        <div>@item.Child</div>
+                    }
+                </ItemTemplate>
+            </HxGridColumn>
+
+            <HxContextMenuGridColumn Context="item">
+                @if (selectedItem == item)
+                {
+                    <HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" OnClick="async ()=> await DeleteItemClicked(item)" />
+                }
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+
+@code {
+    [EditorRequired]
+    [Parameter]
+    public List<InteractionRecordItem> Records { get => records; set { records = value; grid.RefreshDataAsync(); } }
+    private List<InteractionRecordItem> records = [];
+    private HxGrid<InteractionRecordItem> grid = new();
+    private InteractionRecordItem? selectedItem;
+    [Parameter]
+    public EventCallback<List<InteractionRecordItem>> RecordsChanged { get; set; }
+
+    private async Task RefreshDataAsync()
+    {
+        await RecordsChanged.InvokeAsync(records);
+        selectedItem = null;
+    }
+    private Task<GridDataProviderResult<InteractionRecordItem>> LoadDataItems(GridDataProviderRequest<InteractionRecordItem> request)
+    {
+        return Task.FromResult(request.ApplyTo(records));
+    }
+
+    private async Task DeleteItemClicked(InteractionRecordItem deleteRecord)
+    {
+        records?.Remove(deleteRecord);
+        await RefreshDataAsync();
+    }
+
+    private void HandleSelectedItemChanged(InteractionRecordItem item)
+    {
+        selectedItem = item;
+    }
+}

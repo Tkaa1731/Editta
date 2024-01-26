@@ -1,7 +1,6 @@
 ﻿@page "/EditLicenses"
 @* @attribute [Authorize(Policy = "PermitionPolicy", AuthenticationSchemes = "a")] *@
 @inject PobytneService service
-@inject IJSRuntime js
 
 <PageTitle>EditLicense</PageTitle>
 <AuthorizeView Policy="PermitionPolicy" Resource=(PermitionEnum.Aplication,AccessEnum.ReadOnly,String.Empty)>
@@ -15,10 +14,11 @@
                         CssClass="border rounded p-2"
                         ItemTitleSelector="@(p => p.Name)"
                         ItemIconSelector="@(p => p.Icon)"
-                        ItemChildrenSelector="@(p => p.Subdirectories)" />
+                        ItemInitialExpandedSelector=@(p => p.Name=="Pobytne licence")
+                        ItemChildrenSelector="@(p => p.SubDirectories)" />
         </div>
         <div class="col-lg-9">
-            <ListCustom ListItems=@listOfItems currentItem=selectedItem selectedItemChanged=OnItemSelect EventNewItem="OnNewItem"></ListCustom>
+            <ListCustom ListItems=@listOfItems selectedItem=selectedItem selectedItemChanged=OnItemSelect EventNewItem="OnNewItem"></ListCustom>
         </div>
     </div>
 		    <FormMessageBox formItem="formItem" @ref=formMessageBox OnSuccessRequest="OnSuccessRequestHandler"></FormMessageBox>

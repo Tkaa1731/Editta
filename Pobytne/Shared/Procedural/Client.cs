@@ -22,5 +22,6 @@ namespace Pobytne.Shared.Procedural
         public int CreationUserId { get; set; }
         public DateTime CreationDate { get; set; }
         public string CreationUserName { get; set; } = String.Empty;
+        public bool Active => ValidTo >= DateTime.Now;
     }
 }

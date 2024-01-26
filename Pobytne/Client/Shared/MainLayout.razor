@@ -13,13 +13,15 @@
     <main>
         <AuthorizeView>
             <NotAuthorized>
-                <a href="/Login">Login</a>
+                <Pobytne.Client.Pages.Login/>
             </NotAuthorized>
+            <Authorized>
 
+            <article class="content px-4">
+			    @Body
+		    </article>
+            </Authorized>
 		</AuthorizeView>               
-        <article class="content px-4">
-			@Body
-		</article>
     </main>
 </div>
 
