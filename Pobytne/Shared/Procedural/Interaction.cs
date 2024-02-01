@@ -15,9 +15,9 @@ namespace Pobytne.Shared.Procedural
         public int PaymentId { get; set; }
         public DateTime InteractionDate { get; set; } = DateTime.Today;
 
-        public DateTime ValidFrom { get { return InteractionDate; } }
+        public DateTime ValidFrom { get { return InteractionDate; } set { } }
 
-        public DateTime ValidTo { get{ return InteractionDate.AddYears(100); } }
+        public DateTime ValidTo { get{ return InteractionDate.AddYears(100); } set { } }
 
         public int CreationUserId { get; set; } = -1;
 

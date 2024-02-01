@@ -1,10 +1,6 @@
-﻿using Blazored.LocalStorage;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Pobytne.Shared.Authentication;
 using System.Net.Http.Json;
-using System.Text.Json.Serialization;
-using static System.Net.WebRequestMethods;
 
 namespace Pobytne.Client.Services
 {
@@ -25,13 +21,49 @@ namespace Pobytne.Client.Services
 
         public PobytneService(HttpClient httpClient)
         {
-            //httpClient.DefaultRequestHeaders.Add("Expires:", DateTime.Now.AddMinutes(1).ToString());
-
             _httpClient = httpClient;
         }
         public async Task<object?> LoginAsync(LoginRequest obj)
         {
-            var response = await _httpClient.PostAsJsonAsync($"/User/Login", obj);
+            var response = await _httpClient.PostAsJsonAsync($"/Auth/Login", obj);
+
+            var responseStatusCode = response.StatusCode;
+
+            if (responseStatusCode.ToString() == "OK")
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<UserAccount>(responseBody);
+            }
+            //else
+            var errorResponse = new ErrorResponse
+            {
+                StatusCode = (int)responseStatusCode,
+                ErrorMessage = "HTTP request failed with status code " + responseStatusCode
+            };
+            return errorResponse;
+        }
+        public async Task<object?> RevokeAsync(RefreshRequest obj)
+        {
+            var response = await _httpClient.PostAsJsonAsync($"/Auth/Revoke", obj);
+
+            var responseStatusCode = response.StatusCode;
+
+            if (responseStatusCode.ToString() == "OK")
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<bool>(responseBody);
+            }
+            //else
+            var errorResponse = new ErrorResponse
+            {
+                StatusCode = (int)responseStatusCode,
+                ErrorMessage = "HTTP request failed with status code " + responseStatusCode
+            };
+            return errorResponse;
+        }
+        public async Task<object?> RefreshAsync(RefreshRequest obj)
+        {
+            var response = await _httpClient.PostAsJsonAsync($"/Auth/Refresh", obj);
 
             var responseStatusCode = response.StatusCode;
 
@@ -116,7 +148,7 @@ namespace Pobytne.Client.Services
             };
             return errorResponse;
         }
-        public async Task<object?> GetInfoAsync<T,R>(string requestUri)
+        public async Task<object?> GetCountAsync<T>(string requestUri)
         {
             var request = $"/{GetControler(typeof(T))}/{requestUri}";
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, request);
@@ -128,7 +160,7 @@ namespace Pobytne.Client.Services
             if (responseStatusCode.ToString() == "OK")
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<R>(responseBody);
+                return JsonConvert.DeserializeObject<int>(responseBody);
             }
             //else
             var errorResponse = new ErrorResponse

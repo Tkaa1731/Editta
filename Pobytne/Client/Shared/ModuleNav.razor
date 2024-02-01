@@ -1,4 +1,49 @@
-﻿<HxNavbar>
+﻿<nav class="navbar navbar-expand-lg sticky-top justify-content-center text-white">
+	<div style="background-color:#0a1725;" id="navbarText">
+		<ul class="navbar-nav mr-auto">
+			<li class="nav-item">
+				<a class="icon-link nav-link" href=@($"{idModule}/Records")>
+					<HxIcon Icon="BootstrapIcon.Book"/>
+					Evidence
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="icon-link nav-link" href=@($"{idModule}/Clients")>
+					<HxIcon Icon="@BootstrapIcon.People" />
+					Klienti
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="icon-link nav-link" href=@($"{idModule}/Contracts")>
+					<HxIcon Icon="@BootstrapIcon.Clipboard2Check" />
+					Smlouvy
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="icon-link nav-link" href=@($"{idModule}/CashRegister")>
+					<HxIcon Icon="@BootstrapIcon.Wallet" />
+					Pokladna
+				</a>
+			</li>
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle icon-link" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+					<HxIcon Icon="@BootstrapIcon.Gear" />
+					Nastavení
+				</a>
+				<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+					<li><a class="dropdown-item" href=@($"{idModule}/RecordSettings")>Evidence položek</a></li>
+				</ul>
+			</li>
+			<li class="nav-item">
+				<a class="icon-link nav-link" href=@($"{idModule}/Reports")>
+					<HxIcon Icon="@BootstrapIcon.CalculatorFill" />
+					Souhrny
+				</a>
+			</li>
+		</ul>
+	</div>
+</nav>
+@* <HxNavbar Color="ThemeColor.Dark">
 	<HxNavbarCollapse>
 		<HxNav CssClass="me-auto mb-2 mb-lg-0">
 			<HxNavLink Href=@($"{idModule}/Records")>Evidence</HxNavLink>
@@ -9,7 +54,7 @@
 			<HxNavLink Href=@($"{idModule}/Reports")>Souhrny</HxNavLink>
 		</HxNav>
 	</HxNavbarCollapse>
-</HxNavbar>
+</HxNavbar> *@
 @code {
 	[Parameter]
 	[EditorRequired]

@@ -49,12 +49,12 @@ namespace Pobytne.Server.Service
             var users = await _userTable.GetWithPermitions(new { IDModulu = moduleId});
             return users;
         }
-        public async Task<User?> GetUserById(int id)
+        public async Task<User> GetUserById(int id)
         {
             var user = await _userTable.GetById(id);
-            return user;
-        }
-        public async Task<int> Update(User updateUser)
+			return user is null ? throw new Exception($"No user with id {id}.") : user;
+		}
+		public async Task<int> Update(User updateUser)
         {
             return await _userTable.Update(updateUser);
         }

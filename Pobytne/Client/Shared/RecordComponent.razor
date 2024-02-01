@@ -1,22 +1,43 @@
-﻿@using Pobytne.Client.Shared.Records
-		
-@if(Source is not null)
+﻿@if(Source is not null)
 {
 	<div @onclick=OnClickHandler class="p-3 mb-2 record-container @color">
 		<div class="row align-items-center">
 			@switch (Source.Record.RecordType)
 			{
 				case ERecordType.Folder:
-					<RecordFolder folder="Source.Record as IFolder_Record"></RecordFolder>
+					<div class="col-2">
+						<HxIcon Icon="BootstrapIcon.Folder"></HxIcon>
+					</div>
+					<div class="col">
+						<span>@Source.Record.Name</span>
+					</div>
 					break;
 				case ERecordType.Ware:
-					<RecordWare ware="Source.Record as IWare_Record"></RecordWare>
+					<div class="col-2">
+						<HxIcon Icon="BootstrapIcon.Cart"></HxIcon>
+					</div>
+					<div class="col">
+						<span>@Source.Record.Name</span>
+					</div>
+					<div class="col-2" style="color:grey; text-align:right;">
+						<span>@Source.Record.Stock</span>
+					</div>
 					break;
 				case ERecordType.Activity:
-					<RecordActivity activity="Source.Record as IActivity_Record"></RecordActivity>
+					<div class="col-2">
+						<HxIcon Icon="BootstrapIcon.CalendarEvent"></HxIcon>
+					</div>
+					<div class="col">
+						<span>@Source.Record.Name</span>
+					</div>
 					break;
 				case ERecordType.EmployeeTasks:
-					<RecordEmployeeTasks task="Source.Record as IEmployeeTask_Record"></RecordEmployeeTasks>
+					<div class="col-2">
+						<HxIcon Icon="BootstrapIcon.People"></HxIcon>
+					</div>
+					<div class="col">
+						<span>@Source.Record.Name</span>
+					</div>
 					break;
 			}
 		</div>

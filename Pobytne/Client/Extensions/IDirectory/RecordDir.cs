@@ -20,7 +20,7 @@ namespace Pobytne.Client.Extensions.IDirectory
 
         public string Name => _record.Name;
 
-        public IconBase Icon => BootstrapIcon.Folder2Open;
+        public IconBase Icon { get; set; } = BootstrapIcon.Folder2Open;
         private List<Record> subRecords { get; set; } = [];
         private List<Record> SubRecords 
         { 
@@ -48,10 +48,19 @@ namespace Pobytne.Client.Extensions.IDirectory
             throw new NotImplementedException();
         }
 
-        public IListItem GetNew()
+        public IListItem GetNew() => new Record()
         {
-            throw new NotImplementedException();
-        }
+            Id = 0,
+            ParentId = _record.Id,
+            RootId = _record.RootId,
+            ModuleId = _record.ModuleId,
+            StructDepth = _record.StructDepth + 1,
+            Order = this.subRecords.Count,
+            //CreationDate = DateTime.Now,
+            //CreationUserId = 1,// TODO: author id
+            ValidFrom = DateTime.Now,
+            ValidTo = DateTime.Now.AddYears(1),
+        };
 
         public async Task OnSelect()
         {

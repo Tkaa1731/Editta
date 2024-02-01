@@ -1,5 +1,5 @@
 ﻿@inherits LayoutComponentBase
-@inject AuthenticationStateProvider authStateProv
+@inject AuthenticationService service
 @inject NavigationManager navManager
 <div class="page">
     <AuthorizeView>
@@ -13,22 +13,31 @@
     <main>
         <AuthorizeView>
             <NotAuthorized>
-                <Pobytne.Client.Pages.Login/>
+                <Pobytne.Client.Pages.Login />
             </NotAuthorized>
             <Authorized>
 
-            <article class="content px-4">
-			    @Body
-		    </article>
+                <article class="content px-4">
+                    @Body
+                </article>
             </Authorized>
-		</AuthorizeView>               
+        </AuthorizeView>
     </main>
 </div>
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; } = default!;
     private async Task Logout()
     {
-        var customAuthStateProv = (CustomAuthenticationStateProvider)authStateProv;
-        await customAuthStateProv.UpdateAuthenticationState(null);
+        await service.Logout();
     }
+    // private async Task RefreshTokenHandler()
+    // {
+    //     var authState = await authenticationState;
+    //     if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
+    //         await service.CheckTokenValidity();
+    //     await Task.Delay(1* 10 * 1000);
+    //     await RefreshTokenHandler();
+    // }
 }

@@ -8,8 +8,8 @@ namespace Pobytne.Server.Controllers
 {
     [Route("Record")]
     [ApiController]
-    public class RecordController : Controller
-    {
+    public class RecordController : ControllerBase
+	{
         private readonly RecordService _service;
         public RecordController(RecordService service)
         {

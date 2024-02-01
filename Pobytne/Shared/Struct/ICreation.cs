@@ -9,10 +9,10 @@ namespace Pobytne.Shared.Struct
 {
     public interface ICreation
     {
-        DateTime ValidFrom { get;}
-        DateTime ValidTo { get;}
-        int CreationUserId { get;}
-        DateTime CreationDate { get;}
-        string CreationUserName { get;}
+        DateTime ValidFrom { get; set; }
+        DateTime ValidTo { get; set; }
+        int CreationUserId { get; set; }
+        DateTime CreationDate { get; set; }
+        string CreationUserName { get; set; }
     }
 }

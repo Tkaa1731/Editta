@@ -1,30 +1,37 @@
 ﻿@inject IJSRuntime js
 @inject PobytneService service
-
-<HxModal @ref="myModal" Backdrop="ModalBackdrop.Static" Size="ModalSize.Large" OnClosed="HandleHideClick">
-    <HeaderTemplate>
-        <h2 class=@headerStyle>@headerText</h2>
-    </HeaderTemplate>
-    <BodyTemplate>
-        @switch (formItem)
-        {
-            case User user:
-                @if(user.AccessPermition is null)
-                {
-                    <UserForm user=user formType=formType OnValidSubmit="Request" ></UserForm>
-                    break;
-                }
-                <PermitionForm permition="user.AccessPermition.First()" formType="formType" OnValidSubmit="Request"></PermitionForm>
-                break;
-            case Module module:
-                <ModuleForm module=module formType=formType OnValidSubmit="Request"></ModuleForm>
-                break;
-            case License license:
-                <LicenseForm license=license formType=formType OnValidSubmit="Request"></LicenseForm>
-                break;
-        }
-    </BodyTemplate>
-</HxModal>
+    <HxModal @ref="myModal" Backdrop="ModalBackdrop.Static" Size="ModalSize.Large" OnClosed="HandleHideClick">
+        <HeaderTemplate>
+            <h2 class=@headerStyle>@headerText</h2>
+        </HeaderTemplate>
+        <BodyTemplate>
+            @if(formRecord is not null)
+            {
+                <HxTabPanel ActiveTabId="@recordType" >
+	                <HxTab Id="Folder" Title="Slozka" Enabled=@(recordType == "Folder" || formRecord?.Id <= 0)>
+		                <Content>
+                            <FolderForm formType="formType" Folder="formRecord as IFolder_Record" OnValidSubmit="Request"/>
+                        </Content>
+	                </HxTab>
+	                <HxTab Id="Ware" Title="Evidence zbozi"  Enabled=@(recordType == "Ware" || formRecord?.Id <= 0)>
+		                <Content>
+                            <WareForm formType="formType" Ware="formRecord as IWare_Record" OnValidSubmit="Request"/>
+                        </Content>
+	                </HxTab>
+	                <HxTab Id="Activity" Title="Evidence aktivit" Enabled=@(recordType == "Activity" || formRecord?.Id <= 0)>
+                        <Content>
+                            <ActivityForm formType="formType" Activity="formRecord as IActivity_Record" OnValidSubmit="Request"/>
+                        </Content>
+	                </HxTab>
+                    <HxTab Id="EmployeeTasks" Title="Cinnosti" Enabled=@(recordType == "EmployeeTasks" || formRecord?.Id <= 0)>
+                        <Content>
+                            !IMPLEMENT
+                        </Content>
+	                </HxTab>
+                </HxTabPanel>
+            }
+        </BodyTemplate>
+    </HxModal>
 
 @code
 {
@@ -34,8 +41,23 @@
     public EventCallback OnSuccessRequest{ get; set; }
     [Parameter]
     [EditorRequired]
-    public IListItem? formItem{ get; set; }
+    public IListItem? formItem{ get { return formRecord as IListItem; } set { if (value is Record r) formRecord = r; } }
+    private Record? formRecord;
     private FormEnum formType;
+    private string recordType
+    { 
+        get
+        {
+            if (formRecord?.Id > 0)
+                return formRecord.RecordType.ToString();
+            else
+                return "Folder";
+        }
+        set
+        {
+            //set type
+        }
+    }
 
     public HxModal myModal = new();
 
@@ -45,6 +67,7 @@
     public async Task UpdateForm()
     {
         formType = FormEnum.Update;
+
         await myModal.ShowAsync();
     }
     public async Task InsertForm()
@@ -56,6 +79,7 @@
     {
         headerText = "";
         headerStyle = "";
+
         await myModal.HideAsync();
     }
     private async Task GetAuthor()

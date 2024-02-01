@@ -28,5 +28,58 @@ namespace Pobytne.Client.Services
 
             return Task.CompletedTask;
         } // update Token
+        public async Task<bool> Refresh()
+        {
+            var user = await _storageService.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
+            if (user is null)
+                return false;
+            var logResponse = await _pobytneService.RefreshAsync(new RefreshRequest() { UserId = user.User.Id, RefreshToken = user.Refresh });
+            if (logResponse is UserAccount u)
+            {
+                var customAuthStateProvider = new CustomAuthenticationStateProvider(_storageService);
+                await customAuthStateProvider.UpdateAuthenticationState(u);
+                return true;
+            }
+            return false;
+        }
+        public async Task Logout()
+        {
+            var user = await _storageService.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
+            if (user is not null)
+            {
+                await _pobytneService.RevokeAsync(new RefreshRequest() { UserId = user.User.Id, RefreshToken = user.Refresh });
+
+                var customAuthStateProvider = new CustomAuthenticationStateProvider(_storageService);
+                await customAuthStateProvider.UpdateAuthenticationState(null);// provede i remove item
+            }
+        }
+        public async Task<bool> Revoke()
+        {
+            var user = await _storageService.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
+            if (user is null)
+                return false;
+
+            var logResponse = await _pobytneService.RevokeAsync(new RefreshRequest() { UserId = user.User.Id, RefreshToken = user.Refresh });
+            if (logResponse is bool r)
+                return r;
+
+            return false;
+        }
+        public async Task<string?> GetValidToken() // pri vraceni do hlavicky
+        {
+            var result = string.Empty;
+
+            var user = await _storageService.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
+            if (user != null && user.ExpiryTimeStamp > DateTime.UtcNow)
+                result = user.Token;// TODO: Ukladat do lokalStrorage vse nebo jenom tokeny... ukladat zvlast?
+
+            return result;
+        }
+        public async Task CheckTokenValidity()
+        {
+            string? token = await GetValidToken();
+            if(string.IsNullOrEmpty(token))
+                await Refresh();
+        }
     }
 }

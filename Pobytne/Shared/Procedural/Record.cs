@@ -20,14 +20,14 @@ namespace Pobytne.Shared.Procedural
         public int Quantity { get; set; }
         public int Adult {  get; set; }
         public int Child {  get; set; }
-        public int Price {  get; set; }
+        public float Price {  get; set; }
         public int Stock {  get; set; }
         public bool IsClientRequired { get; set; }
         public bool IsPriceRequired {  get; set; }
         public bool IsBalanceCheck { get; set; }
         public bool IsSeasonTicket{  get; set; }
         public int GroupQuantity { get; set; }
-        public int GroupPrice { get; set; }
+        public float GroupPrice { get; set; }
         public string Note {  get; set; } = string.Empty;
         public int StructDepth { get; set; }
         // ICREATION
@@ -42,5 +42,7 @@ namespace Pobytne.Shared.Procedural
         public string Description => Note;
 
         public bool Active => ValidTo >= DateTime.Now;
+        public int RootId {  get; set; }
+        public int ParentId {  get; set; }
     }
 }

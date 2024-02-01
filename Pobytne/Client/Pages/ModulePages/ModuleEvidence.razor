@@ -3,7 +3,6 @@
 @inject IJSRuntime js
 
 <ModuleNav idModule="@idModule"></ModuleNav>
-<h3>Evidence</h3>
 <div class="container-fluid">
     <div class="row">
         @if(maxDepth > 0)
@@ -155,7 +154,7 @@
 
     protected async override Task OnInitializedAsync()
     {
-        var depth = await _service.GetInfoAsync<Record,int>($"RecordsMaxDepth?moduleId={idModule}");
+        var depth = await _service.GetCountAsync<Record>($"RecordsMaxDepth?moduleId={idModule}");
         if (ServiceRequest<int>(depth) && depth is int d)
         {
             maxDepth = d+1;

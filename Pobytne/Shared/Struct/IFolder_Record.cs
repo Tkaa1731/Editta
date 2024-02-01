@@ -8,8 +8,8 @@ namespace Pobytne.Shared.Struct
 {
     public interface IFolder_Record : ICreation
     {
-        string Name { get; }
-        int Order { get; }
-        string Note {  get; }
+        string Name { get; set; }
+        int Order { get; set; }
+        string Note {  get; set; }
     }
 }

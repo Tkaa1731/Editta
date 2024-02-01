@@ -8,19 +8,19 @@ namespace Pobytne.Shared.Struct
 {
     public interface IActivity_Record : ICreation
     {
-        string Name { get; }
-        int Order { get; }
-        int RecordPropertiesId { get; }
-        string RecordPropertiesName { get; }
-        int Adult {  get; }
-        int Child {  get; }
-        int Quantity { get; }
-        int Price { get; }
-        bool IsClientRequired { get; }
-        bool IsPriceRequired { get; }
-        bool IsSeasonTicket { get; }
-        int GroupQuantity { get; }
-        int GroupPrice { get; }
-        string Note { get; }
+        string Name { get; set; }
+        int Order { get; set; }
+        int RecordPropertiesId { get; set; }
+        string RecordPropertiesName { get; set; }
+        int Adult {  get; set; }
+        int Child {  get; set; }
+        int Quantity { get; set; }
+        float Price { get; set; }
+        bool IsClientRequired { get; set; }
+        bool IsPriceRequired { get; set; }
+        bool IsSeasonTicket { get; set; }
+        int GroupQuantity { get; set; }
+        float GroupPrice { get; set; }
+        string Note { get; set; }
     }
 }

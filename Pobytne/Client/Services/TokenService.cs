@@ -24,4 +24,4 @@ namespace Pobytne.Client.Services
             return result;
         }
     }
-}
+}//TODO:DELETE

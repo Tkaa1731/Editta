@@ -23,7 +23,7 @@ namespace Pobytne.Client
             {
                 config.AddPolicy("PermitionPolicy", policy => policy.AddRequirements(new PermitionRequirement()));
             });
-            services.AddTransient<TokenService>();
+            services.AddScoped<TokenService>();//TODO:DELETE
             services.AddTransient<JwtTokenInterceptor>();
             services.AddScoped<AuthenticationService>();
             // ...

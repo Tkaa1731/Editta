@@ -1,12 +1,12 @@
 using Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Pobytne.Data;
 using Pobytne.Data.Tables;
 using Pobytne.Data.Tables.InteractionTables;
 using Pobytne.Server;
-using Pobytne.Server.Authentication;
 using Pobytne.Server.Service;
 using System.Text;
 
@@ -31,20 +31,22 @@ namespace Pobytne
             {
                 o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(o =>
+				o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+			}).AddJwtBearer(o =>
             {
-                o.RequireHttpsMetadata = false;
                 o.SaveToken = true;
+                o.RequireHttpsMetadata = false;
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(JwtAuthenticationManager.JWT_SECURITY_KEY)),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    RequireExpirationTime = true,
-                    NameClaimType = "JwtAuth",
-                    ValidateLifetime = true,
-                };
+					ValidateIssuer = false,
+					ValidateAudience = false,
+					ValidateLifetime = true,
+					ValidateIssuerSigningKey = true,
+					ClockSkew = new TimeSpan(0, 0, 30),
+					//ValidIssuer = builder.Configuration["JWT:ValidIssuer"],// TODO: Vymyslet co s Audience a Issuer.. Potrebuju je?
+					//ValidAudience = builder.Configuration["JWT:ValidAudience"],
+					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"]!)),
+				};
             });
             builder.Services.AddScoped<UserService>();
 			builder.Services.AddScoped<ModuleService>();
@@ -53,9 +55,10 @@ namespace Pobytne
             builder.Services.AddScoped<RecordService>();
             builder.Services.AddScoped<InteractionService>();
             builder.Services.AddScoped<PaymentService>();
+            builder.Services.AddScoped<AuthService>();
 
 
-            builder.Services.AddScoped<UserTable>();
+			builder.Services.AddScoped<UserTable>();
             builder.Services.AddScoped<LicenseTable>();
             builder.Services.AddScoped<ModuleTable>();
             builder.Services.AddScoped<PermitionTable>();
