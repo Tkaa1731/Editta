@@ -9,13 +9,14 @@
 <AuthorizeView>
     <NotAuthorized>
 
-    <p>Pravdepodobne nejste prihlasen</p>
+        <p>Pravdepodobne nejste prihlasen</p>
     </NotAuthorized>
-	<Authorized>
+    <Authorized>
         <div class="container mt-5">
             <div class="row">
-                @if(permitions is not null){
-                    @foreach(var module in permitions)
+                @if (permitions is not null)
+                {
+                    @foreach (var module in permitions)
                     {
                         <div class="col">
                             <a href="/@module.ModuleId/" class="no-link">
@@ -31,24 +32,23 @@
             </div>
         </div>
     </Authorized>
-    
+
 </AuthorizeView>
 
-@code{
+@code {
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
 
     private List<Permition>? permitions => _user?.AccessPermition;
     private User? _user;
-    private string ButtonText = "CLICK";
 
     protected async override Task OnInitializedAsync()
     {
         var authState = await authenticationState;
-        if ( authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
+        if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
         {
             var user = await localStorage.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
-            if(user is not null)
+            if (user is not null)
                 _user = user.User;
         }
         // else

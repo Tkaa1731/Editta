@@ -8,7 +8,7 @@ namespace Pobytne.Data
 
         public string ResolveColumnName(System.Reflection.PropertyInfo propertyInfo)
         {
-            if (!FluentMapper.EntityMaps.TryGetValue(propertyInfo.DeclaringType, out var map))
+            if (!FluentMapper.EntityMaps.TryGetValue(propertyInfo.DeclaringType!, out var map))
             {
                 throw new NotImplementedException("Property DeclaringType not resolved!");
             }

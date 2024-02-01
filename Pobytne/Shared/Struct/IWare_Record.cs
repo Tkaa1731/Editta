@@ -8,16 +8,16 @@ namespace Pobytne.Shared.Struct
 {
     public interface IWare_Record : ICreation
     {
-        string Name { get; }
-        int Order { get; }
-        int Stock { get; }
-        int RecordPropertiesId { get; }
-        string RecordPropertiesName { get; }
-        int Quantity { get; }
-        int Price { get; }
-        bool IsClientRequired { get; }
-        bool IsPriceRequired { get; }
-        bool IsBalanceCheck {  get; }
-        string Note { get; }
+        string Name { get; set; }
+        int Order { get; set; }
+        int Stock { get; set; }
+        int RecordPropertiesId { get; set; }
+        string RecordPropertiesName { get; set; }
+        int Quantity { get; set; }
+        float Price { get; set; }
+        bool IsClientRequired { get; set; }
+        bool IsPriceRequired { get; set; }
+        bool IsBalanceCheck {  get; set; }
+        string Note { get; set; }
     }
 }

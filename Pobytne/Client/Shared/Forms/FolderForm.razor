@@ -1,5 +1,51 @@
-﻿<h3>FolderForm</h3>
+﻿@if (Folder is not null)
+{
+    <EditForm Model="@Folder" OnValidSubmit=OnValidSubmitHandler>
+        <DataAnnotationsValidator />
 
+        <div class="row align-items-start">
+            <div class="col">
+                <HxInputText @bind-Value="Folder.Name" Label="Login user" Type="InputType.Text" />
+            </div>
+            <div class="col">
+                <HxInputNumber Label="License Number" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="Folder.Order" Enabled="false" />
+
+                <HxInputText @bind-Value="Folder.Note" Label="Name user" Type="InputType.Text" />
+            </div>
+        </div>
+
+        <div class="row align-items-start">
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Folder.ValidFrom"  Label="Plati od" />
+            </div>
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Folder.ValidTo" MinDate=Folder.ValidFrom.AddDays(1) Label="Plati do" />
+            </div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        </div>
+
+    </EditForm>
+}
 @code {
-
+    [Parameter]
+    [EditorRequired]
+    public IFolder_Record? Folder { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public FormEnum formType { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public EventCallback<FormEnum> OnValidSubmit { get; set; }
+    private string ButtonText
+    {
+        get
+        {
+            if (formType == FormEnum.Insert) return "Insert";
+            return "Update";
+        }
+    }
+    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
 }

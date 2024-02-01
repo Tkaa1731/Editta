@@ -1,8 +1,7 @@
-﻿@page "/{idModule}/Settings"
+﻿@page "/{idModule}/RecordsSettings"
 @inject PobytneService service
 
 <ModuleNav idModule="@idModule"></ModuleNav>
-<PageTitle>EditRecords</PageTitle>
 <AuthorizeView Policy="PermitionPolicy" Resource=(PermitionEnum.Aplication,AccessEnum.ReadOnly,String.Empty)>
     <Authorized>
 
@@ -21,7 +20,7 @@
                 <ListCustom ListItems=@listOfItems selectedItem=selectedItem selectedItemChanged=OnItemSelect EventNewItem="OnNewItem" PageSize="20"></ListCustom>
             </div>
         </div>
-        <FormMessageBox formItem="formItem" @ref=formMessageBox OnSuccessRequest="OnSuccessRequestHandler"></FormMessageBox>
+        <RecordMessageBox formItem="formItem" @ref=messageBox OnSuccessRequest="OnSuccessRequestHandler"/>
     </Authorized>
     <NotAuthorized>
         JSTE V NOACCESS MODU PRO  PRISTUP - APLICATION
@@ -39,7 +38,7 @@
     private List<IListItem>? listOfItems;
     private List<RecordDir> fileSystem = [];
 
-    private FormMessageBox formMessageBox = new();
+    private RecordMessageBox messageBox = new();
 
 
     private async Task OnSelect(IDirectory e)
@@ -69,7 +68,7 @@
         if (i is not null)
         {
             formItem = i;
-            await formMessageBox.UpdateForm();
+            await messageBox.UpdateForm();
         }
         selectedItem = null;
     }
@@ -80,11 +79,17 @@
                 service,
                 new Record
                     {
-                        Name = "Pobytne",
+                        Name = "Evidence",
                         Id = 0,
                         ModuleId = int.Parse(idModule),
+                        RootId = 0,
+                        ParentId = 0,
+                        StructDepth = 0,
                     }
             )
+            {
+                Icon = BootstrapIcon.Archive
+            }
         );
         await fileSystem[0].OnSelect();
     }
@@ -93,7 +98,7 @@
         if (selectedDirectory is not null)
         {
             formItem = selectedDirectory.GetNew();
-            await formMessageBox.InsertForm();
+            await messageBox.InsertForm();
         }
     }
     private async Task OnSuccessRequestHandler()

@@ -1,0 +1,74 @@
+﻿@if(Activity is not null)
+{
+    <EditForm Model="@Activity" OnValidSubmit=OnValidSubmitHandler>
+        <DataAnnotationsValidator />
+
+        <div class="row align-items-start">
+            <div class="col">
+                <HxInputText @bind-Value="Activity.Name" Label="Nazev polozky" Type="InputType.Text" />
+            </div>
+            <div class="col">
+                <HxInputNumber Label="Poradni" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="Activity.Order"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <HxInputNumber Label="Pocet dospelych" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="Activity.Adult"/>
+            </div>
+            <div class="col">
+                <HxCheckbox @bind-Value="Activity.IsClientRequired" Text="Klient je povinny"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <HxInputNumber Label="Pocet detich" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="Activity.Child"/>
+            </div>
+            <div class="col">
+                <HxCheckbox @bind-Value="Activity.IsPriceRequired" Text="Castka je vyzadovana"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <HxInputNumber Label="Castka" CssClass="mb-3" Decimals="2" TValue="float" @bind-Value="Activity.Price"/>
+
+            </div>
+            <div class="col">
+            </div>
+        </div>
+        <HxInputText @bind-Value="Activity.Note" Label="Poznamka" Type="InputType.Text" />
+
+        <div class="row align-items-start">
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Activity.ValidFrom" Label="Plati od" />
+            </div>
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Activity.ValidTo" MinDate=Activity.ValidFrom.AddDays(1) Label="Plati do" />
+            </div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        </div>
+
+    </EditForm>
+}
+@code {
+	[Parameter]
+	[EditorRequired]
+	public IActivity_Record? Activity { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public FormEnum formType { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public EventCallback<FormEnum> OnValidSubmit { get; set; }
+    private string ButtonText
+    {
+        get
+        {
+            if (formType == FormEnum.Insert) return "Insert";
+            return "Update";
+        }
+    }
+    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
+}

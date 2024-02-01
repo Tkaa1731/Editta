@@ -1,15 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pobytne.Server.Service;
-using Pobytne.Server.Authentication;
 using Pobytne.Shared.Authentication;
 using Pobytne.Shared.Procedural;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Pobytne.Server.Controllers
 {
-    [Route("User")]
+	[Route("User")]
     [ApiController]
     [Authorize]
     public class UserController : ControllerBase
@@ -19,23 +17,6 @@ namespace Pobytne.Server.Controllers
         {
             _userService = userService;
         }
-        [HttpPost]
-        [Route("Login")]
-        [AllowAnonymous]
-        public ActionResult<UserAccount> Login([FromBody]LoginRequest request)
-        {
-            UserAccount user;
-            try
-            {
-                var jwtAuthenticationManager = new JwtAuthenticationManager(_userService);
-                user = jwtAuthenticationManager.GenerateJwtToken(request.Name, request.Password);
-                return user;
-            }
-            catch {
-                return Unauthorized();
-            }
-        }
-
         [HttpPost]
         [Route("Update")]
         public async Task<IActionResult> Update([FromBody]User updateUser) 

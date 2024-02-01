@@ -13,7 +13,7 @@ namespace Pobytne.Client.Authentication
         private ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
         public CustomAuthenticationStateProvider(ILocalStorageService localStorageService) => _localStorageService = localStorageService;
 
-        private IEnumerable<Claim> MapClaims(IEnumerable<Claim> original)
+        private static List<Claim> MapClaims(IEnumerable<Claim> original)
         {
             var mappedClaims = new List<Claim>();
 
@@ -42,9 +42,9 @@ namespace Pobytne.Client.Authentication
         {
             try
             {
-                var user = await _localStorageService.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);// get entity of UserAccount from LS
-                if (user == null)
-                    return new AuthenticationState(_anonymous);// neni nic v Local storage
+                var user = await _localStorageService.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);//proc se ExpiryTimeStamp meni?
+                if (user == null || user.ExpiryTimeStamp < DateTime.UtcNow)
+                    return new AuthenticationState(_anonymous);// neni nic v Local storage nebo je po expiraci
 
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var identity = new ClaimsIdentity();
@@ -57,11 +57,11 @@ namespace Pobytne.Client.Authentication
                 var claimsPrincipal = new ClaimsPrincipal(identity);
                 var authenticationState = new AuthenticationState(claimsPrincipal);
 
-                return await Task.FromResult(authenticationState);
+                return authenticationState;
             }
             catch
             {
-                return await Task.FromResult(new AuthenticationState(_anonymous));
+                return new AuthenticationState(_anonymous);
             }
         }
         public async Task UpdateAuthenticationState(UserAccount? user)
@@ -79,7 +79,7 @@ namespace Pobytne.Client.Authentication
                 }
                 claimsPrincipal = new ClaimsPrincipal(identity);
 
-                user.ExpiryTimeStamp = DateTime.Now.AddSeconds(user.ExpiresIn);
+                //user.ExpiryTimeStamp = DateTime.Now.AddSeconds(user.ExpiresIn);
                 await _localStorageService.SaveItemEncrypted(LocalStorageService.USER_SESSION, user);
             }
             else

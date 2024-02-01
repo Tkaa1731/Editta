@@ -26,7 +26,7 @@ namespace Pobytne.Shared.Procedural
         public int CustomerId { get; set; } = 0;
         public bool Valid { get; set; } = true;
         [Editable(false)]
-        public List<Permition>? AccessPermition { get; set; }
+        public List<Permition> AccessPermition { get; set; } = [];
         public DateTime ValidFrom { get; set; } = DateTime.Now;
         [Required(ErrorMessage = "Enter a date of the end of validation")]
         public DateTime ValidTo { get; set; } = DateTime.Now.AddYears(1);

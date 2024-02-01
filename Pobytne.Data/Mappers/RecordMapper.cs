@@ -28,6 +28,9 @@ namespace Pobytne.Data.Mappers
             Map(r => r.IsBalanceCheck).ToColumn("JeKontrolaNaZustatek");
             Map(r => r.IsSeasonTicket).ToColumn("JePermanentka");
             Map(r => r.Note).ToColumn("Poznamka");
+
+            Map(r => r.ParentId).ToColumn("IDParent");
+            Map(r => r.RootId).ToColumn("IDRoot");                                                 
             Map(r => r.StructDepth).ToColumn("Uroven");
 
             Map(r => r.ValidFrom).ToColumn("PlatiOd");
