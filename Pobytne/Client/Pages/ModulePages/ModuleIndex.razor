@@ -26,10 +26,10 @@
             </a>
         </div>
         <div class="col">
-            <a href="@idModule/Contracts" class="no-link">
+            <a href="@idModule/Contracts" class="disabled">
                 <div class="card">
-                    <div class="card-body">
-                        <HxIcon Icon="@BootstrapIcon.Clipboard2Check"/>
+                    <div class="card-body ">
+                        <HxIcon  Icon="@BootstrapIcon.Clipboard2Check" />
                         <h5 class="card-title">Smlouvy</h5>
                     </div>
                 </div>
@@ -38,7 +38,7 @@
     </div>
     <div class="row mt-5">
         <div class="col">
-            <a href="@idModule/CashRegister" class="no-link">
+            <a href="@idModule/CashRegister" class="disabled">
                 <div class="card">
                     <div class="card-body">
                         <HxIcon Icon="@BootstrapIcon.Wallet" />
@@ -58,7 +58,7 @@
             </a>
         </div>
         <div class="col">
-            <a href="@idModule/Reports" class="no-link">
+            <a href="@idModule/PaymentReports" class="no-link">
                 <div class="card">
                     <div class="card-body">
                         <HxIcon Icon="@BootstrapIcon.CalculatorFill" />
@@ -69,12 +69,18 @@
         </div>
     </div>
 </div>
+
 @code {
     [EditorRequired]
     [Parameter]
     public string idModule { get; set; } = "-1";
+
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
+    [CascadingParameter]
+    public ModuleWorkplace moduleWorkplace { get; set; } = default!;// TODO: pri zmene v URL se neprojevi zmena v ModuleWorkspace
+
+
     private Permition modulePermition = new Permition();
 
     protected async override Task OnInitializedAsync()
@@ -91,6 +97,8 @@
             }
 
         }
+
+        moduleWorkplace.ModuleId = idModule;
 
         return;
     }

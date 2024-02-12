@@ -37,6 +37,8 @@
 {
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkplace { get; set; } = default!;
     [Parameter]
     public EventCallback OnSuccessRequest{ get; set; }
     [Parameter]
@@ -100,9 +102,9 @@
     {
         object? response = null;
         if(e == FormEnum.Update)
-            response = await service.UpdateAsync(obj);
+            response = await service.UpdateAsync(obj, moduleWorkplace.Id);
         else if(e == FormEnum.Insert)
-            response = await service.InsertAsync(obj);
+            response = await service.InsertAsync(obj, moduleWorkplace.Id);
 
         if (response is null || response is ErrorResponse)
         {

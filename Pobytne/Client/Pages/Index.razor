@@ -38,6 +38,8 @@
 @code {
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkplace { get; set; } = default!;
 
     private List<Permition>? permitions => _user?.AccessPermition;
     private User? _user;
@@ -49,7 +51,11 @@
         {
             var user = await localStorage.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
             if (user is not null)
+            {
                 _user = user.User;
+                moduleWorkplace.LicenseNumber = user.User.LicenseNumber;
+                moduleWorkplace.ModulesDic = user.User.AccessPermition.ToDictionary(p => p.ModuleId, p => p.ModuleName);
+            }
         }
         // else
         // {

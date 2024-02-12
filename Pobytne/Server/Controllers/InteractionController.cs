@@ -15,7 +15,7 @@ namespace Pobytne.Server.Controllers
         // POST api/<ItemsController>
         [HttpPost]
         [Route("Insert")]
-        public async Task<IActionResult> Insert([FromBody] Interaction insertInteraction)
+        public async Task<IActionResult> Insert([FromBody] Interaction insertInteraction)//moduleID
         {
             if (insertInteraction is null)
             {

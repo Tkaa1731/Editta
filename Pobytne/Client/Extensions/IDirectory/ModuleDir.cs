@@ -22,7 +22,7 @@ namespace Pobytne.Client.Extensions.IDirectory
         public async Task AddNew() => await LoadData();
         private async Task LoadData()
         {
-            var response = await _service.GetAllAsync<User>($"UsersList?userOfModule={Module.Id}");
+            var response = await _service.GetAllAsync<User>($"UsersList?userOfModule={Module.Id}", -1);
             List<User> users = new();
 
             if (response is null)

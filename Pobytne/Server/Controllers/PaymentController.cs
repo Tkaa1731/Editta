@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Pobytne.Client.Pages.ModulePages;
 using Pobytne.Server.Service;
 using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Struct;
 
 namespace Pobytne.Server.Controllers
 {
@@ -12,7 +13,9 @@ namespace Pobytne.Server.Controllers
     public class PaymentController : ControllerBase
     {
         private PaymentService _paymentService;
-        public PaymentController(PaymentService paymentService) => _paymentService = paymentService;
+		public const EPermition permition = EPermition.PaymentType;
+
+		public PaymentController(PaymentService paymentService) => _paymentService = paymentService;
 
         [HttpGet]
         public async Task<IEnumerable<Payment>> Get([FromQuery] int moduleNumber)

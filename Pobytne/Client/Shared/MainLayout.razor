@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @inject AuthenticationService service
-@inject NavigationManager navManager
+
 <div class="page">
     <AuthorizeView>
         <Authorized>
@@ -11,15 +11,19 @@
     </AuthorizeView>
 
     <main>
-        <AuthorizeView>
+        <AuthorizeView >
             <NotAuthorized>
                 <Pobytne.Client.Pages.Login />
             </NotAuthorized>
             <Authorized>
 
-                <article class="content px-4">
-                    @Body
-                </article>
+                <TokenExpirationCounter/>
+                <CascadingValue Value="moduleWorkplace">
+                    <article class="content px-4">
+                        @Body 
+                    </article>
+                </CascadingValue>
+
             </Authorized>
         </AuthorizeView>
     </main>
@@ -28,16 +32,11 @@
 @code {
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
+
+    private ModuleWorkplace moduleWorkplace { get; set; } = new ModuleWorkplace();
+
     private async Task Logout()
     {
         await service.Logout();
     }
-    // private async Task RefreshTokenHandler()
-    // {
-    //     var authState = await authenticationState;
-    //     if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
-    //         await service.CheckTokenValidity();
-    //     await Task.Delay(1* 10 * 1000);
-    //     await RefreshTokenHandler();
-    // }
 }

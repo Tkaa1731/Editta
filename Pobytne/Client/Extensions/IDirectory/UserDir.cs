@@ -24,7 +24,7 @@ namespace Pobytne.Client.Extensions.IDirectory
         public async Task AddNew() => await LoadData();
         private async Task LoadData()
         {
-            var response = await _service.GetAllAsync<User>($"UsersList?licenseNumber={_licenseNumber}");
+            var response = await _service.GetAllAsync<User>($"UsersList?licenseNumber={_licenseNumber}", -1);
             List<User> users = new();
 
             if (response is null)

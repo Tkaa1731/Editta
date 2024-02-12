@@ -1,31 +1,34 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AuthRequirementsData.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Pobytne.Server.Service;
 using Pobytne.Shared.Procedural;
-using System.Data;
+using Pobytne.Shared.Struct;
 
 namespace Pobytne.Server.Controllers
 {
 
-  [Route("License")]
-  [Authorize]
 	[ApiController]
+    [Authorize]
+	[Route("License")]
 	public class LicenseController : ControllerBase
 	{
 		private LicenseService _licenseService;
+		public const EPermition permition = EPermition.License;
+
 		public LicenseController(LicenseService licenseService)
 		{
 			_licenseService = licenseService;
 		}
+	    [PermissionAuthorize(permition, EAccess.ReadOnly)]
 		[HttpGet]
 		public async Task<IEnumerable<License>> Get()
 		{//TODO: Get by module
 			return await _licenseService.GetLicenses();
 		}
-        [HttpPost]
-        [Route("Update")]
-        public async Task<IActionResult> Update([FromBody] License updateLicense)
-        {
+		[HttpPost]
+		[Route("Update")]
+		public async Task<IActionResult> Update([FromBody] License updateLicense)
+        {/////////////////
             if (updateLicense is null)
             {
                 return BadRequest("Invalid data");

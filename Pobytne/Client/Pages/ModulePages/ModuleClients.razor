@@ -2,10 +2,12 @@
 @inject PobytneService _service
 
 <ModuleNav idModule="@idModule"></ModuleNav>
-
+<div class="container-fluid">
 <ListCustom  ListItems="AllClients"/>
-
+</div>
 @code {
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkplace { get; set; } = default!;
     [EditorRequired]
     [Parameter]
     public string idModule { get; set; } = "-1";
@@ -14,7 +16,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await _service.GetAllAsync<Client>($"ClientsList?moduleNumber={idModule}");
+        moduleWorkplace.ModuleId = idModule;
+        //update moduleWorkpalce
+
+        var response = await _service.GetAllAsync<Client>($"ClientsList?moduleNumber={idModule}", moduleWorkplace.Id);
         List<Client> clients = new();
         if (response is null)
             Console.WriteLine($"NO RESPONSE");

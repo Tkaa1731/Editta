@@ -1,6 +1,6 @@
-﻿namespace Pobytne.Client.Extensions
+﻿namespace Pobytne.Shared.Struct
 {
-    public enum PermitionEnum
+    public enum EPermition
     {
         Aplication,//.Aplikace, "nastavení aplikace")
         License,//.Licence, "seznam licencí") // seznam
@@ -26,7 +26,7 @@
         ContractSeason,//DohodyObdobi, "dohody dle období")
         ContractReport//DohodyZpravy, "dohody - zprávy")
     }
-    public enum AccessEnum 
+    public enum EAccess 
     {
         NoAccess = '0',
         ReadOnly = '1',

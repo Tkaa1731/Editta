@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Pobytne.Server.Service;
 using Pobytne.Shared.Authentication;
 using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Struct;
 
 
 namespace Pobytne.Server.Controllers
@@ -13,7 +14,9 @@ namespace Pobytne.Server.Controllers
     public class UserController : ControllerBase
     {
         private UserService _userService;
-        public UserController(UserService userService)
+		public const EPermition permition = EPermition.LoginUser;
+
+		public UserController(UserService userService)
         {
             _userService = userService;
         }

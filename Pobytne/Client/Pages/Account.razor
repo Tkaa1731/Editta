@@ -1,13 +1,20 @@
 ﻿@page "/Account"
-<h3>Account</h3>
 
 <AuthorizeView>
 	<Authorized>
-        <h1>NAME, @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.Name)?.Value !</h1>
-        <h1>SID, @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.Sid)?.Value!</h1>
-        <h1>EMAIL, @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.Email)?.Value !</h1>
-        <h1>GIVEN NAME, @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.GivenName)?.Value !</h1>
-        <h1>License, @context.User.Claims.FirstOrDefault(c=> c.Type == "License")?.Value !</h1>
+        <HxCard >
+            <BodyTemplate>
+                <HxCardTitle>Můj účet</HxCardTitle>
+                <HxCardSubtitle CssClass="mb-2 text-muted">@context.User.Claims.FirstOrDefault(c => c.Type == "License")?.Value</HxCardSubtitle>
+                <HxCardText>
+                    <p>Login: @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.Name)?.Value</p>
+                    <p>Id uživatele:, @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.Sid)?.Value</p>
+                    <p>Email: @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.Email)?.Value</p>
+                    <p>Jméno uživatele: @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.GivenName)?.Value</p>
+                </HxCardText>
+                <HxButton Enabled="false">Změnit heslo</HxButton>
+            </BodyTemplate>
+        </HxCard>
 	</Authorized>
 </AuthorizeView>
 

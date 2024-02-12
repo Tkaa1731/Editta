@@ -1,6 +1,4 @@
-﻿@inject HttpClient httpClient
-@inject IJSRuntime js
-@inject AuthenticationStateProvider authStateProv
+﻿@inject AuthenticationService _service
 @inject NavigationManager navManager
 
 @if (Visible)
@@ -44,37 +42,13 @@
     private float Opacity { get; set; } = 0;
     private async Task Authenticate()
     {
-        //try
-        //{
-        //    await AuthenticationService.Login(logRequest);
-        //    navManager.NavigateTo("/", true);
-        //}
-        //catch(Exception ex)
-        //{
-        //    await js.InvokeVoidAsync("alert", ex.Message);
-        //    return;
-        //}
-        var logResponse = await httpClient.PostAsJsonAsync<LoginRequest>("/api/User/Login", logRequest);
-        if (logResponse.IsSuccessStatusCode)
-        {
-            var user = await logResponse.Content.ReadFromJsonAsync<UserAccount>();
-            var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProv;
-            await customAuthStateProvider.UpdateAuthenticationState(user);
-            await js.InvokeVoidAsync("alert", user.ToString());
-            navManager.NavigateTo("/", true);
-        }
-        else if (logResponse.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            await js.InvokeVoidAsync("alert", "invalid Username or Password");
-            return;
-        }
+        await _service.Login(logRequest);
     }
-    public async Task Show()
+    public void Show()
     {
         Visible = !Visible;
         Opacity = 0;
         if (Visible)
             Opacity = 1;
-        await js.InvokeVoidAsync("alert", $"PopUp is:{Visible}");
     }
 }

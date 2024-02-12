@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Pobytne.Server.Service;
 using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Struct;
 
 namespace Pobytne.Server.Controllers
 {
@@ -11,7 +12,9 @@ namespace Pobytne.Server.Controllers
     public class RecordController : ControllerBase
 	{
         private readonly RecordService _service;
-        public RecordController(RecordService service)
+		public const EPermition permition = EPermition.Record;
+
+		public RecordController(RecordService service)
         {
             _service = service;
         }

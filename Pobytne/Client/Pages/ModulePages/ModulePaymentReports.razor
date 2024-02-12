@@ -1,0 +1,79 @@
+﻿@page "/{idModule}/PaymentReports"
+@inject PobytneService _service
+
+<ModuleNav idModule="@idModule"></ModuleNav>
+
+<div class="row">
+	<div class="col">
+
+		<HxListLayout Title="Souhrny pokladna" TFilterModel="HxListLayout.NoFilter">
+			<DataTemplate>
+				<HxGrid @ref="grid" 
+						TItem="CashRegister"
+						DataProvider="GetGridData"
+						PageSize="20"
+						Responsive="true"
+						>
+					<Columns>
+						<HxGridColumn HeaderText="Id" ItemTextSelector="cash => cash.Id.ToString()" />
+						<HxGridColumn HeaderText="Datum" ItemTextSelector="cash => cash.InteractionDate.ToShortDateString()" />
+						<HxGridColumn HeaderText="Název položky" ItemTextSelector="cash => cash.RecordName" />
+						<HxGridColumn HeaderText="Popis" ItemTextSelector="cash => cash.InteractionDescription" />
+						<HxGridColumn HeaderText="Uživatel" ItemTextSelector="cash => cash.CustomerName" />
+						<HxGridColumn HeaderText="Změnil" ItemTextSelector="cash => cash.CreationUserName" />
+						<HxGridColumn HeaderText="Zmeněno" ItemTextSelector="cash => cash.CreationDate.ToString()" />
+					</Columns>
+				</HxGrid>
+			</DataTemplate>
+		</HxListLayout>
+
+	</div>
+	<div class="col-4" style="max-width:500px">
+		<ReportFilter Filter="filter">
+
+			<HxSelect TItem="Payment"
+					  TValue="int?"
+					  Label="Platba"
+					  Data="paymentList"
+					  @bind-Value="filter.PaymentId"
+					  Nullable="false"
+					  TextSelector="@(p => p.Name)"
+					  ValueSelector="@(p => p.Id)" />
+
+		</ReportFilter>
+
+
+	</div>
+</div>
+<style>
+	div.dark {
+		background-color: #0a1725;
+		color: #fff;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	}
+</style>
+@code {
+	[EditorRequired]
+	[Parameter]
+	public string idModule { get; set; } = "-1";
+	public HxGrid<CashRegister> grid = new();
+	private List<CashRegister> list = [];
+	private List<Payment> paymentList = new() { new Payment() { Id = 1, Name="Platba Kartou" }, new Payment() { Id = 2, Name = "Platba Hotove" } };
+	private CashRegisterFilter filter = new()
+	{
+		PaymentId = 1,// change
+		ModuleId = -1,// change
+		From = DateTime.Today,
+		To = DateTime.Today.AddDays(1),
+	};
+
+
+
+	private Task<GridDataProviderResult<CashRegister>> GetGridData(GridDataProviderRequest<CashRegister> request)
+	{
+		return Task.FromResult(request.ApplyTo(list));
+	}
+
+
+
+}

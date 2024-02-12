@@ -68,10 +68,10 @@ namespace Pobytne.Client.Extensions.IDirectory
             {
                 object? response;
                 if(_record.Id <= 0)// root
-                    response = await _service.GetAllAsync<Record>($"RecordsRoot?moduleId={_record.ModuleId}");
+                    response = await _service.GetAllAsync<Record>($"RecordsRoot?moduleId={_record.ModuleId}",_record.ModuleId);
 
                 else
-                    response = await _service.GetAllAsync<Record>($"RecordsBranch?parentId={_record.Id}");
+                    response = await _service.GetAllAsync<Record>($"RecordsBranch?parentId={_record.Id}",_record.ModuleId);
 
                 if (response is null)
                     Console.WriteLine($"NO RESPONSE");

@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Pobytne.Client.Extensions;
-using System.Collections;
+using Pobytne.Shared.Struct;
 
 namespace Pobytne.Client.Authentication
 {
-    public class PermitionRequirement : IAuthorizationRequirement
+	internal class PermitionRequirement : IAuthorizationRequirement
     {
-        public bool GetAccess((PermitionEnum,AccessEnum) acces, string permition)
+        public bool GetAccess((EPermition,EAccess) acces, string permition)
         {
             int permitionIndex = ((int)acces.Item1);
             char accessValue = ((char)acces.Item2);

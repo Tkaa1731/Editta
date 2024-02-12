@@ -1,8 +1,9 @@
-﻿@page "/{idModule}/RecordsSettings"
+﻿@page "/{idModule}/RecordSettings"
 @inject PobytneService service
 
 <ModuleNav idModule="@idModule"></ModuleNav>
-<AuthorizeView Policy="PermitionPolicy" Resource=(PermitionEnum.Aplication,AccessEnum.ReadOnly,String.Empty)>
+
+<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Record,EAccess.ReadOnly,idModule)>
     <Authorized>
 
         <div class="row">
