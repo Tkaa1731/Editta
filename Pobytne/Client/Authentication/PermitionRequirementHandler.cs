@@ -1,16 +1,21 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Pobytne.Client.Extensions;
+using Pobytne.Shared.Struct;
+using System.Security.Claims;
 
 namespace Pobytne.Client.Authentication
 {
-    public class PermitionRequirementHandler : AuthorizationHandler<PermitionRequirement>
+    internal class PermitionRequirementHandler : AuthorizationHandler<PermitionRequirement>
     {
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermitionRequirement requirement)
         {
-            var Resource = context.Resource as (PermitionEnum, AccessEnum,string)?;
+            var Resource = context.Resource as (EPermition, EAccess,string)?;
             if(Resource is not null)
-            {//TODO: possilkat v JWT vsechny pristupy... Pak vyhledat pristup v zavislosti na idModulu
-                var permitions = context.User.Claims.FirstOrDefault(c => c.Type == "Permitions");// pole mermici
+            {
+                Claim? permitions;
+                if (Resource.Value.Item3 == "-1")
+                    permitions = context.User.Claims.First();
+                else
+                    permitions = context.User.Claims.FirstOrDefault(c => c.Type == Resource.Value.Item3);//podle modulu
 
                 if (permitions == null)
                 {
@@ -21,7 +26,7 @@ namespace Pobytne.Client.Authentication
                 string permitionString = permitions.Value;
 
 
-                if (Resource is not null && requirement.GetAccess((Resource.Value.Item1,Resource.Value.Item2), permitionString))
+                if (requirement.GetAccess((Resource.Value.Item1,Resource.Value.Item2), permitionString))
                 {
                     context.Succeed(requirement);
                 }

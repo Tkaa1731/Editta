@@ -1,0 +1,83 @@
+﻿@using Havit
+
+<div class="my-3">
+	<div class="form-check form-check-inline" style="width:150px">
+		<input class="form-check-input" type="radio" name="dateRadios" id="radio1" @onchange="@(() => RadioChanged("today"))" checked>
+		<label class="form-check-label" for="radio1">
+			Dnes
+		</label>
+	</div>
+	<div class="form-check form-check-inline">
+		<input class="form-check-input" type="radio" name="dateRadios" id="radio2" @onchange="@(() => RadioChanged("week"))">
+		<label class="form-check-label" for="radio2">
+			Týden
+		</label>
+	</div>
+	<div class="w-100"/>
+
+	<div class="form-check form-check-inline" style="width:150px">
+		<input class="form-check-input" type="radio" name="dateRadios" id="radio3" @onchange="@(() => RadioChanged("month"))">
+		<label class="form-check-label" for="radio3">
+			Měsíc
+		</label>
+	</div>
+	<div class="form-check form-check-inline">
+		<input class="form-check-input" type="radio" name="dateRadios" id="radio4" @onchange="@(() => RadioChanged("year"))">
+		<label class="form-check-label" for="radio4">
+			Rok
+		</label>
+	</div>
+	<div class="w-100 pt-2" />
+	<div class="form-check">
+		<input class="form-check-input" type="radio" name="dateRadios" id="radio5" @onchange="@(() => RadioChanged("date"))">
+		<label class="form-check-label" for="radio5">
+			Vyber obdobi
+		</label>
+	</div>
+	<HxInputDateRange @bind-Value="dateTimeRange" Enabled="@(selectedOption=="date")"/>
+</div>
+
+
+@code {
+	[CascadingParameter]
+	public CashRegisterFilter? Filter { get; set; }
+
+	private string selectedOption = "today";
+	private DateTimeRange dateTimeRange = new DateTimeRange() { StartDate = DateTime.Now.AddMonths(-1), EndDate = DateTime.Now };
+
+
+	private void RadioChanged(string value)
+	{
+		selectedOption = value;
+		var date = DateTime.Now;
+		if(Filter is not null)
+			switch (value)
+			{
+				case "today":
+					Filter.From = new DateTime(date.Year, date.Month, date.Day);
+					Filter.To = Filter.From.AddHours(24);
+					break;
+				case "week":
+					var dayOfWeek = ((int)date.DayOfWeek)-1;
+					Filter.From = date.AddDays(-dayOfWeek);
+					Filter.To = Filter.From.AddDays(7);
+					break;
+				case "month":
+					Filter.From = new DateTime(date.Year, date.Month, 1);
+					Filter.To = Filter.From.AddMonths(1).AddDays(-1);
+					break;
+				case "year":
+					Filter.From = new DateTime(date.Year, 1, 1);
+					Filter.To = new DateTime(date.Year, 12, 31);
+					break;
+				case "date":
+					if(dateTimeRange.StartDate is not null && dateTimeRange.EndDate is not null)
+					{
+						Filter.From = dateTimeRange.StartDate.Value;
+						Filter.To = dateTimeRange.EndDate.Value;
+					}
+					break;
+			}
+	} 
+}
+

@@ -1,7 +1,5 @@
-﻿using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Components.Authorization;
+﻿using Microsoft.AspNetCore.Components.Authorization;
 using Pobytne.Client.Services;
-using Pobytne.Shared.Authentication;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -9,9 +7,12 @@ namespace Pobytne.Client.Authentication
 {
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
-        private readonly ILocalStorageService _localStorageService;
+        private readonly AuthenticationService _service;
         private ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
-        public CustomAuthenticationStateProvider(ILocalStorageService localStorageService) => _localStorageService = localStorageService;
+        public CustomAuthenticationStateProvider(AuthenticationService service)
+        {
+            _service = service;
+        }
 
         private static List<Claim> MapClaims(IEnumerable<Claim> original)
         {
@@ -40,54 +41,28 @@ namespace Pobytne.Client.Authentication
         }
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            try
+
+            var user = await _service.GetValidUser();// pri kaydem dotazu na authentication State je kontrola expirace + pripadny refresh
+            if (user == null)
+                return new AuthenticationState(_anonymous);// neni nic v Local storage
+            
+            
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var identity = new ClaimsIdentity();
+            
+            if (tokenHandler.CanReadToken(user.Token))
             {
-                var user = await _localStorageService.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);//proc se ExpiryTimeStamp meni?
-                if (user == null || user.ExpiryTimeStamp < DateTime.UtcNow)
-                    return new AuthenticationState(_anonymous);// neni nic v Local storage nebo je po expiraci
-
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var identity = new ClaimsIdentity();
-
-                if (tokenHandler.CanReadToken(user.Token))
-                {
-                    var jwtSecurityToken = tokenHandler.ReadJwtToken(user.Token);
-                    identity = new ClaimsIdentity(MapClaims(jwtSecurityToken.Claims), "JwtAuth");
-                }
-                var claimsPrincipal = new ClaimsPrincipal(identity);
-                var authenticationState = new AuthenticationState(claimsPrincipal);
-
-                return authenticationState;
+                var jwtSecurityToken = tokenHandler.ReadJwtToken(user.Token);
+                identity = new ClaimsIdentity(MapClaims(jwtSecurityToken.Claims), "JwtAuth");
             }
-            catch
-            {
-                return new AuthenticationState(_anonymous);
-            }
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            
+            return new AuthenticationState(claimsPrincipal);
+ 
         }
-        public async Task UpdateAuthenticationState(UserAccount? user)
+        public void UpdateAuthenticationState()
         {
-            ClaimsPrincipal claimsPrincipal;
-            if (user != null)
-            {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var identity = new ClaimsIdentity();
-
-                if (tokenHandler.CanReadToken(user.Token))
-                {
-                    var jwtSecurityToken = tokenHandler.ReadJwtToken(user.Token);
-                    identity = new ClaimsIdentity(MapClaims(jwtSecurityToken.Claims), "JwtAuth");
-                }
-                claimsPrincipal = new ClaimsPrincipal(identity);
-
-                //user.ExpiryTimeStamp = DateTime.Now.AddSeconds(user.ExpiresIn);
-                await _localStorageService.SaveItemEncrypted(LocalStorageService.USER_SESSION, user);
-            }
-            else
-            {
-                claimsPrincipal = _anonymous;
-                await _localStorageService.RemoveItemAsync(LocalStorageService.USER_SESSION);
-            }
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
     }
 }

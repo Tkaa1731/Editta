@@ -1,23 +1,25 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using AuthRequirementsData.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pobytne.Server.Service;
-using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Struct;
 
 namespace Pobytne.Server.Controllers
 {
     [Route("Client")]
+    [Authorize]
     [ApiController]
     public class ClientController : ControllerBase
 	{
         private readonly ClientService _clientService;
+        public const EPermition permition = EPermition.Customer; 
         public ClientController(ClientService clientService)
         {
             _clientService = clientService;
         }
-        [Authorize]
         [HttpGet]
-        [Route("ClientsList")]
+		[PermissionAuthorize(permition, EAccess.ReadOnly)]
+		[Route("ClientsList")]
         public Task<IEnumerable<Shared.Procedural.Client>> GetClients(int moduleNumber)
         {
             return _clientService.GetClientsByModule(moduleNumber);

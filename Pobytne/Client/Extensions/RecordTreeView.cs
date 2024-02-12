@@ -9,7 +9,7 @@ namespace Pobytne.Client.Extensions
 	{
 		private readonly PobytneService _service;
 		public required Record Record {  get; set; }
-		public List<RecordTreeView> SubRecords { get; set; } = new List<RecordTreeView>();
+		public List<RecordTreeView> SubRecords { get; set; } = [];
 		public int Depth { get {  return Record.StructDepth; } }
 		public bool Active { 
 			get 
@@ -29,7 +29,7 @@ namespace Pobytne.Client.Extensions
 		}
 		public async Task LoadData()
 		{
-			var response = await _service.GetAllAsync<Record>($"RecordsBranch?parentId={Record.Id}");
+			var response = await _service.GetAllAsync<Record>($"RecordsBranch?parentId={Record.Id}", Record.ModuleId);
 
 			if (response is null)
 				Console.WriteLine($"NO RESPONSE");

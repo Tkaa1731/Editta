@@ -35,7 +35,7 @@ namespace Pobytne.Client.Extensions.IDirectory
 		public async Task AddNew() => await LoadData();
 		private async Task LoadData()
 		{
-			var response = await _service.GetAllAsync<License>("");
+			var response = await _service.GetAllAsync<License>("",-1);
             List<License> licenses = new();
 
 			if(response is null)

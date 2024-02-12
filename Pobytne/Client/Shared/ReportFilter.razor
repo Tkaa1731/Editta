@@ -1,0 +1,88 @@
+﻿@inject PobytneService _service
+<div class="p-4 border rounded">
+
+	@ChildContent
+
+	<DateFilter/>
+	<div style="display:flex; justify-content:center;">
+		<HxButton CssClass="w-50 my-3" Enabled="false" Color="ThemeColor.Primary">Potvrdit vyber</HxButton>
+	</div>
+
+	<div style="height: 300px">
+	<HxTreeView TItem="IDirectory"
+				SelectedItemChanged="OnSelect"
+				OnItemExpanded="OnExpanded"
+				Items="@fileSystem"
+				CssClass="border rounded p-2"
+				ItemTitleSelector="@(p => p.Name)"
+				ItemIconSelector="@(p => p.Icon)"
+				ItemChildrenSelector="@(p => p.SubDirectories)" />
+	</div>
+
+	<div style="display:flex; justify-content:center;">
+		<HxButton CssClass="w-50 my-3" Enabled="false" Color="ThemeColor.Primary">Export do excelu</HxButton>
+	</div>
+</div>
+@code {
+	[CascadingParameter]
+	public ModuleWorkplace moduleWorkplace { get; set; } = new();
+
+	[Parameter]
+	public RenderFragment? ChildContent { get; set; }
+	[Parameter]
+	[EditorRequired]
+	public CashRegisterFilter? Filter { get; set; }//TODO:Interface
+
+	private IDirectory? selectedDirectory;
+	private IListItem? selectedItem;
+	private IListItem? formItem;
+	private List<IListItem>? listOfItems;
+	private List<RecordDir> fileSystem = [];
+	protected override async Task OnInitializedAsync()
+	{
+		// var response =  await _service.GetAllAsync<CashRegister>($"moduleId={idModule}");
+		// if(response is not null && response is List<CashRegister> l)
+		// {
+		// 	list = l;
+		// 	await grid.RefreshDataAsync();
+		// }
+		//TODO: recordListView => komponenta
+		fileSystem.Add(
+			new RecordDir(
+				_service,
+				new Record
+					{
+						Name = "Evidence",
+						Id = 0,
+						ModuleId = moduleWorkplace.Id,
+						RootId = 0,
+						ParentId = 0,
+						StructDepth = 0,
+					}
+			)
+				{
+					Icon = BootstrapIcon.Archive
+				}
+		);
+		await fileSystem[0].OnSelect();
+	}
+	private async Task OnSelect(IDirectory e)
+	{
+		this.selectedDirectory = e;
+		if (selectedDirectory is not null)
+		{
+			await selectedDirectory.OnSelect();
+			listOfItems = selectedDirectory.ItemsList;
+		}
+	}
+	private async Task OnExpanded(IDirectory e)
+	{
+		if (e is not null)
+		{
+			await e.OnExpanded();
+			StateHasChanged();
+		}
+
+	}
+
+}

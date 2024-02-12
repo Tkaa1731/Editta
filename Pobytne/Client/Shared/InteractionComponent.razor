@@ -1,11 +1,12 @@
 ﻿@inherits ComponentBase
+
+
 <HxGrid @ref="grid"
             TItem="InteractionRecordItem"
             Responsive="true"
             DataProvider="LoadDataItems"
             ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
             PageSize="15"
-            ItemRowHeight="41"
             TableContainerCssClass="virtualized-table-container"
             HeaderRowCssClass="sticky-top"
             SelectedDataItem="selectedItem"

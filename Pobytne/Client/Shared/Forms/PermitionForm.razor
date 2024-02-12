@@ -24,7 +24,7 @@
                           Enabled="formType == FormEnum.Insert" />
             </div>
         </div>        
-        @foreach (PermitionEnum rec in Enum.GetValues(typeof(PermitionEnum)))
+        @foreach (EPermition rec in Enum.GetValues(typeof(EPermition)))
         {
     
             <div class="row align-items-start">
@@ -34,7 +34,7 @@
                     <div class="col">
 
                         <HxSelect TItem="AccessRecord"
-                                  TValue="AccessEnum"
+                                  TValue="EAccess"
                                   Data="@access"
                     @bind-Value="@accessList[rec].Access"
                                   TextSelector="@(p => p.accessStr)"
@@ -50,6 +50,9 @@
 }
 
 @code {
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkplace { get; set; } = default!;
+
     [EditorRequired]
     [Parameter]
     public FormEnum formType { get; set; }
@@ -61,7 +64,7 @@
     public Permition? permition{ get; set; }
 
     private UserModel model = new();
-    private Dictionary<PermitionEnum, PermitionRecord> accessList { get; }
+    private Dictionary<EPermition, PermitionRecord> accessList { get; }
     private List<UserRecord> userList = new(); //HxSelect component
     private List<AccessRecord> access = new(); //HxSelect component
     private string ButtonText
@@ -73,7 +76,7 @@
         }
     }
 
-    private record AccessRecord(string accessStr, AccessEnum accesVal);
+    private record AccessRecord(string accessStr, EAccess accesVal);
     private record UserRecord(string userName,int id);
     private class UserModel
     {
@@ -82,11 +85,11 @@
     }
     private class PermitionRecord {
         public string PermitionString { get; set; }
-        public AccessEnum Access { get; set; }
+        public EAccess Access { get; set; }
         public PermitionRecord(string permitionStr)
         {
             PermitionString = permitionStr;
-            Access = AccessEnum.NoAccess;
+            Access = EAccess.NoAccess;
         }
     }
 
@@ -106,36 +109,36 @@
 
     public PermitionForm()
     {
-        accessList = new Dictionary<PermitionEnum, PermitionRecord>();
-        accessList[PermitionEnum.Aplication] = new PermitionRecord("Nastavení aplikace");
-        accessList[PermitionEnum.License] = new PermitionRecord("Seznam licencí");//TOTO: kdo eviduje liccence
-        accessList[PermitionEnum.LoginUser] = new PermitionRecord("Seznam uživatelů aplikace");
-        accessList[PermitionEnum.Module] = new PermitionRecord("Seznam modulů");
-        accessList[PermitionEnum.Permition] = new PermitionRecord("Seznam oprávnění");
-        accessList[PermitionEnum.PropertiesRecord] = new PermitionRecord("Seznam účetní spefikace");
-        accessList[PermitionEnum.PaymentType] = new PermitionRecord("Typy plateb");
-        accessList[PermitionEnum.Record] = new PermitionRecord("Seznam záznamů");
-        accessList[PermitionEnum.EvidenceMotion] = new PermitionRecord("Sklad zboží");
-        accessList[PermitionEnum.CashMotion] = new PermitionRecord("Vedlejší pokladna");
-        accessList[PermitionEnum.Customer] = new PermitionRecord("Seznam klientů");
-        accessList[PermitionEnum.Evidence] = new PermitionRecord("Evidence záznamů");
-        accessList[PermitionEnum.Pernament] = new PermitionRecord("Permanentky");
-        accessList[PermitionEnum.EvidenceSummary] = new PermitionRecord("Souhrny evidence");
-        accessList[PermitionEnum.CashSummary] = new PermitionRecord("Souhrny druhů plateb");
-        accessList[PermitionEnum.PernamentSummary] = new PermitionRecord("Souhrny permanentky");
-        accessList[PermitionEnum.ContractReportSummary] = new PermitionRecord("Souhrny dohody - zprávy");
-        accessList[PermitionEnum.EvidenceStorageSummary] = new PermitionRecord("Souhrny stavu zásob");
-        accessList[PermitionEnum.Contract] = new PermitionRecord("Dohody vpp");
-        accessList[PermitionEnum.ContractPerson] = new PermitionRecord("Dohody - osoby");
-        accessList[PermitionEnum.ContractSupplement] = new PermitionRecord("Dohody - přílohy");
-        accessList[PermitionEnum.ContractSeason] = new PermitionRecord("Dohody dle období");
-        accessList[PermitionEnum.ContractReport] = new PermitionRecord("Dohody - zprávy");
+        accessList = new Dictionary<EPermition, PermitionRecord>();
+        accessList[EPermition.Aplication] = new PermitionRecord("Nastavení aplikace");
+        accessList[EPermition.License] = new PermitionRecord("Seznam licencí");//TOTO: kdo eviduje liccence
+        accessList[EPermition.LoginUser] = new PermitionRecord("Seznam uživatelů aplikace");
+        accessList[EPermition.Module] = new PermitionRecord("Seznam modulů");
+        accessList[EPermition.Permition] = new PermitionRecord("Seznam oprávnění");
+        accessList[EPermition.PropertiesRecord] = new PermitionRecord("Seznam účetní spefikace");
+        accessList[EPermition.PaymentType] = new PermitionRecord("Typy plateb");
+        accessList[EPermition.Record] = new PermitionRecord("Seznam záznamů");
+        accessList[EPermition.EvidenceMotion] = new PermitionRecord("Sklad zboží");
+        accessList[EPermition.CashMotion] = new PermitionRecord("Vedlejší pokladna");
+        accessList[EPermition.Customer] = new PermitionRecord("Seznam klientů");
+        accessList[EPermition.Evidence] = new PermitionRecord("Evidence záznamů");
+        accessList[EPermition.Pernament] = new PermitionRecord("Permanentky");
+        accessList[EPermition.EvidenceSummary] = new PermitionRecord("Souhrny evidence");
+        accessList[EPermition.CashSummary] = new PermitionRecord("Souhrny druhů plateb");
+        accessList[EPermition.PernamentSummary] = new PermitionRecord("Souhrny permanentky");
+        accessList[EPermition.ContractReportSummary] = new PermitionRecord("Souhrny dohody - zprávy");
+        accessList[EPermition.EvidenceStorageSummary] = new PermitionRecord("Souhrny stavu zásob");
+        accessList[EPermition.Contract] = new PermitionRecord("Dohody vpp");
+        accessList[EPermition.ContractPerson] = new PermitionRecord("Dohody - osoby");
+        accessList[EPermition.ContractSupplement] = new PermitionRecord("Dohody - přílohy");
+        accessList[EPermition.ContractSeason] = new PermitionRecord("Dohody dle období");
+        accessList[EPermition.ContractReport] = new PermitionRecord("Dohody - zprávy");
 
         access = new List<AccessRecord>
         {
-            new AccessRecord("Bez přístupu",AccessEnum.NoAccess),
-            new AccessRecord("Jen pro čtení",AccessEnum.ReadOnly),
-            new AccessRecord("Plný přístup",AccessEnum.FullAccess),
+            new AccessRecord("Bez přístupu",EAccess.NoAccess),
+            new AccessRecord("Jen pro čtení",EAccess.ReadOnly),
+            new AccessRecord("Plný přístup",EAccess.FullAccess),
         };
     }
 
@@ -158,7 +161,7 @@
 
             if (id > 0)
             {
-                User? u = await service.GetByIdAsync<User>(id) as User;
+                User? u = await service.GetByIdAsync<User>(id,moduleWorkplace.Id) as User;
 
                 userList.Add(new UserRecord(u.UserName, u.Id));
                 model.userId = id;
@@ -166,7 +169,7 @@
             else
             {   
                 int module = permition.ModuleId;
-                List<User>? users = await service.GetAllAsync<User>($"GetRest?moduleId={module}") as List<User>;// TODO: dodelat ErrorResult handlery
+                List<User>? users = await service.GetAllAsync<User>($"GetRest?moduleId={module}", moduleWorkplace.Id) as List<User>;// TODO: dodelat ErrorResult handlery
 
 
                 if(users is not null)
@@ -185,17 +188,17 @@
     {
         if(permition is not null)
         {
-            @foreach (PermitionEnum pe in Enum.GetValues(typeof(PermitionEnum)))
+            @foreach (EPermition pe in Enum.GetValues(typeof(EPermition)))
             {
                 if(permition.PermitionString.Length > (int)pe)
                     switch (permition.PermitionString[((int)pe)])
                     {
-                        case '1': accessList[pe].Access = AccessEnum.ReadOnly; break;
-                        case '2': accessList[pe].Access = AccessEnum.FullAccess; break;
-                        default: accessList[pe].Access = AccessEnum.NoAccess; break;
+                        case '1': accessList[pe].Access = EAccess.ReadOnly; break;
+                        case '2': accessList[pe].Access = EAccess.FullAccess; break;
+                        default: accessList[pe].Access = EAccess.NoAccess; break;
                     }
                 else
-                    accessList[pe].Access = AccessEnum.NoAccess;
+                    accessList[pe].Access = EAccess.NoAccess;
             }
         }
     }
@@ -205,7 +208,7 @@
         {            
             int capacity = 50; // Setting the lenght of PermitionString 
             var sb = new StringBuilder(capacity);
-            foreach (PermitionEnum pe in Enum.GetValues(typeof(PermitionEnum)))
+            foreach (EPermition pe in Enum.GetValues(typeof(EPermition)))
                 sb.Append((char)accessList[pe].Access);
 
             while (sb.Length < capacity)

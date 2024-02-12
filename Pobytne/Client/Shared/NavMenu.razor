@@ -5,7 +5,7 @@
         <HeaderTemplate>
             <HxSidebarBrand BrandName="Pobytne">
                 <LogoTemplate>
-                    <img src="/P.png" width="40" height="40" />
+                    <img src="/P.jpg" width="40" height="40" />
                 </LogoTemplate>
             </HxSidebarBrand>
         </HeaderTemplate>
@@ -46,6 +46,6 @@
 
     private async Task Logout()
     {
-        await OnLogout.InvokeAsync();
+        await OnLogout.InvokeAsync();//TODO: nefunguje UpdateAuthState
     }
 }

@@ -1,0 +1,10 @@
+﻿@page "/{idModule}/EvidenceReports"
+
+<ModuleNav idModule="@idModule"></ModuleNav>
+
+
+@code {
+    [EditorRequired]
+    [Parameter]
+    public string idModule { get; set; } = "-1";
+}

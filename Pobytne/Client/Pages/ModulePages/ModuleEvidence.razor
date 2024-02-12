@@ -17,8 +17,9 @@
                 </div>
             }
             //interakce komponenta
+            //TODO: presunout do komponenty
             <div class="col">
-                <div class="p-3 border-top" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                <div class="p-3" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-top:2px solid #AAA;">
                     <!-- Seznam položek -->
                     <div class="row" style="z-index:1021; position:relative;">
                         <!--Kalendar-->
@@ -29,19 +30,21 @@
                             <InteractionComponent @bind-Records="interaction.Records"></InteractionComponent>
                         </div>
                     </div>
-                    <div style="background-color:azure">
-                        <div class="row">
+                    <div>
+                        <div class="row mb-3">
                             <div class="col-5">
-                                <b>CELKEM: </b>@sum ,-
+                                <span style="font-size:1.5rem">
+                                    <b>CELKEM: </b>@sum ,-
+                                </span>
                             </div>
                             <div class="col">
-                                <HxInputTextArea Placeholder="Poznamka" @bind-Value="interaction.InteractionName"/>
+                                <HxInputTextArea Placeholder="Poznamka" @bind-Value="interaction.InteractionName" />
                             </div>
                         </div>
                         <div class="row">
                             <div class="col" style="display:flex; flex-direction:column;">
                                 <HxButton CssClass="row-cols-1 mb-1" Text="Potvrdit" Color=ThemeColor.Success OnClick="SubmitHandler" Enabled="(interaction.Records.Count>0)"></HxButton>
-                                <HxButton CssClass="row-cols-1" Text="Smazat vse" Color=ThemeColor.Danger OnClick="()=>{interaction.Records.Clear();interaction.InteractionName = string.Empty;}"></HxButton>
+                                <HxButton CssClass="row-cols-1" Text="Smazat vse" Color=ThemeColor.Danger Enabled="(interaction.Records.Count>0)" OnClick="()=>{interaction.Records.Clear();interaction.InteractionName = string.Empty;}"></HxButton>
                             </div>
                         </div>
                     </div>
@@ -131,6 +134,9 @@
     [EditorRequired]
     [Parameter]
     public string idModule { get; set; } = "-1";
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkplace { get; set; } = default!;
+
     private int maxDepth = 0;
     private Interaction interaction = new();
     private Dictionary<int,List<RecordTreeView>> records = new();
@@ -154,14 +160,17 @@
 
     protected async override Task OnInitializedAsync()
     {
-        var depth = await _service.GetCountAsync<Record>($"RecordsMaxDepth?moduleId={idModule}");
+        moduleWorkplace.ModuleId = idModule;
+        //update moduleWorkplace
+
+        var depth = await _service.GetCountAsync<Record>($"RecordsMaxDepth?moduleId={idModule}", moduleWorkplace.Id);
         if (ServiceRequest<int>(depth) && depth is int d)
         {
             maxDepth = d+1;
             for (int i = 0; i < maxDepth; i++)
                 records[i] = new();
 
-            var root = await _service.GetAllAsync<Record>($"RecordsRoot?moduleId={idModule}");
+            var root = await _service.GetAllAsync<Record>($"RecordsRoot?moduleId={idModule}", moduleWorkplace.Id);
             if (ServiceRequest<List<Record>>(root) && root is List<Record> r)
             {
                 List<RecordTreeView> rootTV = [];
@@ -222,7 +231,7 @@
         bool customerRequired = interaction.Records.Exists(r => r.IsClientRequired);
         if (customerRequired)
         {
-            var response = await _service.GetAllAsync<Client>($"ClientsList?moduleNumber={idModule}");
+            var response = await _service.GetAllAsync<Client>($"ClientsList?moduleNumber={idModule}", moduleWorkplace.Id);
             List<Client> clients = new();
             if (response is null)
                 Console.WriteLine($"NO RESPONSE");
@@ -253,7 +262,7 @@
     }
     private async Task InsertInteraction()
     {
-        var response = await _service.InsertAsync<Interaction>(interaction);
+        var response = await _service.InsertAsync<Interaction>(interaction, moduleWorkplace.Id);
 
         if (response is null)
             await js.InvokeAsync<string>("alert",$"NO RESPONSE");
@@ -283,7 +292,7 @@
     }
     private async Task LoadPayments()
     {
-        var response = await _service.GetAllAsync<Payment>($"?moduleNumber={idModule}");
+        var response = await _service.GetAllAsync<Payment>($"?moduleNumber={idModule}", moduleWorkplace.Id);
         List<Payment> payments = new();
         if (response is null)
             Console.WriteLine($"NO RESPONSE");

@@ -41,7 +41,7 @@ namespace Pobytne.Client.Extensions.IDirectory
         public async Task AddNew() => await LoadData();
         private async Task LoadData()
         {
-            var response = await _service.GetAllAsync<Module>($"?licenseNumber={License.LicenseNumber}");
+            var response = await _service.GetAllAsync<Module>($"?licenseNumber={License.LicenseNumber}",-1);
             List<Module> modules = new(); 
             if (response is null)
                 Console.WriteLine($"NO RESPONSE");

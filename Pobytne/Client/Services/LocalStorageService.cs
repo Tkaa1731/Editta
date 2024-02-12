@@ -7,7 +7,6 @@ namespace Pobytne.Client.Services
     public static class LocalStorageService
     {
         public const string USER_SESSION = "UserSession";
-        public const string MODULE_SESSION = "ActiveModule";
         public static async Task SaveItemEncrypted<T>(this ILocalStorageService localStorageService, string key, T value)
         {
             var itemJson = JsonSerializer.Serialize(value);
@@ -17,7 +16,10 @@ namespace Pobytne.Client.Services
         }
         public static async Task<T?> ReadEncryptedItem<T>(this ILocalStorageService localStorageService, string key)
         {
+            T? result = default;
             var base64Json = await localStorageService.GetItemAsync<string>(key);
+            if (base64Json is null) return result;
+
             var itemJsonBytes = Convert.FromBase64String(base64Json);
             var itemJson = Encoding.ASCII.GetString(itemJsonBytes);
             var item = JsonSerializer.Deserialize<T>(itemJson);

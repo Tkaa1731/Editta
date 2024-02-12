@@ -1,18 +1,19 @@
 using Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Pobytne.Data;
 using Pobytne.Data.Tables;
 using Pobytne.Data.Tables.InteractionTables;
 using Pobytne.Server;
+using Pobytne.Server.Extensions;
 using Pobytne.Server.Service;
 using System.Text;
 
 namespace Pobytne
 {
-    public class Program
+	public class Program
     {
         public static void Main(string[] args)
         {
@@ -48,7 +49,11 @@ namespace Pobytne
 					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"]!)),
 				};
             });
-            builder.Services.AddScoped<UserService>();
+            builder.Services.AddAuthorization();
+			builder.Services.AddSingleton<IAuthorizationHandler, PermitionRequirementHandler>();
+			builder.Services.AddHttpContextAccessor();
+
+			builder.Services.AddScoped<UserService>();
 			builder.Services.AddScoped<ModuleService>();
             builder.Services.AddScoped<LicenseService>();
             builder.Services.AddScoped<ClientService>();

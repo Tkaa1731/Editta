@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Struct;
 
 namespace Pobytne.Server.Controllers
 {
@@ -11,6 +12,8 @@ namespace Pobytne.Server.Controllers
 	public class ModuleController : ControllerBase
 	{
 		private ModuleService _moduleService;
+		public const EPermition permition = EPermition.Module;
+
 		public ModuleController(ModuleService moduleService)
 		{
 			_moduleService = moduleService;
