@@ -1,4 +1,5 @@
 ﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
 using Pobytne.Client.Authentication;
 using Pobytne.Shared.Authentication;
 
@@ -8,11 +9,12 @@ namespace Pobytne.Client.Services
     {
         private readonly ILocalStorageService _storageService;
         private readonly PobytneService _pobytneService;
-
-        public AuthenticationService(ILocalStorageService storageService, PobytneService pobytneService)
+        private IServiceProvider sp;
+        public AuthenticationService(ILocalStorageService storageService, PobytneService pobytneService, IServiceProvider sp/* AuthenticationStateProvider authenticationStateProvider*/)
         {
             _storageService = storageService;
             _pobytneService = pobytneService;
+            this.sp = sp;
         }
         public async Task<Task> Login(LoginRequest logRequest)
         {
@@ -21,11 +23,11 @@ namespace Pobytne.Client.Services
             {
                 return Task.FromResult(logResponse);
             }
-            if(logResponse is UserAccount user)
+            if (logResponse is UserAccount user)
             {
                 await SaveUserAccount(user);
-                var customAuthStateProvider = new CustomAuthenticationStateProvider(this);
-                customAuthStateProvider.UpdateAuthenticationState();
+                // var customAuthStateProvider = new CustomAuthenticationStateProvider(this);
+                (sp.GetService<AuthenticationStateProvider>() as CustomAuthenticationStateProvider).UpdateAuthenticationState();
             }
             return Task.CompletedTask;
         } // update Token
@@ -38,8 +40,9 @@ namespace Pobytne.Client.Services
             if (logResponse is UserAccount user)
             {
                 await SaveUserAccount(user);
-                var customAuthStateProvider = new CustomAuthenticationStateProvider(this);
-                customAuthStateProvider.UpdateAuthenticationState();
+                //var customAuthStateProvider = new CustomAuthenticationStateProvider(this);
+                //customAuthStateProvider.UpdateAuthenticationState();
+                (sp.GetService<AuthenticationStateProvider>() as CustomAuthenticationStateProvider).UpdateAuthenticationState();
                 return true;
             }
             return false;
@@ -48,9 +51,10 @@ namespace Pobytne.Client.Services
         {
             await Revoke();// odhlas ze serveru a odstran ze storage
 
-            var customAuthStateProvider = new CustomAuthenticationStateProvider(this);
-            customAuthStateProvider.UpdateAuthenticationState();// odhlas od klienta
+            //var customAuthStateProvider = new CustomAuthenticationStateProvider(this);
+            (sp.GetService<AuthenticationStateProvider>() as CustomAuthenticationStateProvider).UpdateAuthenticationState();// odhlas od klienta
         }
+
         public async Task Revoke()
         {
             var user = await ReadUserAccount();
@@ -62,16 +66,16 @@ namespace Pobytne.Client.Services
         }
         public async Task<UserAccount?> GetValidUser()
         {
-			var user = await ReadUserAccount();
-            if(user is null) 
+            var user = await ReadUserAccount();
+            if (user is null)
                 return null;
-            if(user.ExpiryTimeStamp < DateTime.UtcNow)
+            if (user.ExpiryTimeStamp < DateTime.UtcNow)
             {
-                if(await Refresh()) return await GetValidUser();// refresh se podaril
+                if (await Refresh()) return await GetValidUser();// refresh se podaril
                 return null;// refresh se nezdaril => odhlas uzivatele
             }
             return user;
-		}
+        }
         public async Task<string> GetToken() // pri vraceni do hlavicky
         {
             var result = string.Empty;
@@ -79,7 +83,7 @@ namespace Pobytne.Client.Services
             var user = await ReadUserAccount();
             if (user != null)
                 result = user.Token;
-  
+
             return result;
         }
         public async Task<TimeSpan> ExpiresIn()
@@ -102,9 +106,9 @@ namespace Pobytne.Client.Services
         }
         private async Task<UserAccount?> ReadUserAccount()
         {
-			var user = await _storageService.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
-			if (user is null) return null;
+            var user = await _storageService.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
+            if (user is null) return null;
             return user;
-		}
+        }
     }
 }
