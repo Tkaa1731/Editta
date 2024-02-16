@@ -38,7 +38,7 @@
     [Parameter]
     [EditorRequired]
     public IListItem? formItem{ get; set; }
-    private FormEnum formType;
+    private EForm formType;
 
     public HxModal myModal = new();
 
@@ -47,19 +47,19 @@
 
     public async Task UpdateForm()
     {
-        formType = FormEnum.Update;
+        formType = EForm.Update;
         await myModal.ShowAsync();
     }
     public async Task InsertForm()
     {
-        formType = FormEnum.Insert;
+        formType = EForm.Insert;
         await myModal.ShowAsync();
     }
-    private async Task HandleHideClick()
+    private void HandleHideClick()
     {
         headerText = "";
         headerStyle = "";
-        await myModal.HideAsync();
+        // await myModal.HideAsync();
     }
     private async Task GetAuthor()
     {
@@ -75,12 +75,12 @@
                 Console.WriteLine("PRBLEM WITH AUTHORIZATION");
         }
     }
-    private async Task  CompleteReq<T>(FormEnum e,T obj)
+    private async Task  CompleteReq<T>(EForm e,T obj)
     {
         object? response = null;
-        if(e == FormEnum.Update)
+        if(e == EForm.Update)
             response = await service.UpdateAsync(obj, moduleWorkplace.Id);
-        else if(e == FormEnum.Insert)
+        else if(e == EForm.Insert)
             response = await service.InsertAsync(obj, moduleWorkplace.Id);
 
         if (response is null || response is ErrorResponse)
@@ -98,7 +98,7 @@
         return;
 
     }
-    private async Task Request(FormEnum request)
+    private async Task Request(EForm request)
     {
         if(formItem is not null)
         {   
@@ -126,7 +126,7 @@
 
             await Task.Delay(1000);
 
-            await HandleHideClick();
+            HandleHideClick();
         }
     }
 //TODO: pri failu obnovit hodnoty // kopie?

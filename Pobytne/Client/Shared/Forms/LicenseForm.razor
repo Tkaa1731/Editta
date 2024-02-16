@@ -8,7 +8,7 @@
                 <HxInputText @bind-Value="license.NameOfOrganization" Label="Name of organization" Type="InputType.Text" />
             </div>
             <div class="col-sm">
-                <HxInputNumber Label="ICO" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="license.ICO" @oninput="ICOChangedHandler" Enabled="formType == FormEnum.Insert" />
+                <HxInputNumber Label="ICO" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="license.ICO" @oninput="ICOChangedHandler" Enabled="formType == EForm.Insert" />
             </div>
             <div class="col-sm">
                 <HxInputNumber Label="License Number" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="@license.ICO" Enabled="false"/>
@@ -72,14 +72,14 @@
     [Parameter]
     public License? license{ get; set; }
     [Parameter]
-    public FormEnum formType { get; set; }
+    public EForm formType { get; set; }
     [Parameter]
-    public EventCallback<FormEnum> OnValidSubmit { get; set; }
+    public EventCallback<EForm> OnValidSubmit { get; set; }
     private string ButtonText
     {
         get
         {
-            if (formType == FormEnum.Insert) return "Insert";
+            if (formType == EForm.Insert) return "Insert";
             return "Update";
         }
     }

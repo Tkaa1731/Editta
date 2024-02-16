@@ -8,7 +8,7 @@ namespace Pobytne.Data.Tables
     public class ModuleTable
     {
 
-        public async Task<IEnumerable<Module>> GetAll(object conditions)
+        public async Task<IEnumerable<Module>> GetAll(object condition)
         {
             using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
             {
@@ -17,10 +17,23 @@ namespace Pobytne.Data.Tables
                                JOIN S_LoginUser c ON m.Kdo = c.IDLogin
                                WHERE m.CisloLicence = @CisloLicence;";
 
-                return await cnn.QueryAsync<Module>(sql,conditions);
+                return await cnn.QueryAsync<Module>(sql,condition);
             }
-        }
-        public async Task<Module?> GetById(int id)
+		}
+		public async Task<IEnumerable<Module>> GetByUser(int userId)
+		{
+			using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+			{
+				string sql = @"SELECT m.*
+                                FROM S_LoginUser l
+                                JOIN S_Opravneni o ON o.IDLogin = l.IDLogin
+                                JOIN S_Moduly m ON m.IDModulu = o.IDModulu
+                                WHERE l.IDLogin  = @IDLogin;";
+				var condition = new { IDLogin = userId };
+				return await cnn.QueryAsync<Module>(sql, condition);
+			}
+		}
+		public async Task<Module?> GetById(int id)
         {
             using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
             {

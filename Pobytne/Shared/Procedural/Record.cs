@@ -1,4 +1,5 @@
 ﻿using Pobytne.Shared.Struct;
+using Pobytne.Shared.Struct.RecordType;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

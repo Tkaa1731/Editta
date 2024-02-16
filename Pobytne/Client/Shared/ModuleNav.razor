@@ -1,6 +1,6 @@
-﻿<div style="position: absolute; top:0;left:0; width: 100%; z-index:1500 ; display: flex;flex-direction: column; align-items: center;">
+﻿<div style="position: absolute; top:0;left:0; width: 100%; display: flex;flex-direction: column; align-items: center;">
 	<nav class="navbar navbar-expand-lg p-0">
-		<div class="collapse dark" style="border-radius: 0 0 10px 10px;" id="menuCollapse">
+		<div class="collapse dark" style="border-radius: 0 0 10px 10px; z-index:1500 ; " id="menuCollapse">
 			<ul class="navbar-nav mr-auto">
 				<li class="nav-item">
 					<a class="icon-link nav-link text-white" href=@($"{idModule}/Records")>
@@ -67,7 +67,7 @@
 			</ul>
 		</div>
 	</nav>
-	<div style="display: flex; justify-content: space-evenly;">
+	<div style="display: flex; justify-content: space-evenly; z-index:1500;">
 		<a data-bs-toggle="collapse" href="#menuCollapse" role="button" aria-expanded="false" aria-controls="menuCollapse">
 			<div class="dark" style="padding-left:25px; padding-right: 25px; width: fit-content;border-radius: 0 0 10px 10px;">
 					<HxIcon Icon="@BootstrapIcon.ThreeDots" />
@@ -91,18 +91,6 @@
 	}
 
 </style>
-@* <HxNavbar Color="ThemeColor.Dark">
-	<HxNavbarCollapse>
-		<HxNav CssClass="me-auto mb-2 mb-lg-0">
-			<HxNavLink Href=@($"{idModule}/Records")>Evidence</HxNavLink>
-			<HxNavLink Href=@($"{idModule}/Clients")>Klienti</HxNavLink>
-			<HxNavLink Href=@($"{idModule}/Contracts")>Smlouvy</HxNavLink>
-			<HxNavLink Href=@($"{idModule}/CashRegister")>Pokladna</HxNavLink>
-			<HxNavLink Href=@($"{idModule}/Settings")>Nastavení</HxNavLink>
-			<HxNavLink Href=@($"{idModule}/Reports")>Souhrny</HxNavLink>
-		</HxNav>
-	</HxNavbarCollapse>
-</HxNavbar> *@
 @code {
 	[Parameter]
 	[EditorRequired]

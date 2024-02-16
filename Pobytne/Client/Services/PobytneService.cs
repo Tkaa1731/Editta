@@ -34,10 +34,10 @@ namespace Pobytne.Client.Services
 
             if(ModuleId is not null)
             {
-                if (_httpClient.DefaultRequestHeaders.Contains("module-id"))
-                    _httpClient.DefaultRequestHeaders.Remove("module-id");// pokud existuje tak ji odstranim
+                if (_httpClient.DefaultRequestHeaders.Contains("X-module-id"))
+                    _httpClient.DefaultRequestHeaders.Remove("X-module-id");// pokud existuje tak ji odstranim
 
-                _httpClient.DefaultRequestHeaders.Add("module-id", ModuleId.ToString());
+                _httpClient.DefaultRequestHeaders.Add("X-module-id", ModuleId.ToString());
             }
         }
 
@@ -134,13 +134,19 @@ namespace Pobytne.Client.Services
 
             return await SendAsyncAuthorizedHandler<int>(requestMessage);
 		}
+		public async Task<object?> GetFilteredReports<T,P>(T obj, int ModuleId)
+		{
+			var request = $"/{GetControler(typeof(P))}/Filtered";
 
-        public async Task<object?> InsertAsync<T>(T obj, int ModuleId)
+			await UpdateHeader(ModuleId);
+
+			return await PostFilterAsyncAuthorizedHandler<T,P>(request, obj);
+		}
+		public async Task<object?> InsertAsync<T>(T obj, int ModuleId)
         {
             var request = $"/{GetControler(typeof(T))}/Insert";
 
             await UpdateHeader(ModuleId);
-
 
             return await PostAsyncAuthorizedHandler(request, obj);
         }
@@ -149,7 +155,6 @@ namespace Pobytne.Client.Services
             var request = $"/{GetControler(typeof(T))}/Update";
 
             await UpdateHeader(ModuleId);
-
 
             return await PostAsyncAuthorizedHandler(request, obj);
         }
@@ -181,6 +186,35 @@ namespace Pobytne.Client.Services
                     await UpdateHeader();
 					return await PostAsyncAuthorizedHandler(request,obj);// Pokud se podari refresh posli dotaz znovu
                 }
+			}
+
+			var errorResponse = new ErrorResponse
+			{
+				StatusCode = (int)responseStatusCode,
+				ErrorMessage = "HTTP request failed with status code " + responseStatusCode
+			};
+			return errorResponse;
+		}
+		private async Task<object?> PostFilterAsyncAuthorizedHandler<T,P>(string request, T obj)
+		{
+			var response = await _httpClient.PostAsJsonAsync(request, obj);
+
+			var responseStatusCode = response.StatusCode;
+			var message = response.Headers.WwwAuthenticate.ToString();
+
+			if (responseStatusCode == HttpStatusCode.OK)
+            {
+				var responseBody = await response.Content.ReadAsStringAsync();
+			    return JsonConvert.DeserializeObject<IEnumerable<P>>(responseBody);
+            }
+			else if (responseStatusCode == HttpStatusCode.Unauthorized && message.Contains("invalid_token") && message.Contains("The access token expired"))
+			{
+				var auth = new AuthenticationService(_storageService, this);
+				if (await auth.Refresh())
+				{
+					await UpdateHeader();
+					return await PostFilterAsyncAuthorizedHandler<T,P>(request, obj);// Pokud se podari refresh posli dotaz znovu
+				}
 			}
 
 			var errorResponse = new ErrorResponse

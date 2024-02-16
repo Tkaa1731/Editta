@@ -1,10 +1,180 @@
 ﻿@page "/{idModule}/EvidenceReports"
+@inject PobytneService _service
+@inject ExcelExportService _excelService
+@inject AuthenticationService _authService
 
 <ModuleNav idModule="@idModule"></ModuleNav>
 
+<div class="row">
+	<div class="col">
 
+		<HxListLayout TFilterModel="HxListLayout.NoFilter">
+			<TitleTemplate>
+				Souhrny evidence <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1 fs-6">@reportsList.Count</HxBadge>
+			</TitleTemplate>
+			<DataTemplate>
+				<HxGrid @ref="grid" 
+						TItem="Evidence"
+						DataProvider="GetGridData"
+						PageSize="20"
+						Responsive="true"
+						>
+					<Columns>
+						<HxGridColumn HeaderText="Id" ItemTextSelector="evidence => evidence.Id.ToString()"/>
+						<HxGridColumn HeaderText="Datum" ItemTextSelector="evidence => evidence.InteractionDate.ToShortDateString()" SortKeySelector="evidence => evidence.InteractionDate" />
+						<HxGridColumn HeaderText="Název položky" ItemTextSelector="evidence => evidence.RecordName" SortKeySelector="evidence => evidence.RecordName"/>
+						<HxGridColumn HeaderText="Popis" ItemTextSelector="evidence => evidence.InteractionDescription" />
+						<HxGridColumn HeaderText="Kusy" ItemTextSelector="evidence => evidence.Quantity.ToString()" />
+						<HxGridColumn HeaderText="Dospělí" ItemTextSelector="evidence => evidence.Adult.ToString()" />
+						<HxGridColumn HeaderText="Dítě" ItemTextSelector="evidence => evidence.Child.ToString()" />
+						<HxGridColumn HeaderText="Uživatel" ItemTextSelector="evidence => evidence.CustomerName" SortKeySelector="evidence => evidence.CustomerName"/>
+						<HxGridColumn HeaderText="Změnil" ItemTextSelector="evidence => evidence.CreationUserName" SortKeySelector="evidence => evidence.CreationUserName"/>
+						<HxGridColumn HeaderText="Změněno" ItemTextSelector="evidence => evidence.CreationDate.ToString()" SortKeySelector="evidence => evidence.CreationDate"/>
+					</Columns>
+				</HxGrid>
+			</DataTemplate>
+		</HxListLayout>
+
+	</div>
+	<div class="col-4" style="max-width:500px">
+		<div class="p-4 border rounded mb-3">
+			<div class="row">
+				<h4 class="col">Kusy</h4>
+				<h4 class="col">0</h4>
+				<h4 class="col">@reportsList.Sum(r=>r.Quantity)</h4>
+			</div>			
+			<div class="row">
+				<h4 class="col">Dospělí</h4>
+				<h4 class="col">0</h4>
+				<h4 class="col">@reportsList.Sum(r=>r.Adult)</h4>
+			</div>			
+			<div class="row">
+				<h4 class="col">Dítě</h4>
+				<h4 class="col">0</h4>
+				<h4 class="col">@reportsList.Sum(r=>r.Child)</h4>
+			</div>
+		</div>
+		<ReportFilter Filter="filter" OnFilterSubmit="ApplyFilter" OnExcelTransmit="async()=>await _excelService.ExportData(reportsList)" ExcelEnable="@(reportsList.Count > 0)">
+
+@*More Filter *@
+			<HxCheckbox @bind-Value="moreFilters" Text="Dalsi fitry" />
+			<div>
+				<HxInputText Label="Uzivatel" Enabled="false" InputCssClass="@(moreFilters?"bg-white":"")" @bind-Value="clientName">
+					<InputGroupEndTemplate>
+						<HxButton Enabled="moreFilters" Text="" Color="ThemeColor.Secondary" Outline="true" Icon="BootstrapIcon.Search" OnClick="async()=>await clientsModal.ShowAsync()" />
+					</InputGroupEndTemplate>
+				</HxInputText>
+				<HxSelect TItem="Module"
+						  TValue="int?"
+						  Label="Modul"
+						  Data="moduleList"
+						  @bind-Value="filter.ModuleId"
+						  Nullable="false"
+						  TextSelector="@(m => m.Name)"
+						  ValueSelector="@(m => m.Id)" 
+						  Enabled="moreFilters"/>
+			</div>
+
+			
+		</ReportFilter>
+
+
+	</div>
+</div>
+<HxModal @ref="clientsModal" Centered=true Title="Klienti" Backdrop="ModalBackdrop.Static" Size="ModalSize.Large">
+	<BodyTemplate>
+		<ClientList Editable="false" @bind-Value="selectedClient"/>
+	</BodyTemplate>
+	<FooterTemplate>
+		<HxButton Text="Potvrdit" OnClick="async()=>await clientsModal.HideAsync()" Color="ThemeColor.Primary" />
+	</FooterTemplate>
+</HxModal>
+<style>
+	div.dark {
+		background-color: #0a1725;
+		color: #fff;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	}
+</style>
 @code {
-    [EditorRequired]
-    [Parameter]
-    public string idModule { get; set; } = "-1";
+	[EditorRequired]
+	[Parameter]
+	public string idModule { get; set; } = "-1";
+	[CascadingParameter]
+	private ModuleWorkplace moduleWorkplace { get; set; } = default!;
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationState { get; set; } = default!;
+	private int userId;
+	/// <summary>
+	///  Properties
+	/// </summary>
+	public HxGrid<Evidence> grid = new();
+	private List<Evidence> reportsList = [];
+	private List<Module> moduleList = [];
+
+	private HxModal clientsModal = new();
+
+	private bool moreFilters = false;
+
+	private IListItem? selectedClient { get; set; }
+	private string clientName { get => (selectedClient is null) ? "" : selectedClient.Name; set{} }// jenom pro TextInput
+
+	private EvidenceFilter filter = new()
+	{
+		ModuleId = null,// change
+		ClientId = null,
+		RecordId = null,
+		From = DateTime.Today,
+		To = DateTime.Today.AddDays(1),
+		OSPOD = string.Empty,
+		ContractType = null
+	};
+	/// <summary>
+	/// Functions
+	/// </summary>
+	protected override async void OnInitialized()
+	{
+		moduleWorkplace.ModuleId = idModule;
+
+		var user = await _authService.GetValidUser();
+		userId = user!.User.Id;
+
+		var response = await _service.GetAllAsync<Module>($"ModulesOfUser?userId={userId}", moduleWorkplace.Id);
+		if (response is null)
+			Console.WriteLine($"NO RESPONSE");
+		else if (response is ErrorResponse response1)
+			Console.WriteLine($"{response1.ErrorMessage}");
+		else if (response is List<Module> list)
+		{
+			moduleList = list;
+			filter.ModuleId = list.FirstOrDefault()?.Id;
+		}
+
+		await ApplyFilter(filter);
+	}
+	private Task<GridDataProviderResult<Evidence>> GetGridData(GridDataProviderRequest<Evidence> request) => Task.FromResult(request.ApplyTo(reportsList));
+
+	private async Task ApplyFilter(IFilterReport _filter)
+	{
+		if(_filter is EvidenceFilter f)
+		{
+			f.ClientId = selectedClient?.Id;
+
+			var response = await _service.GetFilteredReports<EvidenceFilter,Evidence>(f,moduleWorkplace.Id);
+
+			if (response is null)
+				Console.WriteLine($"NO RESPONSE");
+			else if (response is ErrorResponse response1)
+				Console.WriteLine($"{response1.ErrorMessage}");
+			else if (response is List<Evidence> list)
+			{
+				reportsList = list;
+				await grid.RefreshDataAsync();
+			}
+		}
+	}
+	private async Task OnExcelTransmitHandler()
+	{
+		
+	}
 }

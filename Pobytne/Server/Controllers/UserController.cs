@@ -1,14 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AuthRequirementsData.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pobytne.Server.Service;
-using Pobytne.Shared.Authentication;
 using Pobytne.Shared.Procedural;
 using Pobytne.Shared.Struct;
 
 
 namespace Pobytne.Server.Controllers
 {
-	[Route("User")]
+    [Route("User")]
     [ApiController]
     [Authorize]
     public class UserController : ControllerBase
@@ -21,6 +21,7 @@ namespace Pobytne.Server.Controllers
             _userService = userService;
         }
         [HttpPost]
+        [PermissionAuthorize(permition, EAccess.FullAccess)]
         [Route("Update")]
         public async Task<IActionResult> Update([FromBody]User updateUser) 
         {
@@ -43,6 +44,7 @@ namespace Pobytne.Server.Controllers
         }
 
         [HttpGet]
+        [PermissionAuthorize(permition, EAccess.ReadOnly)]
         [Route("UsersList")]
         public ActionResult<IEnumerable<User>> GetByLicOrMod([FromQuery]int licenseNumber = -1, [FromQuery]int userOfModule = -1)
         {
@@ -55,6 +57,7 @@ namespace Pobytne.Server.Controllers
         }
 
         [HttpGet]
+        [PermissionAuthorize(permition, EAccess.ReadOnly)]
         [Route("GetRest")]//GetRest?moduleId={module}"
         public ActionResult<IEnumerable<User>> GetRest([FromQuery] int moduleId)
         {
@@ -62,6 +65,7 @@ namespace Pobytne.Server.Controllers
         }
 
         [HttpGet]
+        [PermissionAuthorize(permition, EAccess.ReadOnly)]
         [Route("{id}")]
         public ActionResult<User> Get(int id)
         {
@@ -79,12 +83,14 @@ namespace Pobytne.Server.Controllers
             }
         }
         // DELETE api/<ItemsController>/5
+        [PermissionAuthorize(permition, EAccess.FullAccess)]
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
         }
         // POST api/<ItemsController>
         [HttpPost]
+        [PermissionAuthorize(permition, EAccess.FullAccess)]
         [Route("Insert")]
         public async Task<IActionResult> Insert([FromBody] User insertUser)
         {

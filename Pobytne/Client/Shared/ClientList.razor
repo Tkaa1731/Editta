@@ -1,0 +1,36 @@
+﻿@inject PobytneService _service
+	<ListCustom ListItems="AllClients" selectedItemChanged="HandleSelectedDataItemChanged" selectedItem="Value" PageSize="PageSize" Editable=Editable />
+@code {
+	[CascadingParameter]
+	private ModuleWorkplace moduleWorkplace { get; set; } = default!;
+	[Parameter]
+	public bool Editable { get; set; } = true;
+	[Parameter]
+	public required IListItem Value { get; set; }
+	[Parameter]
+	public EventCallback<IListItem?> ValueChanged { get; set; }
+	[Parameter]
+	public int PageSize { get; set; } = 10;
+
+	private List<IListItem> AllClients = [];
+
+	protected override async Task OnInitializedAsync()
+	{
+		var response = await _service.GetAllAsync<Client>($"ClientsList?moduleNumber={moduleWorkplace.Id}", moduleWorkplace.Id);
+		List<Client> clients = new();
+		if (response is null)
+			Console.WriteLine($"NO RESPONSE");
+		else if (response is ErrorResponse response1)
+			Console.WriteLine($"{response1.ErrorMessage}");
+		else if (response is List<Client> list)
+			clients = list;
+
+		if (clients.Count > 0)
+			AllClients = clients.Where(c => c.Id != 0).Select(c => c as IListItem).ToList();
+	}
+	private async Task HandleSelectedDataItemChanged(IListItem selection)
+	{
+		Value = selection;
+		await ValueChanged.InvokeAsync(Value);
+	}
+}

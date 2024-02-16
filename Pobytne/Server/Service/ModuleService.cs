@@ -17,11 +17,15 @@ namespace Pobytne.Server
             _permitionTable = permition;
             _moduleTable = module;
         }
-        public async Task<IEnumerable<Module>> GetModulesByLicense(int licenseNumber)
+		public async Task<IEnumerable<Module>> GetModulesByLicense(int licenseNumber)
 		{
-			return await _moduleTable.GetAll(new{ CisloLicence = licenseNumber});
+			return await _moduleTable.GetAll(new { CisloLicence = licenseNumber });
 		}
-        public async Task<int> Update(Module updateModule)
+		public async Task<IEnumerable<Module>> GetModulesByUser(int userId)
+		{
+			return await _moduleTable.GetByUser(userId);
+		}
+		public async Task<int> Update(Module updateModule)
         {
             return await _moduleTable.Update(updateModule);
         }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Pobytne.Shared.Procedural;
 using Dapper.Transaction;
 using Dapper;
+using Pobytne.Shared.Procedural.FilterReports;
 
 namespace Pobytne.Data.Tables.InteractionTables
 {
@@ -28,7 +29,46 @@ namespace Pobytne.Data.Tables.InteractionTables
                 }
             throw new Exception($"Closed connection for exec '{cashRegisterSQL}'");
         }
-        public DynamicParameters GetParamsForTrans(InteractionRecordItem record, bool delete)
+		public async Task<IEnumerable<CashRegister>> SelectByCondition(DynamicParameters parameters, string sqlCondition)
+		{
+			using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))// TODO: Odstranit Top 20
+			{
+				string sql = @" SELECT TOP 20 p.*,i.NazevInterakce, i.IDUzivatele, i.Datum, i.IDModulu, i.IDTypuPlatby, z.Nazev,u.JmenoUzivatele,l.JmenoUser AS CreationUserName
+								FROM P_Pokladna p
+								JOIN P_Interakce i ON i.IDInterakce = p.IDInterakce
+								JOIN S_Uzivatele u ON i.IDUzivatele = u.IDUzivatele	
+								JOIN S_Zaznamy z ON p.IDZaznamu = z.IDZaznamu
+								JOIN S_LoginUser l ON l.IDLogin = p.Kdo ";
+				sql += sqlCondition;
+				return await cnn.QueryAsync<CashRegister>(sql, parameters);
+			}
+		}
+		public DynamicParameters HandleCondition(CashRegisterFilter filter, out string condition)
+		{
+			var result = new DynamicParameters();
+			var strBuilder = new StringBuilder();
+			strBuilder.Append(" WHERE ");
+
+			result.Add("@DateStart", filter.From);
+			result.Add("@DateEnd", filter.To);
+			strBuilder.Append(" Datum BETWEEN @DateStart AND @DateEnd ");
+
+				if (filter.ModuleId is not null && filter.ModuleId > 0)
+				{
+					result.Add("@IDMudulu", filter.ModuleId);
+					strBuilder.Append(" AND i.IDModulu = @IDMudulu ");
+				}
+				if (filter.ClientId is not null && filter.ClientId > 0)
+				{
+					result.Add("@IDUzivatele", filter.ClientId);
+					strBuilder.Append(" AND i.IDUzivatele = @IDUzivatele ");
+				}
+
+			strBuilder.Append(';');
+			condition = strBuilder.ToString();
+			return result;
+		}
+		public DynamicParameters GetParamsForTrans(InteractionRecordItem record, bool delete)
         {
             var result = new DynamicParameters();
             object? template = new
