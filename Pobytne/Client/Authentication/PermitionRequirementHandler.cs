@@ -9,7 +9,7 @@ namespace Pobytne.Client.Authentication
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermitionRequirement requirement)
         {
             var Resource = context.Resource as (EPermition, EAccess,string)?;
-            if(Resource is not null)
+            if(Resource is not null)  
             {
                 Claim? permitions;
                 if (Resource.Value.Item3 == "-1")
@@ -19,7 +19,7 @@ namespace Pobytne.Client.Authentication
 
                 if (permitions == null)
                 {
-				    context.Fail(new(this, "Access denied"));
+                    context.Fail(new(this, "Access denied"));
                     return Task.CompletedTask;
                 }
 
