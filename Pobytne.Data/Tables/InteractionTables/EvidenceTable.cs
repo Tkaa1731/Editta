@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Pobytne.Shared.Procedural;
-using System.Security.Policy;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using Dapper.Transaction;
 using Dapper;
+using System.Data.SqlClient;
+using Pobytne.Shared.Procedural.FilterReports;
+using System.Text;
 
 namespace Pobytne.Data.Tables.InteractionTables
 {
-    public class EvidenceTable //P_Evidence
+	public class EvidenceTable //P_Evidence
     {
         public async Task<int> InsUpTran(DynamicParameters param, IDbTransaction tran, IDbConnection cnn)
         {
@@ -30,6 +25,45 @@ namespace Pobytne.Data.Tables.InteractionTables
                 }
             throw new Exception($"Closed connection for exec '{evidenceSQL}'");
         }
+        public async Task<IEnumerable<Evidence>> SelectByCondition(DynamicParameters parameters, string sqlCondition)
+        {
+			using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString())) // TODO: odstranit omezeni TOP 15
+			{
+				string sql = @" SELECT TOP 20 e.*, i.NazevInterakce, i.IDUzivatele, i.Datum, i.IDModulu, u.JmenoUzivatele, z.Nazev, l.JmenoUser AS CreationUserName
+                                FROM P_Evidence e
+                                JOIN P_Interakce i ON i.IDInterakce = e.IDInterakce
+                                JOIN S_Uzivatele u ON i.IDUzivatele = u.IDUzivatele	
+                                JOIN S_Zaznamy z ON e.IDZaznamu = z.IDZaznamu
+                                JOIN S_LoginUser l ON l.IDLogin = e.Kdo ";
+                sql += sqlCondition;
+				return await cnn.QueryAsync<Evidence>(sql, parameters);
+			}
+		}
+        public DynamicParameters HandleCondition(EvidenceFilter filter, out string condition)
+        {
+			var result = new DynamicParameters();
+            var strBuilder = new StringBuilder();
+            strBuilder.Append(" WHERE ");
+
+            result.Add("@DateStart", filter.From);
+            result.Add("@DateEnd", filter.To);
+            strBuilder.Append(" Datum BETWEEN @DateStart AND @DateEnd ");
+
+            if(filter.ModuleId is not null && filter.ModuleId > 0)
+            {
+				result.Add("@IDMudulu", filter.ModuleId);
+				strBuilder.Append(" AND i.IDModulu = @IDMudulu ");
+			}
+			if (filter.ClientId is not null && filter.ClientId > 0)
+			{
+				result.Add("@IDUzivatele", filter.ClientId);
+				strBuilder.Append(" AND i.IDUzivatele = @IDUzivatele ");
+			}
+
+			strBuilder.Append(';');
+			condition = strBuilder.ToString();
+            return result;
+		}
         public DynamicParameters GetParamsForTrans(InteractionRecordItem record, bool delete)
         {
             var result = new DynamicParameters();

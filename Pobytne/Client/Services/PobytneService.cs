@@ -25,29 +25,29 @@ namespace Pobytne.Client.Services
         }
         private async Task UpdateHeader(int? ModuleId = null)
         {
-            var service = new AuthenticationService(_storageService, this, sp);
+            var service = new AuthenticationService(_storageService,this, sp);
             var token = await service.GetToken();
             if (!token.IsNullOrEmpty())
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             if (ModuleId is not null)
             {
-                if (_httpClient.DefaultRequestHeaders.Contains("module-id"))
-                    _httpClient.DefaultRequestHeaders.Remove("module-id");// pokud existuje tak ji odstranim
+                if (_httpClient.DefaultRequestHeaders.Contains("X-module-id"))
+                    _httpClient.DefaultRequestHeaders.Remove("X-module-id");// pokud existuje tak ji odstranim
 
-                _httpClient.DefaultRequestHeaders.Add("module-id", ModuleId.ToString());
+                _httpClient.DefaultRequestHeaders.Add("X-module-id", ModuleId.ToString());
             }
         }
 
-        private IServiceProvider sp;
-        public PobytneService(HttpClient httpClient, ILocalStorageService localStorage, IServiceProvider sp)
-        {
-            _httpClient = httpClient;
-            _storageService = localStorage;
-            this.sp = sp;
-        }
-        //Allow UnAuthorized
-        public async Task<object?> LoginAsync(LoginRequest obj)
+		private IServiceProvider sp;
+		public PobytneService(HttpClient httpClient, ILocalStorageService localStorage, IServiceProvider sp)
+		{
+			_httpClient = httpClient;
+			_storageService = localStorage;
+			this.sp = sp;
+		}
+		//Allow UnAuthorized
+		public async Task<object?> LoginAsync(LoginRequest obj)
         {
             var response = await _httpClient.PostAsJsonAsync($"/Auth/Login", obj);
 
@@ -133,14 +133,20 @@ namespace Pobytne.Client.Services
             await UpdateHeader(ModuleId);
 
             return await SendAsyncAuthorizedHandler<int>(requestMessage);
-        }
+		}
+		public async Task<object?> GetFilteredReports<T,P>(T obj, int ModuleId)
+		{
+			var request = $"/{GetControler(typeof(P))}/Filtered";
 
-        public async Task<object?> InsertAsync<T>(T obj, int ModuleId)
+			await UpdateHeader(ModuleId);
+
+			return await PostFilterAsyncAuthorizedHandler<T,P>(request, obj);
+		}
+		public async Task<object?> InsertAsync<T>(T obj, int ModuleId)
         {
             var request = $"/{GetControler(typeof(T))}/Insert";
 
             await UpdateHeader(ModuleId);
-
 
             return await PostAsyncAuthorizedHandler(request, obj);
         }
@@ -149,7 +155,6 @@ namespace Pobytne.Client.Services
             var request = $"/{GetControler(typeof(T))}/Update";
 
             await UpdateHeader(ModuleId);
-
 
             return await PostAsyncAuthorizedHandler(request, obj);
         }
@@ -162,26 +167,55 @@ namespace Pobytne.Client.Services
             await UpdateHeader(ModuleId);
 
             return await SendAsyncAuthorizedHandler<bool>(requestMessage);
-        }
-        // Private Authenticitation Handlers
-        private async Task<object?> PostAsyncAuthorizedHandler<T>(string request, T obj)
-        {
-            var response = await _httpClient.PostAsJsonAsync(request, obj);
+		}
+		// Private Authenticitation Handlers
+		private async Task<object?> PostAsyncAuthorizedHandler<T>(string request, T obj)
+		{
+			var response = await _httpClient.PostAsJsonAsync(request, obj);
 
             var responseStatusCode = response.StatusCode;
             var message = response.Headers.WwwAuthenticate.ToString();
 
-            if (responseStatusCode == HttpStatusCode.OK)
-                return Task.CompletedTask;
-            else if (responseStatusCode == HttpStatusCode.Unauthorized && message.Contains("invalid_token") && message.Contains("The access token expired"))
+			if (responseStatusCode == HttpStatusCode.OK)
+				return Task.CompletedTask;
+			else if (responseStatusCode == HttpStatusCode.Unauthorized && message.Contains("invalid_token") && message.Contains("The access token expired"))
+			{
+				var auth = new AuthenticationService(_storageService, this, sp);
+				if (await auth.Refresh())
+				{
+					await UpdateHeader();
+					return await PostAsyncAuthorizedHandler(request, obj);// Pokud se podari refresh posli dotaz znovu
+				}
+			}
+
+			var errorResponse = new ErrorResponse
+			{
+				StatusCode = (int)responseStatusCode,
+				ErrorMessage = "HTTP request failed with status code " + responseStatusCode
+			};
+			return errorResponse;
+		}
+		private async Task<object?> PostFilterAsyncAuthorizedHandler<T,P>(string request, T obj)
+		{
+			var response = await _httpClient.PostAsJsonAsync(request, obj);
+
+			var responseStatusCode = response.StatusCode;
+			var message = response.Headers.WwwAuthenticate.ToString();
+
+			if (responseStatusCode == HttpStatusCode.OK)
             {
-                var auth = new AuthenticationService(_storageService, this, sp);
-                if (await auth.Refresh())
-                {
-                    await UpdateHeader();
-                    return await PostAsyncAuthorizedHandler(request, obj);// Pokud se podari refresh posli dotaz znovu
-                }
+				var responseBody = await response.Content.ReadAsStringAsync();
+			    return JsonConvert.DeserializeObject<IEnumerable<P>>(responseBody);
             }
+			else if (responseStatusCode == HttpStatusCode.Unauthorized && message.Contains("invalid_token") && message.Contains("The access token expired"))
+			{
+				var auth = new AuthenticationService(_storageService, this, sp);
+				if (await auth.Refresh())
+				{
+					await UpdateHeader();
+					return await PostFilterAsyncAuthorizedHandler<T,P>(request, obj);// Pokud se podari refresh posli dotaz znovu
+				}
+			}
 
             var errorResponse = new ErrorResponse
             {
@@ -197,15 +231,15 @@ namespace Pobytne.Client.Services
             var responseStatusCode = response.StatusCode;
             var message = response.Headers.WwwAuthenticate.ToString();
 
-            if (responseStatusCode == HttpStatusCode.OK)
-            {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<T>(responseBody);
-            }
-            else if (responseStatusCode == HttpStatusCode.Unauthorized && message.Contains("invalid_token") && message.Contains("The token expired"))
-            {
-                var auth = new AuthenticationService(_storageService, this, sp);
-                if (await auth.Refresh())
+			if (responseStatusCode == HttpStatusCode.OK)
+			{
+				var responseBody = await response.Content.ReadAsStringAsync();
+				return JsonConvert.DeserializeObject<T>(responseBody);
+			}
+			else if (responseStatusCode == HttpStatusCode.Unauthorized && message.Contains("invalid_token") && message.Contains("The token expired"))
+			{
+				var auth = new AuthenticationService(_storageService, this, sp);
+				if (await auth.Refresh())
                 {
                     var newRequest = new HttpRequestMessage(requestMessage.Method, requestMessage.RequestUri);
                     await UpdateHeader();

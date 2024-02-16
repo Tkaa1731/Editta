@@ -58,15 +58,15 @@
 	public IActivity_Record? Activity { get; set; }
     [EditorRequired]
     [Parameter]
-    public FormEnum formType { get; set; }
+    public EForm formType { get; set; }
     [EditorRequired]
     [Parameter]
-    public EventCallback<FormEnum> OnValidSubmit { get; set; }
+    public EventCallback<EForm> OnValidSubmit { get; set; }
     private string ButtonText
     {
         get
         {
-            if (formType == FormEnum.Insert) return "Insert";
+            if (formType == EForm.Insert) return "Insert";
             return "Update";
         }
     }

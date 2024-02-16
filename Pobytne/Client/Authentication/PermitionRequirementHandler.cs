@@ -8,8 +8,8 @@ namespace Pobytne.Client.Authentication
     {
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermitionRequirement requirement)
         {
-            var Resource = context.Resource as (EPermition, EAccess, string)?;
-            if (Resource is not null)
+            var Resource = context.Resource as (EPermition, EAccess,string)?;
+            if(Resource is not null)  
             {
                 Claim? permitions;
                 if (Resource.Value.Item3 == "-1")
@@ -26,7 +26,7 @@ namespace Pobytne.Client.Authentication
                 string permitionString = permitions.Value;
 
 
-                if (requirement.GetAccess((Resource.Value.Item1, Resource.Value.Item2), permitionString))
+                if (requirement.GetAccess((Resource.Value.Item1,Resource.Value.Item2), permitionString))
                 {
                     context.Succeed(requirement);
                 }

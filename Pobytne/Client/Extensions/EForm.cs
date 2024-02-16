@@ -1,6 +1,6 @@
 ﻿namespace Pobytne.Client.Extensions
 {
-    public enum FormEnum
+    public enum EForm
     {
         Update,Insert
     }

@@ -3,6 +3,7 @@ using Pobytne.Data;
 using Pobytne.Data.Tables;
 using Pobytne.Data.Tables.InteractionTables;
 using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Procedural.FilterReports;
 using Pobytne.Shared.Struct;
 using System.Data;
 
@@ -79,5 +80,15 @@ namespace Pobytne.Server.Service
             
             return result;
         }
-    }
+        public async Task<IEnumerable<CashRegister>> GetFilteredReports(CashRegisterFilter filter)
+        {
+			var condition = _cashTable.HandleCondition(filter, out string SQL_Where);
+			return await _cashTable.SelectByCondition(condition, SQL_Where);
+        }
+		public async Task<IEnumerable<Evidence>> GetFilteredReports(EvidenceFilter filter)
+		{
+			var condition = _evidTable.HandleCondition(filter, out string SQL_Where);
+			return await _evidTable.SelectByCondition(condition, SQL_Where);
+		}
+	}
 }

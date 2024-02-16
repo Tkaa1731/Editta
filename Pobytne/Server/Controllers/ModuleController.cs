@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AuthRequirementsData.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pobytne.Shared.Procedural;
 using Pobytne.Shared.Struct;
@@ -18,12 +19,21 @@ namespace Pobytne.Server.Controllers
 		{
 			_moduleService = moduleService;
 		}
-		[HttpGet]
+        [PermissionAuthorize(permition, EAccess.ReadOnly)]
+        [HttpGet]
 		public async Task<IEnumerable<Module>> Get([FromQuery]int licenseNumber)
         { 
 			return await _moduleService.GetModulesByLicense(licenseNumber);
 		}
-        [HttpPost]
+		[HttpGet]
+		[PermissionAuthorize(permition, EAccess.ReadOnly)]
+        [Route("ModulesOfUser")]
+		public async Task<IEnumerable<Module>> ModulesOfUser(int userId)
+		{
+			return await _moduleService.GetModulesByUser(userId);
+		}
+		[HttpPost]
+		[PermissionAuthorize(permition, EAccess.FullAccess)]
         [Route("Update")]
         public async Task<IActionResult> Update([FromBody] Module updateModule)
         {
@@ -44,16 +54,20 @@ namespace Pobytne.Server.Controllers
                 return StatusCode(500, $"Internal Server Error :{ex.Message}");
             }
         }
+
         // DELETE api/<ItemsController>/5
+        [PermissionAuthorize(permition, EAccess.FullAccess)]
         [HttpDelete("{id}")]
-        //public ActionResult Delete(int id)
-        //{
-        //    var lines = _moduleService.Delete(id).Result;
-        //    if (lines == 1)
-        //        return new A;
-        //}
+        public ActionResult Delete(int id)
+        {
+            var lines = _moduleService.Delete(id).Result;
+            if (lines == 1)
+                return Ok();
+            return BadRequest();
+        }
         // POST api/<ItemsController>
         [HttpPost]
+        [PermissionAuthorize(permition, EAccess.FullAccess)]
         [Route("Insert")]
         public async Task<IActionResult> Insert([FromBody] Module insertModule)
         {

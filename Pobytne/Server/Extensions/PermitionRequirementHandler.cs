@@ -17,7 +17,7 @@ namespace Pobytne.Server.Extensions
 		}
 		protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionAuthorizeAttribute requirement)
         {
-            var module = _httpContextAccessor.HttpContext?.Request.Headers["module-id"];
+            var module = _httpContextAccessor.HttpContext?.Request.Headers["X-module-id"];
             if(module is null)
             {
 				context.Fail(new(this, "Access denied"));

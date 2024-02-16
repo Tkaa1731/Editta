@@ -26,7 +26,8 @@ namespace Pobytne.Server.Controllers
 			return await _licenseService.GetLicenses();
 		}
 		[HttpPost]
-		[Route("Update")]
+        [PermissionAuthorize(permition, EAccess.FullAccess)]
+        [Route("Update")]
 		public async Task<IActionResult> Update([FromBody] License updateLicense)
         {/////////////////
             if (updateLicense is null)
@@ -47,12 +48,14 @@ namespace Pobytne.Server.Controllers
             }
         }
         // DELETE api/<ItemsController>/5
+        [PermissionAuthorize(permition, EAccess.FullAccess)]
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
         }
         // POST api/<ItemsController>
         [HttpPost]
+        [PermissionAuthorize(permition, EAccess.FullAccess)]
         [Route("Insert")]
         public async Task<IActionResult> Insert([FromBody] License insertLicense)
         {

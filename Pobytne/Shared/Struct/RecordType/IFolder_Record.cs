@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pobytne.Shared.Struct
+namespace Pobytne.Shared.Struct.RecordType
 {
     public interface IFolder_Record : ICreation
     {
         string Name { get; set; }
         int Order { get; set; }
-        string Note {  get; set; }
+        string Note { get; set; }
     }
 }

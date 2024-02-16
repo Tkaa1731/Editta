@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using AuthRequirementsData.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pobytne.Server.Service;
 using Pobytne.Shared.Procedural;
@@ -8,6 +8,7 @@ using Pobytne.Shared.Struct;
 namespace Pobytne.Server.Controllers
 {
     [Route("Record")]
+    [Authorize]
     [ApiController]
     public class RecordController : ControllerBase
 	{
@@ -18,22 +19,24 @@ namespace Pobytne.Server.Controllers
         {
             _service = service;
         }
-        [Authorize]
         [HttpGet]
+        [PermissionAuthorize(permition, EAccess.ReadOnly)]
         [Route("RecordsBranch")]
         public async Task<IEnumerable<Record>> GetBranch(int parentId)
         {
             return await _service.GetRecords(parentId);
         }
-        [Authorize]
+
         [HttpGet]
+        [PermissionAuthorize(permition, EAccess.ReadOnly)]
         [Route("RecordsRoot")]
         public async Task<IEnumerable<Record>> GetRoot(int moduleId)
         {
             return await _service.GetRoot(moduleId);
         }
-        [Authorize]
+
         [HttpGet]
+        [PermissionAuthorize(permition, EAccess.ReadOnly)]
         [Route("RecordsMaxDepth")]
         public async Task<int> GetMaxDepth(int moduleId)
         {
