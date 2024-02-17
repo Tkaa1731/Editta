@@ -1,34 +1,50 @@
 ﻿@inject PobytneService _service
-<div class="p-4 border rounded">
 
-	@ChildContent
+	<HxTabPanel InitialActiveTabId="tab_filter"> 
+		<HxTab Title="Filtr" Id="tab_filter" ContentCssClass="p-3 border rounded-bottom border-top-0" TitleCssClass="text-secondary">
+			<Content>
+				@FilterTemplate
+				<DateFilter @bind-Filter="Filter"/>
+@* 				<div style="display:flex; justify-content:center;">
+					<HxButton CssClass="w-50 my-3" Color="ThemeColor.Primary" OnClick="async()=>await OnFilterSubmit.InvokeAsync(Filter)">Potvrdit vyber</HxButton>
+				</div> *@
 
-	<DateFilter @bind-Filter="Filter"/>
-	<div style="display:flex; justify-content:center;">
-		<HxButton CssClass="w-50 my-3" Color="ThemeColor.Primary" OnClick="async()=>await OnFilterSubmit.InvokeAsync(Filter)">Potvrdit vyber</HxButton>
-	</div>
+				<div style="">
+				<HxTreeView TItem="IDirectory"
+							SelectedItemChanged="OnSelect"
+							OnItemExpanded="OnExpanded"
+							Items="@fileSystem"
+							CssClass="border rounded p-2"
+							ItemTitleSelector="@(p => p.Name)"
+							ItemIconSelector="@(p => p.Icon)"
+							ItemChildrenSelector="@(p => p.SubDirectories)" />
+				</div>
 
-	<div style="">
-	<HxTreeView TItem="IDirectory"
-				SelectedItemChanged="OnSelect"
-				OnItemExpanded="OnExpanded"
-				Items="@fileSystem"
-				CssClass="border rounded p-2"
-				ItemTitleSelector="@(p => p.Name)"
-				ItemIconSelector="@(p => p.Icon)"
-				ItemChildrenSelector="@(p => p.SubDirectories)" />
-	</div>
-
-	<div style="display:flex; justify-content:center;">
-		<HxButton CssClass="w-50 my-3" Color="ThemeColor.Primary" OnClick="async()=>{await OnExcelTransmit.InvokeAsync();await Task.Delay(2000);}" Enabled="ExcelEnable">Export do excelu</HxButton>
-	</div>
-</div>
+				<div class="row my-3">
+					<HxButton CssClass="col mx-3" Color="ThemeColor.Primary" OnClick="async()=>await OnFilterSubmit.InvokeAsync(Filter)">Potvrdit vyber</HxButton>
+					<HxButton CssClass="col mx-3" Color="ThemeColor.Primary" OnClick="async()=>{await OnExcelTransmit.InvokeAsync();await Task.Delay(2000);}" Enabled="ExcelEnable">Export do excelu</HxButton>
+				</div>
+			</Content>
+		</HxTab>
+		<HxTab Title="Souhrny" Id="tab_group"  ContentCssClass="p-3 border rounded-bottom border-top-0"  TitleCssClass="text-secondary">
+			<Content>
+				@GroupByTemplate
+				<div style="display:flex; justify-content:center;">
+					<HxButton CssClass="w-50 my-3" Color="ThemeColor.Primary" OnClick="async()=>await OnGroupBySubmit.InvokeAsync()" Enabled="ExcelEnable">Zobrazit souhrny</HxButton>
+				</div>
+			</Content>
+		</HxTab>
+	</HxTabPanel>
 @code {
+	CardSettings customCardSettings => new CardSettings { HeaderCssClass = "bg-transparent" };
 	[CascadingParameter]
 	public ModuleWorkplace moduleWorkplace { get; set; } = new();
 
 	[Parameter]
-	public RenderFragment? ChildContent { get; set; }
+	public RenderFragment? FilterTemplate { get; set; }
+	[Parameter]
+    public RenderFragment? GroupByTemplate { get; set; }
+
 	[Parameter]
 	[EditorRequired]
 	public required IFilterReport Filter { get; set; }
@@ -37,7 +53,9 @@
 	public EventCallback<IFilterReport> OnFilterSubmit { get; set; }
 	[Parameter]
 	[EditorRequired]
-	public EventCallback OnExcelTransmit { get; set; }
+	public EventCallback OnExcelTransmit { get; set; }	
+	[Parameter]
+	public EventCallback OnGroupBySubmit { get; set; }
 	[Parameter]
 	[EditorRequired]
 	public bool ExcelEnable { get; set; }

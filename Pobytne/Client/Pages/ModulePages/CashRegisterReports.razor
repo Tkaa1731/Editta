@@ -1,0 +1,240 @@
+﻿@page "/{idModule}/CashRegisterReports"
+@inject PobytneService _service
+@inject ExcelExportService _csvService
+
+<ModuleNav idModule="@idModule"></ModuleNav>
+
+<div class="row overflow-hidden">
+	<div class="col">
+
+		<HxListLayout TFilterModel="HxListLayout.NoFilter">
+			<TitleTemplate>
+				Souhrny pokladna <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1 fs-6">@reportsList.Count</HxBadge>
+			</TitleTemplate>
+			<DataTemplate>
+				<HxGrid @ref="grid" 
+						TItem="CashRegister"
+						DataProvider="GetGridData"
+						PageSize="20"
+						Responsive="true"
+						ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
+						TableContainerCssClass="h-75 overflow-auto"
+						>
+					<Columns>
+						@if (ShowGroups)
+						{
+							<HxGridColumn HeaderText="Id" ItemTextSelector="cash => cash.Id.ToString()" />
+							<HxGridColumn HeaderText="Název" ItemTextSelector="cash => cash.RecordName" SortKeySelector="cash => cash.RecordName"/>
+							<HxGridColumn HeaderText="Částka" ItemTextSelector="cash => cash.Price.ToString()" SortKeySelector="cash=>cash.Price"/>						
+							<HxGridColumn HeaderText="ÚčetA" ItemTextSelector="cash => cash.AccountA.ToString()" SortKeySelector="cash=>cash.AccountA"/>						
+							<HxGridColumn HeaderText="ÚčetS" ItemTextSelector="cash => cash.AccountS.ToString()" SortKeySelector="cash=>cash.AccountS"/>						
+						}
+						else
+						{							
+							<HxGridColumn HeaderText="Id" ItemTextSelector="cash => cash.Id.ToString()" />
+							<HxGridColumn HeaderText="Datum" ItemTextSelector="cash => cash.InteractionDate.ToShortDateString()" SortKeySelector="cash => cash.InteractionDate" />
+							<HxGridColumn HeaderText="Název položky" ItemTextSelector="cash => cash.RecordName" SortKeySelector="cash => cash.RecordName"/>
+							<HxGridColumn HeaderText="Popis" ItemTextSelector="cash => cash.InteractionDescription" />
+							<HxGridColumn HeaderText="Částka" ItemTextSelector="cash => cash.Price.ToString()" SortKeySelector="cash=>cash.Price"/>
+							<HxGridColumn HeaderText="Uživatel" ItemTextSelector="cash => cash.CustomerName" SortKeySelector="cash => cash.CustomerName"/>
+							<HxGridColumn HeaderText="Změnil" ItemTextSelector="cash => cash.CreationUserName" SortKeySelector="cash => cash.CreationUserName"/>
+							<HxGridColumn HeaderText="Změněno" ItemTextSelector="cash => cash.CreationDate.ToString()" SortKeySelector="cash => cash.CreationDate"/>
+						}
+					</Columns>
+				</HxGrid>
+			</DataTemplate>
+		</HxListLayout>
+
+	</div>
+	<div class="col-4" style="max-width:500px">
+		<div class="p-3 border rounded mb-3" style="text-align:right;">
+			@* Porovnani k pokladne *@
+			<h2>@reportsList.Sum(r => r.Price) Kč</h2>
+		</div>
+		<ReportFilter 
+			Filter="filter" 
+			OnFilterSubmit="ApplyFilter"
+			OnExcelTransmit="async()=>await _csvService.ExportData(reportsList)"
+			OnGroupBySubmit="async()=>{ShowGroups = true;await grid.RefreshDataAsync();}"
+			ExcelEnable="@(reportsList.Count > 0)"
+		>
+			<FilterTemplate>
+				@* Payment Filter *@
+				<HxSelect TItem="Payment"
+						  TValue="int?"
+						  Label="Platba"
+						  Data="paymentList"
+						  @bind-Value="filter.PaymentId"
+						  Nullable="false"
+						  TextSelector="@(p => p.Name)"
+						  ValueSelector="@(p => p.Id)"
+						  NullDataText="Načítání..."
+						  />
+
+				<div class="w-100 pt-3"/>
+				@*Client Filter *@
+				<HxInputText Enabled="false" InputCssClass="bg-white border-right-0" @bind-Value="clientName" Label="Uživatel">
+					<InputGroupEndTemplate>
+						@if (selectedClient is not null)
+						{
+							<HxButton Icon="@BootstrapIcon.XLg" style="color:red;" Color="ThemeColor.Link" OnClick="()=>selectedClient = null" CssClass="border-top border-bottom" />
+						}
+						<HxButton Text="" Color="ThemeColor.Primary" Outline="true" Icon="BootstrapIcon.Search" OnClick="async()=>await clientsModal.ShowAsync()" />
+					</InputGroupEndTemplate>
+				</HxInputText>
+
+			</FilterTemplate>
+			<GroupByTemplate>
+
+				<HxRadioButtonList Label="Souhrny podle:"
+				   TItem="Radio"
+				   TValue="int"
+				   Data="@radioList"
+				   @bind-Value="@selectedRadio"
+				   ItemTextSelector="@(r => r.Name)"
+				   ItemValueSelector="@(r => r.Id)" />
+
+			</GroupByTemplate>
+		</ReportFilter>
+
+
+	</div>
+</div>
+<HxModal @ref="clientsModal" Centered=true Title="Klienti" Backdrop="ModalBackdrop.Static" Size="ModalSize.Large">
+	<BodyTemplate>
+		<ClientList Editable="false" @bind-Value="selectedClient"/>
+	</BodyTemplate>
+	<FooterTemplate>
+		<HxButton Text="Potvrdit" OnClick="async()=>await clientsModal.HideAsync()" Color="ThemeColor.Primary" />
+	</FooterTemplate>
+</HxModal>
+<style>
+	div.dark {
+		background-color: #0a1725;
+		color: #fff;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	}
+	.border-right-0{
+		border-right: none;
+	}
+</style>
+@code {
+	[EditorRequired]
+	[Parameter]
+	public string idModule { get; set; } = "-1";
+	[CascadingParameter]
+	private ModuleWorkplace moduleWorkplace { get; set; } = default!;
+	/// <summary>
+	///  Properties
+	/// </summary>
+	private bool ShowGroups = false;
+	private HxGrid<CashRegister> grid = new();
+	private List<CashRegister> reportsList = [];
+
+	private HxModal clientsModal = new();
+	private List<Payment> paymentList = [];
+
+	private IListItem? selectedClient { get; set; }
+	private string clientName { get => (selectedClient is null) ? "" : selectedClient.Name; set{} }// jenom pro TextInput
+
+	private CashRegisterFilter filter = new()
+	{
+		PaymentId = null,// change
+		ModuleId = null,// change
+		ClientId = null,
+		RecordId = null,
+		From = DateTime.Today,
+		To = DateTime.Today.AddDays(1),
+	};
+
+	private int selectedRadio = 1;
+	private readonly List<Radio> radioList = new() 
+	{ 
+		new() { Id = 1, Name = "Dle položek" }, 
+		new() { Id = 2, Name = "Dle vlastnosti" } 
+	};
+	/// <summary>
+	/// Functions
+	/// </summary>
+	protected override async Task OnInitializedAsync()
+	{
+		moduleWorkplace.ModuleId = idModule;
+		//load payment enum
+		var response = await _service.GetAllAsync<Payment>($"?moduleNumber={moduleWorkplace.Id}", moduleWorkplace.Id);
+
+		if (response is null)
+			Console.WriteLine($"NO RESPONSE");
+		else if (response is ErrorResponse response1)
+			Console.WriteLine($"{response1.ErrorMessage}");
+		else if (response is List<Payment> list)
+		{
+			paymentList = list;
+			filter.PaymentId = list.FirstOrDefault().Id;
+		}
+
+		await ApplyFilter(filter);
+	}
+	private Task<GridDataProviderResult<CashRegister>> GetGridData(GridDataProviderRequest<CashRegister> request)
+	{
+		if(!ShowGroups)
+			return Task.FromResult(request.ApplyTo(reportsList));
+		switch (selectedRadio)
+		{
+			case 1:
+				return Task.FromResult(
+					request.ApplyTo(
+						reportsList.GroupBy(r => r.RecordId)
+						.Select(g =>
+							new CashRegister()
+							{
+								Id = g.Key,
+								RecordName = g.First().RecordName, 
+								Price = g.Sum(r=>r.Price),
+								AccountA = g.First().AccountA,
+								AccountS = g.First().AccountS
+							}
+						)
+					)
+				);
+			default:
+				return Task.FromResult(
+					request.ApplyTo(
+						reportsList.GroupBy(r => r.RecordPropertyId)
+						.Select(g =>
+							new CashRegister()
+							{
+								Id = g.Key,
+								RecordName = g.First().RecordPropertyName,
+								Price = g.Sum(r=>r.Price),
+								AccountA = g.First().AccountA,
+								AccountS = g.First().AccountS
+							}
+						)
+					)
+				);
+		}
+	}
+	private async Task ApplyFilter(IFilterReport _filter)
+	{
+		ShowGroups = false;
+		if(_filter is CashRegisterFilter f)
+		{
+			f.ClientId = selectedClient?.Id;
+			f.ModuleId = moduleWorkplace.Id;
+
+			//Filter prepared
+			var response = await _service.GetFilteredReports<CashRegisterFilter,CashRegister>(f,moduleWorkplace.Id);
+
+			if (response is null)
+				Console.WriteLine($"NO RESPONSE");
+			else if (response is ErrorResponse response1)
+				Console.WriteLine($"{response1.ErrorMessage}");
+			else if (response is List<CashRegister> list)
+			{
+				reportsList = list;
+				await grid.RefreshDataAsync();
+			}
+		}
+	}
+
+}

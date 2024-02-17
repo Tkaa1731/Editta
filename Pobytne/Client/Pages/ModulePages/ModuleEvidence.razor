@@ -3,57 +3,57 @@
 @inject IJSRuntime js
 
 <ModuleNav idModule="@idModule"></ModuleNav>
-<div class="container-fluid">
-    <div class="row">
-        @if(maxDepth > 0)
-        {   
-            @for (int i = 0; i < maxDepth; i++)
-            {
-                <div class="col custom-scrollbar" style="overflow-y: scroll;max-height:90vh; min-width:14rem; "> 
-                    @for(int j = 0; j < records[i].Count; j++)
-                    {
-                        <RecordComponent Source=@records[i][j] OnClick=OnSelect></RecordComponent>
-                    }
+
+<div class="row h-100">
+    @if(maxDepth > 0)
+    {   
+        @for (int i = 0; i < maxDepth; i++)
+        {
+            <div class="col custom-scrollbar" style="overflow-y: scroll;max-height:90vh; min-width:14rem; "> 
+                @for(int j = 0; j < records[i].Count; j++)
+                {
+                    <RecordComponent Source=@records[i][j] OnClick=OnSelect></RecordComponent>
+                }
+            </div>
+        }
+        //interakce komponenta
+        //TODO: presunout do komponenty
+        <div class="col h-100">
+            <div class="p-3" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-top:2px solid #AAA;">
+                <!-- Seznam položek -->
+                <div class="row" style="z-index:1021; position:relative;">
+                    <!--Kalendar-->
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="interaction.InteractionDate" InputSize="InputSize.Large"/>
                 </div>
-            }
-            //interakce komponenta
-            //TODO: presunout do komponenty
-            <div class="col">
-                <div class="p-3" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-top:2px solid #AAA;">
-                    <!-- Seznam položek -->
-                    <div class="row" style="z-index:1021; position:relative;">
-                        <!--Kalendar-->
-                        <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="interaction.InteractionDate" InputSize="InputSize.Large"/>
+                <div class="row">
+                    <div class="col h-75">
+                        <InteractionComponent @bind-Records="interaction.Records"></InteractionComponent>
+                    </div>
+                </div>
+                <div>
+                    <div class="row mb-3">
+                        <div class="col-5">
+                            <span style="font-size:1.5rem">
+                                <b>CELKEM: </b>@sum ,-
+                            </span>
+                        </div>
+                        <div class="col">
+                            <HxInputTextArea Placeholder="Poznamka" @bind-Value="interaction.InteractionName" />
+                        </div>
                     </div>
                     <div class="row">
-                        <div class="col">
-                            <InteractionComponent @bind-Records="interaction.Records"></InteractionComponent>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="row mb-3">
-                            <div class="col-5">
-                                <span style="font-size:1.5rem">
-                                    <b>CELKEM: </b>@sum ,-
-                                </span>
-                            </div>
-                            <div class="col">
-                                <HxInputTextArea Placeholder="Poznamka" @bind-Value="interaction.InteractionName" />
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col" style="display:flex; flex-direction:column;">
-                                <HxButton CssClass="row-cols-1 mb-1" Text="Potvrdit" Color=ThemeColor.Success OnClick="SubmitHandler" Enabled="(interaction.Records.Count>0)"></HxButton>
-                                <HxButton CssClass="row-cols-1" Text="Smazat vse" Color=ThemeColor.Danger Enabled="(interaction.Records.Count>0)" OnClick="()=>{interaction.Records.Clear();interaction.InteractionName = string.Empty;}"></HxButton>
-                            </div>
+                        <div class="col" style="display:flex; flex-direction:column;">
+                            <HxButton CssClass="row-cols-1 mb-1" Text="Potvrdit" Color=ThemeColor.Success OnClick="SubmitHandler" Enabled="(interaction.Records.Count>0)"></HxButton>
+                            <HxButton CssClass="row-cols-1" Text="Smazat vse" Color=ThemeColor.Danger Enabled="(interaction.Records.Count>0)" OnClick="()=>{interaction.Records.Clear();interaction.InteractionName = string.Empty;}"></HxButton>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-        }
-    </div>
+    }
 </div>
+
 <HxModal @ref="clientsModal" Centered=true Title="Klienti"  Backdrop="ModalBackdrop.Static" Size="ModalSize.Large">
 	<BodyTemplate>
 		    <ListCustom ListItems="AllClients" @bind-selectedItem="selectedClient" PageSize="10" Editable=false />
@@ -81,24 +81,6 @@
 	</BodyTemplate>
 </HxModal>
 <style>
-    ::-webkit-scrollbar {
-      width: 20px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background-color: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background-color: #d6dee1;
-      border-radius: 20px;
-      border: 6px solid transparent;
-      background-clip: content-box;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background-color: #a8bbbf;
-    }
     .record-container:hover{
         background: #f3f3f3;
     }
@@ -163,14 +145,14 @@
         moduleWorkplace.ModuleId = idModule;
         //update moduleWorkplace
 
-        var depth = await _service.GetCountAsync<Record>($"RecordsMaxDepth?moduleId={idModule}", moduleWorkplace.Id);
+        var depth = await _service.GetCountAsync<Record>($"RecordsMaxDepth?moduleId={moduleWorkplace.Id}", moduleWorkplace.Id);
         if (ServiceRequest<int>(depth) && depth is int d)
         {
             maxDepth = d+1;
             for (int i = 0; i < maxDepth; i++)
                 records[i] = new();
 
-            var root = await _service.GetAllAsync<Record>($"RecordsRoot?moduleId={idModule}", moduleWorkplace.Id);
+            var root = await _service.GetAllAsync<Record>($"RecordsRoot?moduleId={moduleWorkplace.Id}", moduleWorkplace.Id);
             if (ServiceRequest<List<Record>>(root) && root is List<Record> r)
             {
                 List<RecordTreeView> rootTV = [];
@@ -231,7 +213,7 @@
         bool customerRequired = interaction.Records.Exists(r => r.IsClientRequired);
         if (customerRequired)
         {
-            var response = await _service.GetAllAsync<Client>($"ClientsList?moduleNumber={idModule}", moduleWorkplace.Id);
+            var response = await _service.GetAllAsync<Client>($"ClientsList?moduleNumber={moduleWorkplace.Id}", moduleWorkplace.Id);
             List<Client> clients = new();
             if (response is null)
                 Console.WriteLine($"NO RESPONSE");
@@ -292,7 +274,7 @@
     }
     private async Task LoadPayments()
     {
-        var response = await _service.GetAllAsync<Payment>($"?moduleNumber={idModule}", moduleWorkplace.Id);
+        var response = await _service.GetAllAsync<Payment>($"?moduleNumber={moduleWorkplace.Id}", moduleWorkplace.Id);
         List<Payment> payments = new();
         if (response is null)
             Console.WriteLine($"NO RESPONSE");

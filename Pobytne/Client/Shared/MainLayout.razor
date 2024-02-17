@@ -19,16 +19,35 @@
 
                 <TokenExpirationCounter/>
                 <CascadingValue Value="moduleWorkplace">
-                    <article class="content px-4">
+                    <div class="p-4 h-100">
                         @Body 
-                    </article>
+                    </div>
                 </CascadingValue>
 
             </Authorized>
         </AuthorizeView>
     </main>
 </div>
+<style>
+    ::-webkit-scrollbar {
+        width: 20px;
+    }
 
+    ::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: #d6dee1;
+        border-radius: 20px;
+        border: 6px solid transparent;
+        background-clip: content-box;
+    }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #a8bbbf;
+        }
+</style>
 @code {
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;

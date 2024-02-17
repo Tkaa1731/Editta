@@ -1,7 +1,7 @@
 ﻿@inject AuthenticationService service
 
 <div style="position: fixed; bottom: 0; right: 0; z-index: 1500;">
-	<div class="m-5 dark" style="display: flex; flex-direction: row; border-radius: @Radius;" @onmouseenter="()=>OnMouseEvent(false)" @onmouseleave="()=>OnMouseEvent(true)">
+	<div class="m-5 dark @Rounded" style="display: flex; flex-direction: row;" @onmouseenter="()=>OnMouseEvent(false)" @onmouseleave="()=>OnMouseEvent(true)">
         <div class="p-2" style="width:58px; display:flex; justify-content:center; " >
             <HxIcon Icon="BootstrapIcon.Stopwatch" CssClass="fs-3"/>
         </div>
@@ -29,12 +29,12 @@
             return "show";
         }
     }
-    private string Radius
+    private string Rounded
     {
         get
         {
-            if (Collapsed) return "50%";
-            return "25% 25% 25%/100%" ;
+            if (Collapsed) return "rounded-circle";
+            return "rounded-pill";
         }
     }
     private string color

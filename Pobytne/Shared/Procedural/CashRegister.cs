@@ -1,13 +1,8 @@
 ﻿using Pobytne.Shared.Struct;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pobytne.Shared.Procedural
 {
-	public class CashRegister
+	public class CashRegister : IRecordProperty
 	{
 		public int Id { get; set; }
 		public int Order { get; set; }
@@ -29,6 +24,10 @@ namespace Pobytne.Shared.Procedural
 		public int CreationUserId { get; set; }
 		public DateTime CreationDate { get; set; }
 		public string CreationUserName { get; set; } = string.Empty;
-
+		// IRecordProperty
+		public int RecordPropertyId { get; set; }
+		public string RecordPropertyName { get; set; } = string.Empty;
+		public int AccountA { get; set; }
+		public int AccountS { get; set; }
 	}
 }
