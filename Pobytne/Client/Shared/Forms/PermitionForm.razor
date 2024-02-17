@@ -110,29 +110,38 @@
     public PermitionForm()
     {
         accessList = new Dictionary<EPermition, PermitionRecord>();
+        accessList[EPermition.UserRole] = new PermitionRecord("Role uzivatele");
         accessList[EPermition.Aplication] = new PermitionRecord("Nastavení aplikace");
-        accessList[EPermition.License] = new PermitionRecord("Seznam licencí");//TOTO: kdo eviduje liccence
-        accessList[EPermition.LoginUser] = new PermitionRecord("Seznam uživatelů aplikace");
+        accessList[EPermition.License] = new PermitionRecord("Seznam licencí");
         accessList[EPermition.Module] = new PermitionRecord("Seznam modulů");
+        accessList[EPermition.LoginUser] = new PermitionRecord("Seznam uživatelů aplikace");
         accessList[EPermition.Permition] = new PermitionRecord("Seznam oprávnění");
         accessList[EPermition.PropertiesRecord] = new PermitionRecord("Seznam účetní spefikace");
         accessList[EPermition.PaymentType] = new PermitionRecord("Typy plateb");
+        accessList[EPermition.Client] = new PermitionRecord("Seznam klientů");
         accessList[EPermition.Record] = new PermitionRecord("Seznam záznamů");
-        accessList[EPermition.EvidenceMotion] = new PermitionRecord("Sklad zboží");
-        accessList[EPermition.CashMotion] = new PermitionRecord("Vedlejší pokladna");
-        accessList[EPermition.Customer] = new PermitionRecord("Seznam klientů");
+        accessList[EPermition.EvidenceTransport] = new PermitionRecord("Sklad zboží");
+        accessList[EPermition.CashTransport] = new PermitionRecord("Vedlejší pokladna");
+        accessList[EPermition.ClientSelect] = new PermitionRecord("Vyber Uzivatele");
         accessList[EPermition.Evidence] = new PermitionRecord("Evidence záznamů");
-        accessList[EPermition.Pernament] = new PermitionRecord("Permanentky");
+        accessList[EPermition.SeasonTicket] = new PermitionRecord("Permanentky");
+        accessList[EPermition.SeasonTicketPayment] = new PermitionRecord("Permanentky platba");
+        accessList[EPermition.SeasonTicketEvidence] = new PermitionRecord("Permanentky evidence");
+        accessList[EPermition.ActivityEvidence] = new PermitionRecord("Cinnosti evidence");
         accessList[EPermition.EvidenceSummary] = new PermitionRecord("Souhrny evidence");
         accessList[EPermition.CashSummary] = new PermitionRecord("Souhrny druhů plateb");
-        accessList[EPermition.PernamentSummary] = new PermitionRecord("Souhrny permanentky");
-        accessList[EPermition.ContractReportSummary] = new PermitionRecord("Souhrny dohody - zprávy");
         accessList[EPermition.EvidenceStorageSummary] = new PermitionRecord("Souhrny stavu zásob");
+        accessList[EPermition.SeasonTicketSummary] = new PermitionRecord("Souhrny permanentky");
+        accessList[EPermition.ContractReportSummary] = new PermitionRecord("Souhrny dohody - zprávy");
+        accessList[EPermition.ActivitySummary] = new PermitionRecord("Souhrny cinnosti");
         accessList[EPermition.Contract] = new PermitionRecord("Dohody vpp");
-        accessList[EPermition.ContractPerson] = new PermitionRecord("Dohody - osoby");
+        accessList[EPermition.ContractClient] = new PermitionRecord("Dohody - osoby");
         accessList[EPermition.ContractSupplement] = new PermitionRecord("Dohody - přílohy");
         accessList[EPermition.ContractSeason] = new PermitionRecord("Dohody dle období");
-        accessList[EPermition.ContractReport] = new PermitionRecord("Dohody - zprávy");
+        accessList[EPermition.OSPOD] = new PermitionRecord("OSPOD");
+        accessList[EPermition.ContractClientPlan] = new PermitionRecord("Dohody - OsobyPlan");
+        accessList[EPermition.ContractOther] = new PermitionRecord("Dohody - DalsiJevy");
+        accessList[EPermition.Other] = new PermitionRecord("DalsiJevy");
 
         access = new List<AccessRecord>
         {
