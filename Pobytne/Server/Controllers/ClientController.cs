@@ -12,7 +12,7 @@ namespace Pobytne.Server.Controllers
     public class ClientController : ControllerBase
 	{
         private readonly ClientService _clientService;
-        public const EPermition permition = EPermition.Customer; 
+        public const EPermition permition = EPermition.Client; 
         public ClientController(ClientService clientService)
         {
             _clientService = clientService;
