@@ -7,7 +7,7 @@ namespace Pobytne.Shared.Procedural.FilterReports
 		public required int? ModuleId { get; set; }
 		public required int? RecordId { get; set; }
 		public required int? ContractType { get; set; }
-		public required string OSPOD { get; set; } = string.Empty;
+		public required int? OSPOD { get; set; }
 		public required DateTime From { get; set; }
 		public required DateTime To { get; set; }
 		public int? ClientId { get; set; }

@@ -29,12 +29,16 @@ namespace Pobytne.Data.Tables.InteractionTables
         {
 			using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString())) // TODO: odstranit omezeni TOP 15
 			{
-				string sql = @" SELECT TOP 20 e.*, i.NazevInterakce, i.IDUzivatele, i.Datum, i.IDModulu, u.JmenoUzivatele, z.Nazev, l.JmenoUser AS CreationUserName
+				string sql = @" SELECT TOP 20 
+                                    e.*, i.NazevInterakce, i.IDUzivatele, i.Datum, i.IDModulu, u.JmenoUzivatele, 
+                                    z.Nazev, z.IDZaznamuVlastnosti AS RecordPropertyId, l.JmenoUser AS CreationUserName,
+                                    zv.Nazev AS RecordPropertyName, zv.UcetA AS AccountA, zv.UcetS AS AccountS
                                 FROM P_Evidence e
                                 JOIN P_Interakce i ON i.IDInterakce = e.IDInterakce
                                 JOIN S_Uzivatele u ON i.IDUzivatele = u.IDUzivatele	
                                 JOIN S_Zaznamy z ON e.IDZaznamu = z.IDZaznamu
-                                JOIN S_LoginUser l ON l.IDLogin = e.Kdo ";
+                                JOIN S_LoginUser l ON l.IDLogin = e.Kdo 
+                                LEFT JOIN S_ZaznamyVlastnosti zv ON zv.IDZaznamuVlastnosti = z.IDZaznamuVlastnosti";
                 sql += sqlCondition;
 				return await cnn.QueryAsync<Evidence>(sql, parameters);
 			}

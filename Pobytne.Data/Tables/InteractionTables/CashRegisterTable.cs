@@ -33,12 +33,16 @@ namespace Pobytne.Data.Tables.InteractionTables
 		{
 			using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))// TODO: Odstranit Top 20
 			{
-				string sql = @" SELECT TOP 20 p.*,i.NazevInterakce, i.IDUzivatele, i.Datum, i.IDModulu, i.IDTypuPlatby, z.Nazev,u.JmenoUzivatele,l.JmenoUser AS CreationUserName
+				string sql = @" SELECT TOP 20 
+									p.*,i.NazevInterakce, i.IDUzivatele, i.Datum, i.IDModulu, i.IDTypuPlatby, 
+									z.Nazev, z.IDZaznamuVlastnosti AS RecordPropertyId,u.JmenoUzivatele,l.JmenoUser AS CreationUserName,
+									zv.Nazev AS RecordPropertyName, zv.UcetA AS AccountA, zv.UcetS AS AccountS
 								FROM P_Pokladna p
 								JOIN P_Interakce i ON i.IDInterakce = p.IDInterakce
 								JOIN S_Uzivatele u ON i.IDUzivatele = u.IDUzivatele	
 								JOIN S_Zaznamy z ON p.IDZaznamu = z.IDZaznamu
-								JOIN S_LoginUser l ON l.IDLogin = p.Kdo ";
+								JOIN S_LoginUser l ON l.IDLogin = p.Kdo 
+								LEFT JOIN S_ZaznamyVlastnosti zv ON zv.IDZaznamuVlastnosti = z.IDZaznamuVlastnosti";
 				sql += sqlCondition;
 				return await cnn.QueryAsync<CashRegister>(sql, parameters);
 			}
