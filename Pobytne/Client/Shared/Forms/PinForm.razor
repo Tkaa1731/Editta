@@ -1,0 +1,209 @@
+﻿@inherits InputBase<string>
+@inject IJSRuntime js
+
+
+    <HxAutosuggest Label="Přístupy"
+    	           Placeholder="Vyhledat podle názvu.."
+    	           TItem="PermitionRecord"
+    	           TValue="int?"
+    	           Value="@selected"
+                   ValueChanged='async(value)=>{selected = value;await js.InvokeVoidAsync("focusElementById", $"code-{value}");}'
+                   ValueExpression="()=>selected"
+    	           DataProvider="ProvideSuggestions"
+                   ItemFromValueResolver="ItemValueResolver"
+    	           ValueSelector="employee => employee.Index"
+    	           TextSelector="employee => employee.Name">
+        <EmptyTemplate>
+            <span class="p-2 text-muted">Neexistující název přístupu</span>
+        </EmptyTemplate>
+    </HxAutosuggest>
+
+    <div class="w-100 mt-4"/>
+    <div class="d-flex flex-row flex-wrap">
+        @for (int i = 0; i < PermitionCount; i++)
+        {
+
+                var index = i;
+                <input type="text"
+                       id="code-@index"
+                       maxlength="1"
+                       class="ms-1 mt-1 px-2 form-control input-@pinCodes[index]"
+                       style="width:1.8rem;"
+                       value="@pinCodes[index]"
+                       required
+                       onfocus="this.select();"
+                       @onfocusin = "()=>selected = permition[index].Index"
+                       @oninput="e => OnInput(index,e)"
+                       @onkeydown="e => OnKeyDown(index, e)" />
+
+        }
+    </div>
+
+    @ValidationMessage
+
+    <div class="w-100 mt-3"/>
+    <div class="d-flex flex-row justify-content-center">
+        <HxTooltip @ref="copyToolTip"
+		       Trigger="TooltipTrigger.Manual"
+               Html="true"
+		       Text="Copied <i class='bi bi-check'/>">
+            <HxButton Icon="BootstrapIcon.Copy" Text="Kopírovat" OnClick="OnCopy" Color="ThemeColor.Light" Spinner="false" Size="ButtonSize.Small" CssClass="mx-1"/>
+        </HxTooltip>
+        <HxButton Icon="BootstrapIcon.BoxArrowInDown"  Text="Vložit" OnClick="OnPaste"Color="ThemeColor.Light" Size="ButtonSize.Small" CssClass="mx-1"/>
+    </div>
+
+<script>
+    window.focusElementById = function (id) {
+        var element = document.getElementById(id);
+        if (element) {
+            element.focus();
+        }
+    };
+    window.elementsBlur = function () {
+        document.activeElement.blur();
+    };
+</script>
+<style>
+    input.input-1, input.input-2, input.input-0{
+        font-size:large;
+    }
+    input.input-0{
+        color:red;
+        background-color:#ff810038;
+    }
+    input.input-1{
+        color: #0c81a7;
+        background-color:#add8e652;
+    }
+    input.input-2{
+        color:green;
+        background-color:#97d85a8a;
+    }
+</style>
+@code {
+    [Parameter]
+    public RenderFragment? ValidationMessage { get; set; }
+
+
+    private static readonly int PermitionCount = Enum.GetValues(typeof(EPermition)).Length;
+    private HxTooltip? copyToolTip;
+    private bool keyUp = false;
+    private string text = string.Empty;
+    private int? selected;
+    private string[] pinCodes = new string[PermitionCount];
+    private List<PermitionRecord> permition = [];
+
+    private record PermitionRecord{
+        public required string Name;
+        public required int Index;
+    }
+
+    protected override void OnInitialized()
+    {
+        int i = 0;
+        if(true)
+            foreach (EPermition rec in Enum.GetValues(typeof(EPermition)))
+            {
+                var field = rec.GetType().GetField(rec.ToString());
+                var displayAttribute = (DisplayAttribute)Attribute.GetCustomAttribute(field!, typeof(DisplayAttribute))!;
+                var name = displayAttribute?.Name ?? rec.ToString();
+
+                permition.Add(new PermitionRecord(){Name = name, Index = i});
+
+                if ((int)rec < CurrentValue?.Length)
+                    pinCodes[i] = CurrentValue[(int)rec].ToString();
+                else
+                    pinCodes[i] = "0";
+                i ++;
+            }
+        base.OnInitialized();
+    }
+
+    /// <summary>
+    /// private fnc
+    /// </summary>
+    private void OnInput(int index,ChangeEventArgs e)
+  {
+        string condition = "012";
+        var inputValue = e.Value?.ToString() ?? "";
+
+        pinCodes[index] = (inputValue.Length == 0||condition.Contains(inputValue[0]))?inputValue:"0";
+        //set output permition string
+        SetCurrentValue();
+        //move next
+        if(index < PermitionCount && inputValue.Length > 0)
+            js.InvokeVoidAsync("focusElementById", $"code-{index + 1}");
+        else if(index > 0 && inputValue.Length == 0)
+            js.InvokeVoidAsync("focusElementById", $"code-{index - 1}");
+
+    }
+    private void OnKeyDown(int index, KeyboardEventArgs e)
+    {
+
+        if (e.Key == "ArrowLeft" && index > 0) // posun doleva
+        {
+            var previousInput = $"code-{index - 1}";
+            js.InvokeVoidAsync("focusElementById", previousInput);
+        }
+        else if (e.Key == "ArrowRight" && index < PermitionCount) // posun doprava
+        {
+            var nextInput = $"code-{index + 1}";
+            js.InvokeVoidAsync("focusElementById", nextInput);
+        }
+        else if(e.Key == "Enter")
+
+            js.InvokeVoidAsync("elementsBlur");
+
+    }
+    private async Task OnCopy()
+    {
+        await copyToolTip.ShowAsync();
+        await js.InvokeVoidAsync("navigator.clipboard.writeText", CurrentValue);
+        await Task.Delay(500);
+        await copyToolTip.HideAsync();
+    }
+    private async Task OnPaste()
+    {
+        string condition = "012";
+        var paste = await js.InvokeAsync<string>("navigator.clipboard.readText");
+
+        for (int i = 0; i < pinCodes.Length; i++)
+        {
+            if (paste.Length > i && condition.Contains(paste[i]))
+                pinCodes[i] = paste[i].ToString();
+            else
+                pinCodes[i] = "0";
+        }
+        SetCurrentValue();
+    }
+    private void SetCurrentValue()
+    {
+        string[] output = Enumerable.Repeat("0",50).ToArray();// 50 Constant
+
+        int i = 0;
+        foreach (EPermition rec in Enum.GetValues(typeof(EPermition)))
+        {
+            if (i >= pinCodes.Length)
+                break;
+            output[(int)rec] = pinCodes[i];
+            i ++;
+        }
+        CurrentValue = string.Join("", output);
+    }
+    protected override bool TryParseValueFromString(string value, out string result, out string validationErrorMessage)
+    {
+        result = value;
+        validationErrorMessage = string.Empty;
+        return true;
+    }
+    private Task<AutosuggestDataProviderResult<PermitionRecord>> ProvideSuggestions(AutosuggestDataProviderRequest request) => Task.FromResult( new AutosuggestDataProviderResult<PermitionRecord> { Data = permition.Where(p => p.Name.ToLower().StartsWith(request.UserInput.ToLower())) }); 
+    private Task<PermitionRecord?> ItemValueResolver(int? value)
+    {
+        if (value.HasValue)
+        {
+            return Task.FromResult(permition.Where(i => i.Index == value).FirstOrDefault());
+        }
+        return null;
+
+    }
+}

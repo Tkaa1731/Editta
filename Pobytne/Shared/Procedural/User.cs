@@ -14,9 +14,7 @@ namespace Pobytne.Shared.Procedural
         public string UserLogin { get; set; } = string.Empty;
         [Required(ErrorMessage = "Enter UserName")]
         public string UserName { get; set; } = string.Empty;
-        [Editable(false)]
-        private string _password { get; set; } = string.Empty;
-        public string Password { set { _password = value; } get { return _password; } }
+        public string Password { get; set; } = string.Empty;
         public bool PasswordIsInicial { get; set;} = false;
         public int LicenseNumber { get; set; }
         [EmailAddress]
@@ -25,23 +23,25 @@ namespace Pobytne.Shared.Procedural
         public string PhoneNumber { get; set; } = string.Empty;
         public int CustomerId { get; set; } = 0;
         public bool Valid { get; set; } = true;
-        [Editable(false)]
-        public List<Permition> AccessPermition { get; set; } = [];
         public DateTime ValidFrom { get; set; } = DateTime.Now;
         [Required(ErrorMessage = "Enter a date of the end of validation")]
         public DateTime ValidTo { get; set; } = DateTime.Now.AddYears(1);
         public int CreationUserId { get; set; }
+
+        // Aplication propetries
         public DateTime CreationDate { get; set; }
         [Editable(false)]
         public string CreationUserName { get; set; } = string.Empty;
         [Editable(false)]
+        public List<Permition> AccessPermition { get; set; } = [];
+        [Editable(false)]
         public string Name => UserLogin;
         [Editable(false)]
         public string Description => UserName;
+        [Editable(false)]
+        public bool Active => Valid && (ValidTo >= DateTime.Now);
 
-        public bool Active => Valid && ValidTo >= DateTime.Now;
-
-        public bool CheckPassword(string password) => _password == password;
+        public bool CheckPassword(string password) => Password == password;
 
         public object Clone()
         {

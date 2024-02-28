@@ -20,7 +20,18 @@ namespace Pobytne.Data.Tables
                 return await cnn.QueryAsync<Permition>(sql, condition);
             }
         }
-        public async Task<int?> Insert(Permition item)
+		public async Task<int> InsUpTran(DynamicParameters param)
+		{
+			string cashRegisterSQL = "p_sp_Opravneni_InsUp";
+			using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+			int success = await cnn.ExecuteAsync(cashRegisterSQL, param, commandType: CommandType.StoredProcedure);
+
+			if (success == 1)
+				return 1;
+
+			throw new Exception($"Failed 'p_sp_Opravneni_InsUp' {success}");
+		}
+		public async Task<int?> Insert(Permition item)
         {
             using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
             return await cnn.InsertAsync(item);

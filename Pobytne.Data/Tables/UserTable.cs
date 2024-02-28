@@ -3,6 +3,8 @@ using System.Data.SqlClient;
 using System.Data;
 using Dapper;
 using System.Transactions;
+using Dapper.Transaction;
+using System;
 
 namespace Pobytne.Data.Tables
 {
@@ -87,7 +89,42 @@ namespace Pobytne.Data.Tables
                 return users;
             }
         }
-        public async Task<int?> Insert(User user)
+		public async Task<int> InsUpTran(DynamicParameters param)
+		{
+			string cashRegisterSQL = "p_sp_LoginUser_InsUp";
+			using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            int success = await cnn.ExecuteAsync(cashRegisterSQL, param, commandType: CommandType.StoredProcedure);
+
+			if (success == 1)
+				return 1;
+
+			throw new Exception($"Failed 'p_sp_LoginUser_InsUp' {success}");
+		}
+		public DynamicParameters GetParamsForTrans(User user, bool delete)
+		{
+			var result = new DynamicParameters();
+            result.Add("@IDLoginUser", user.Id, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
+			object? template = new
+			{
+				LoginUser = user.UserLogin,
+                JmenoUser = user.Name,
+                Helso = user.Password,
+                JeHesloInicial = user.PasswordIsInicial,
+                CisloLicence = user.LicenseNumber,
+				user.Email,
+                Telefon = user.PhoneNumber,
+                IDUzivatele = user.CustomerId,
+				user.Valid,
+                PlatiOd = user.ValidFrom,
+                PlatiDo = user.ValidTo,
+                Kdo = user.CreationUserId,
+                Kdy = user.CreationDate,
+				Smazat = delete ? 1 : 0,
+			};
+			result.AddDynamicParams(template);
+			return result;
+		}
+		public async Task<int?> Insert(User user)
         {
             using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
             return await cnn.InsertAsync(user);

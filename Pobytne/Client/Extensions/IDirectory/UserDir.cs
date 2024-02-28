@@ -18,6 +18,7 @@ namespace Pobytne.Client.Extensions.IDirectory
             _licenseNumber = licenseNumber;
         }
         public string Name => "Users";
+        public int Id => 0;
         public IconBase Icon => BootstrapIcon.People;
         public List<IListItem> ItemsList { get; set; } = new List<IListItem>() { };
         public List<IDirectory> SubDirectories => new List<IDirectory>();

@@ -5,6 +5,7 @@ namespace Pobytne.Client.Extensions.IDirectory
 {
     public interface IDirectory
     {
+        int Id { get; }
         string Name { get; }
         IconBase Icon { get; }
         List<IDirectory> SubDirectories { get; }

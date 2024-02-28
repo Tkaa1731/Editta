@@ -24,7 +24,7 @@ namespace Pobytne.Server.Controllers
         [Route("RecordsBranch")]
         public async Task<IEnumerable<Record>> GetBranch(int parentId)
         {
-            return await _service.GetRecords(parentId);
+            return await _service.GetBranch(parentId);
         }
 
         [HttpGet]

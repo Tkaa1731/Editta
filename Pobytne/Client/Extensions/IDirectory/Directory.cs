@@ -7,11 +7,11 @@ using System.Collections.Generic;
 
 namespace Pobytne.Client.Extensions.IDirectory
 {
-    internal class Directory : IDirectory
+	internal class Directory : IDirectory
 	{
 		private readonly PobytneService _service;
 		public string Name { get; set; }
-
+		public int Id => 0;
 		public IconBase Icon => BootstrapIcon.Archive;
 		private List<LicenseDir> Licenses { get; set; } = new List<LicenseDir>();
 

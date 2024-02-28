@@ -1,57 +1,38 @@
 ﻿@inject IJSRuntime js
 @inject PobytneService service
 
-@if(permition is not null)
+@if(permition is not null && _editContext is not null)
 {
-    <h3>Module name: @permition.ModuleName</h3>
-    <h1>@pString</h1>
-    <EditForm Model="@model" OnValidSubmit=OnValidSubmitHandler>
-    <DataAnnotationsValidator />
-
-        <div class="row align-items-start m-3">
-            <div class="col">
-
-                <HxSelect TItem="UserRecord"
-                          TValue="int?"
-                          Label="User"
-                          Data="@userList"
-                @bind-Value="@model.userId"
-                          TextSelector="@(u => u.userName)"
-                          ValueSelector="@(u => u.id)"
-                          Nullable="true"
-                          NullText="-select name-"
-                          NullDataText="Loading users..." 
-                          Enabled="formType == EForm.Insert" />
+    <EditForm EditContext="_editContext" OnValidSubmit="OnValidSubmitHandler">
+    <DataAnnotationsValidator/>
+        <div class="mx-3">
+            <HxSelect TItem="UserRecord"
+                                  TValue="int?"
+                                  Label="Uživatel"
+                                  Data="userList"
+                        @bind-Value="model.userId"
+                                  TextSelector="@(u => u.userName)"
+                                  ValueSelector="@(u => u.id)"
+                                  Nullable="true"
+                                  NullText="-Vyber uživatele-"
+                                  NullDataText="Načítám data..." 
+                                  Enabled="formType == EForm.Insert" 
+                                  />
+            <div class="my-3">        
+                <PinForm @bind-Value="model.permitionString">
+                    <ValidationMessage>
+                        <HxValidationMessage For="() => model.permitionString" Mode="ValidationMessageMode.Regular"/>
+                    </ValidationMessage>
+                </PinForm>
             </div>
-        </div>        
-        @foreach (EPermition rec in Enum.GetValues(typeof(EPermition)))
-        {
-    
-            <div class="row align-items-start">
-                    <div class="col">
-                    <p>@accessList[rec].PermitionString</p>
-                    </div>
-                    <div class="col">
-
-                        <HxSelect TItem="AccessRecord"
-                                  TValue="EAccess"
-                                  Data="@access"
-                    @bind-Value="@accessList[rec].Access"
-                                  TextSelector="@(p => p.accessStr)"
-                                  ValueSelector="@(p => p.accesVal)"
-                                  Nullable="false"/>
-                    </div>
-                </div>
-        }
-        <div class="d-grid gap-2">
-            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
         </div>
     </EditForm>
+    <HxSubmit Color="ThemeColor.Success" CssClass="w-100 mt-3" EditContext="@_editContext" OnValidClick="OnValidSubmitHandler" >@ButtonText</HxSubmit>
+  
+
 }
 
 @code {
-    [CascadingParameter]
-    private ModuleWorkplace moduleWorkplace { get; set; } = default!;
 
     [EditorRequired]
     [Parameter]
@@ -64,103 +45,50 @@
     public Permition? permition{ get; set; }
 
     private UserModel model = new();
-    private Dictionary<EPermition, PermitionRecord> accessList { get; }
-    private List<UserRecord> userList = new(); //HxSelect component
-    private List<AccessRecord> access = new(); //HxSelect component
+    private EditContext? _editContext;
+    private List<UserRecord> userList = new(); 
     private string ButtonText
     {
         get
         {
-            if (formType == EForm.Insert) return "Insert";
-            return "Update";
+            if (formType == EForm.Insert) return "Vložit";
+            return "Aktualizovat";
         }
     }
-
-    private record AccessRecord(string accessStr, EAccess accesVal);
     private record UserRecord(string userName,int id);
     private class UserModel
     {
-        [Required(ErrorMessage = "Choose a user.")]
-        public int? userId { get; set; }
-    }
-    private class PermitionRecord {
-        public string PermitionString { get; set; }
-        public EAccess Access { get; set; }
-        public PermitionRecord(string permitionStr)
-        {
-            PermitionString = permitionStr;
-            Access = EAccess.NoAccess;
-        }
+        [Required(ErrorMessage = "Zvolte uživatele")]
+        public int? userId { get; set; } = default!;
+        [MinLength(50,ErrorMessage ="Vyplňte všechna oprávnění")]
+        public string permitionString { get; set; } = string.Empty;
     }
 
-    private string pString = String.Empty;
     private async Task OnValidSubmitHandler()
     {
         if(permition is not null && model.userId.HasValue)
         {
             permition.UserId = model.userId.Value;
-            GetPermitionString();
-            pString = permition.PermitionString;
-
-            await OnValidSubmit.InvokeAsync(formType);// TODO: dodelat update a insert pro permition
-
+            permition.PermitionString = model.permitionString;
+            permition.ValidFrom = DateTime.Today;
+            permition.ValidTo = DateTime.Today.AddYears(5);
         }
+
+        await OnValidSubmit.InvokeAsync(formType);// TODO: dodelat update a insert pro permition
+
+
     }
-
-    public PermitionForm()
-    {
-        accessList = new Dictionary<EPermition, PermitionRecord>();
-        accessList[EPermition.UserRole] = new PermitionRecord("Role uzivatele");
-        accessList[EPermition.Aplication] = new PermitionRecord("Nastavení aplikace");
-        accessList[EPermition.License] = new PermitionRecord("Seznam licencí");
-        accessList[EPermition.Module] = new PermitionRecord("Seznam modulů");
-        accessList[EPermition.LoginUser] = new PermitionRecord("Seznam uživatelů aplikace");
-        accessList[EPermition.Permition] = new PermitionRecord("Seznam oprávnění");
-        accessList[EPermition.PropertiesRecord] = new PermitionRecord("Seznam účetní spefikace");
-        accessList[EPermition.PaymentType] = new PermitionRecord("Typy plateb");
-        accessList[EPermition.Client] = new PermitionRecord("Seznam klientů");
-        accessList[EPermition.Record] = new PermitionRecord("Seznam záznamů");
-        accessList[EPermition.EvidenceTransport] = new PermitionRecord("Sklad zboží");
-        accessList[EPermition.CashTransport] = new PermitionRecord("Vedlejší pokladna");
-        accessList[EPermition.ClientSelect] = new PermitionRecord("Vyber Uzivatele");
-        accessList[EPermition.Evidence] = new PermitionRecord("Evidence záznamů");
-        accessList[EPermition.SeasonTicket] = new PermitionRecord("Permanentky");
-        accessList[EPermition.SeasonTicketPayment] = new PermitionRecord("Permanentky platba");
-        accessList[EPermition.SeasonTicketEvidence] = new PermitionRecord("Permanentky evidence");
-        accessList[EPermition.ActivityEvidence] = new PermitionRecord("Cinnosti evidence");
-        accessList[EPermition.EvidenceSummary] = new PermitionRecord("Souhrny evidence");
-        accessList[EPermition.CashSummary] = new PermitionRecord("Souhrny druhů plateb");
-        accessList[EPermition.EvidenceStorageSummary] = new PermitionRecord("Souhrny stavu zásob");
-        accessList[EPermition.SeasonTicketSummary] = new PermitionRecord("Souhrny permanentky");
-        accessList[EPermition.ContractReportSummary] = new PermitionRecord("Souhrny dohody - zprávy");
-        accessList[EPermition.ActivitySummary] = new PermitionRecord("Souhrny cinnosti");
-        accessList[EPermition.Contract] = new PermitionRecord("Dohody vpp");
-        accessList[EPermition.ContractClient] = new PermitionRecord("Dohody - osoby");
-        accessList[EPermition.ContractSupplement] = new PermitionRecord("Dohody - přílohy");
-        accessList[EPermition.ContractSeason] = new PermitionRecord("Dohody dle období");
-        accessList[EPermition.OSPOD] = new PermitionRecord("OSPOD");
-        accessList[EPermition.ContractClientPlan] = new PermitionRecord("Dohody - OsobyPlan");
-        accessList[EPermition.ContractOther] = new PermitionRecord("Dohody - DalsiJevy");
-        accessList[EPermition.Other] = new PermitionRecord("DalsiJevy");
-
-        access = new List<AccessRecord>
-        {
-            new AccessRecord("Bez přístupu",EAccess.NoAccess),
-            new AccessRecord("Jen pro čtení",EAccess.ReadOnly),
-            new AccessRecord("Plný přístup",EAccess.FullAccess),
-        };
-    }
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && permition is not null)
+        if (permition is not null && firstRender)
         {
-            LoadPermition();
+           _editContext = new(model);
             if (permition.UserId > 0)
                 await LoadUsers(permition.UserId);
             else
                 await LoadUsers();
         }
+        await base.OnAfterRenderAsync(firstRender);
     }
     private async Task LoadUsers(int id = -1)
     {
@@ -170,60 +98,38 @@
 
             if (id > 0)
             {
-                User? u = await service.GetByIdAsync<User>(id,moduleWorkplace.Id) as User;
+                var response = await service.GetByIdAsync<User>(id, -1);
 
-                userList.Add(new UserRecord(u.UserName, u.Id));
-                model.userId = id;
+		        if (response is null)
+			        Console.WriteLine($"NO RESPONSE");
+		        else if (response is ErrorResponse response1)
+			        Console.WriteLine($"{response1.ErrorMessage}");
+		        else if (response is User u)
+		        {
+                    userList.Add(new UserRecord(u.UserName, u.Id));
+
+                    model.permitionString = permition.PermitionString;
+                    model.userId = id;
+		        }
             }
             else
             {   
                 int module = permition.ModuleId;
-                List<User>? users = await service.GetAllAsync<User>($"GetRest?moduleId={module}", moduleWorkplace.Id) as List<User>;// TODO: dodelat ErrorResult handlery
+                var response =  await service.GetAllAsync<User>($"GetRest?moduleId={module}", -1);
 
-
-                if(users is not null)
-                {
-                    foreach (var u in users)
+		        if (response is null)
+			        Console.WriteLine($"NO RESPONSE");
+		        else if (response is ErrorResponse response1)
+			        Console.WriteLine($"{response1.ErrorMessage}");
+		        else if (response is List<User> list)
+		        {
+                    foreach (var u in list)
                     {
                         userList.Add(new UserRecord(u.UserName,u.Id));
-                    }                  
-                }
+                    }     
+		        }
             }
             StateHasChanged();
-        }
-    }
-
-    private void LoadPermition()
-    {
-        if(permition is not null)
-        {
-            @foreach (EPermition pe in Enum.GetValues(typeof(EPermition)))
-            {
-                if(permition.PermitionString.Length > (int)pe)
-                    switch (permition.PermitionString[((int)pe)])
-                    {
-                        case '1': accessList[pe].Access = EAccess.ReadOnly; break;
-                        case '2': accessList[pe].Access = EAccess.FullAccess; break;
-                        default: accessList[pe].Access = EAccess.NoAccess; break;
-                    }
-                else
-                    accessList[pe].Access = EAccess.NoAccess;
-            }
-        }
-    }
-    private void GetPermitionString()
-    {
-        if(permition is not null)
-        {            
-            int capacity = 50; // Setting the lenght of PermitionString 
-            var sb = new StringBuilder(capacity);
-            foreach (EPermition pe in Enum.GetValues(typeof(EPermition)))
-                sb.Append((char)accessList[pe].Access);
-
-            while (sb.Length < capacity)
-                sb.Append('0');
-
-            permition.PermitionString = sb.ToString();
         }
     }
 }

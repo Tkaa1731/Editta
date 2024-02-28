@@ -16,6 +16,7 @@ namespace Pobytne.Client.Extensions.IDirectory
         }
         public Module Module { get; set; }
         public string Name =>  Module.ModuleName;
+        public int Id => Module.Id;
         public IconBase Icon => BootstrapIcon.FolderPlus;
         public List<IListItem> ItemsList { get; set; } = new();
         public List<IDirectory> SubDirectories => new();

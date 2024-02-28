@@ -8,9 +8,6 @@ main {
     flex: 1;
 }
 
-.sidebar {
-    background-color: rgba(255, 255, 255, 0.1);
-}
 
 .top-row {
     background-color: #f7f7f7;

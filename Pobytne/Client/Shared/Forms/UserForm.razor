@@ -7,10 +7,10 @@
 
         <div class="row align-items-start">
             <div class="col">
-                <HxInputText @bind-Value="user.UserLogin" Label="Login user" Type="InputType.Text"/>
+                <HxInputText @bind-Value="user.UserLogin" Label="Login" Type="InputType.Text"/>
             </div>
             <div class="col">
-                <HxInputText @bind-Value="user.UserName" Label="Name user" Type="InputType.Text" />
+                <HxInputText @bind-Value="user.UserName" Label="Jméno uživatele" Type="InputType.Text" />
             </div>
         </div>
         <div class="row align-items-start">
@@ -18,19 +18,19 @@
                 <HxInputText @bind-Value="user.Email" Label="Email" Type="InputType.Email" />
             </div>
             <div class="col">
-                <HxInputText @bind-Value="user.PhoneNumber" Label="Phone number" Type="InputType.Tel" />
+                <HxInputText @bind-Value="user.PhoneNumber" Label="Telefonní číslo" Type="InputType.Tel" />
             </div>
         </div>
         <div class="row align-items-start">
 		    <div class="col">		
-                <HxInputNumber Label="License Number" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="user.LicenseNumber" Enabled="false" />
+                <HxInputNumber Label="Číslo licence" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="user.LicenseNumber" Enabled="false" />
             </div>
 		    <div class="col">
-                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="user.ValidTo" MinDate=DateTime.Now.AddDays(1) Label="Valid To" />
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="user.ValidTo" MinDate=DateTime.Now.AddDays(1) Label="Platný do" />
             </div>
         </div>
 
-        <HxSwitch Text="Valid user" @bind-Value="user.Valid" />
+        <HxSwitch Text="Je aktivní" @bind-Value="user.Valid" />
 
         <div class="d-grid gap-2">
             <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
@@ -53,8 +53,8 @@
     {
         get
         {
-            if(formType == EForm.Insert) return "Insert";
-            return "Update";
+            if (formType == EForm.Insert) return "Vložit";
+            return "Aktualizovat";
         }
     }
     private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);

@@ -1,32 +1,41 @@
 ﻿@inject PobytneService _service
 
-	<HxTabPanel InitialActiveTabId="tab_filter"> 
-		<HxTab Title="Filtr" Id="tab_filter" ContentCssClass="p-3 border rounded-bottom border-top-0" TitleCssClass="text-secondary">
+	<HxTabPanel InitialActiveTabId="tab_filter" CssClass=""> 
+		<HxTab Title="Filtr" Id="tab_filter" ContentCssClass="px-4 py-2 border rounded-bottom border-top-0" TitleCssClass="text-secondary">
 			<Content>
 				@FilterTemplate
 				<DateFilter @bind-Filter="Filter"/>
-@* 				<div style="display:flex; justify-content:center;">
-					<HxButton CssClass="w-50 my-3" Color="ThemeColor.Primary" OnClick="async()=>await OnFilterSubmit.InvokeAsync(Filter)">Potvrdit vyber</HxButton>
-				</div> *@
 
-				<div style="">
+				<HxChipList Chips="@recordChips" ShowResetButton="true" ResetButtonText="Reset" OnResetClick="()=>multiselectItems.Clear()"  />
+
+				<div class="w-100 my-2" style="flex:1; overflow-y:hidden;">
 				<HxTreeView TItem="IDirectory"
 							SelectedItemChanged="OnSelect"
 							OnItemExpanded="OnExpanded"
 							Items="@fileSystem"
-							CssClass="border rounded p-2"
+							CssClass="border rounded p-2 overflow-auto"
 							ItemTitleSelector="@(p => p.Name)"
 							ItemIconSelector="@(p => p.Icon)"
-							ItemChildrenSelector="@(p => p.SubDirectories)" />
+							ItemChildrenSelector="@(p => p.SubDirectories)">
+
+					<ItemTemplate>
+						@if (context.SubDirectories?.Any() ?? false)
+						{
+							<HxBadge CssClass="mx-2" TextColor="ThemeColor.Dark" Color="ThemeColor.Light">@context.SubDirectories.Count</HxBadge>
+						}
+						<div role="button" @onclick="()=>multiselectMode=true" class="btn-plus rounded-1 px-1"><HxIcon Icon="BootstrapIcon.PlusLg" /></div>
+					</ItemTemplate>
+
+				</HxTreeView>
 				</div>
 
-				<div class="row my-3">
-					<HxButton CssClass="col mx-3" Color="ThemeColor.Primary" OnClick="async()=>await OnFilterSubmit.InvokeAsync(Filter)">Potvrdit vyber</HxButton>
-					<HxButton CssClass="col mx-3" Color="ThemeColor.Primary" OnClick="async()=>{await OnExcelTransmit.InvokeAsync();await Task.Delay(2000);}" Enabled="ExcelEnable">Export do excelu</HxButton>
+				<div class="w-100 py-1 d-flex">
+						<HxButton CssClass="flex-fill me-2" Color="ThemeColor.Primary" OnClick="OnSubmitHandler">Potvrdit vyber</HxButton>
+						<HxButton CssClass="flex-fill ms-2" Color="ThemeColor.Primary" OnClick="async()=>{await OnExcelTransmit.InvokeAsync();await Task.Delay(2000);}" Enabled="ExcelEnable">Export do excelu</HxButton>
 				</div>
 			</Content>
 		</HxTab>
-		<HxTab Title="Souhrny" Id="tab_group"  ContentCssClass="p-3 border rounded-bottom border-top-0"  TitleCssClass="text-secondary">
+		<HxTab Title="Souhrny" Id="tab_group"  ContentCssClass="p-4 border rounded-bottom border-top-0"  TitleCssClass="text-secondary">
 			<Content>
 				@GroupByTemplate
 				<div style="display:flex; justify-content:center;">
@@ -35,15 +44,32 @@
 			</Content>
 		</HxTab>
 	</HxTabPanel>
+	<style>
+	.tab-content{
+		overflow-y:hidden !important;
+		/* flex:1; */
+	}
+	div.tab-pane.active{
+		
+		height: 100%;
+		/* max-height: 100%; */
+		/* overflow: hidden; */
+		display: flex;
+		flex-direction: column;
+
+	}
+	.btn-plus:hover{
+		background: #dae5ff;
+	}
+	</style>
 @code {
-	CardSettings customCardSettings => new CardSettings { HeaderCssClass = "bg-transparent" };
 	[CascadingParameter]
 	public ModuleWorkplace moduleWorkplace { get; set; } = new();
 
 	[Parameter]
 	public RenderFragment? FilterTemplate { get; set; }
 	[Parameter]
-    public RenderFragment? GroupByTemplate { get; set; }
+	public RenderFragment? GroupByTemplate { get; set; }
 
 	[Parameter]
 	[EditorRequired]
@@ -60,20 +86,14 @@
 	[EditorRequired]
 	public bool ExcelEnable { get; set; }
 
-	private IDirectory? selectedDirectory;
-	private IListItem? selectedItem;
-	private IListItem? formItem;
-	private List<IListItem>? listOfItems;
+	private HxChipList chipList = new();
+	private ChipItem[] recordChips => multiselectItems.Select(i => new ChipItem(){ ChipTemplate = GetChipRenderFragment(i.Id,i.Name), Removable = true }).ToArray();
+
+	private List<IDirectory> multiselectItems = [];
+	private bool multiselectMode = false;
 	private List<RecordDir> fileSystem = [];
 	protected override async Task OnInitializedAsync()
 	{
-		// var response =  await _service.GetAllAsync<CashRegister>($"moduleId={idModule}");
-		// if(response is not null && response is List<CashRegister> l)
-		// {
-		// 	list = l;
-		// 	await grid.RefreshDataAsync();
-		// }
-		//TODO: recordListView => komponenta
 		fileSystem.Add(
 			new RecordDir(
 				_service,
@@ -93,15 +113,19 @@
 		);
 		await fileSystem[0].OnSelect();
 	}
-	private async Task OnSelect(IDirectory e)
+	private void OnSelect(IDirectory e)
 	{
-		this.selectedDirectory = e;
-		if (selectedDirectory is not null)
+		if(!multiselectItems.Contains(e))
 		{
-			// Filter.RecordId = e.ItemsList.Re
-			await selectedDirectory.OnSelect();
-			listOfItems = selectedDirectory.ItemsList;
+			if (!multiselectMode)
+			{
+				multiselectItems.Clear();
+				// Filter.RecordId = e.ItemsList.Re
+				//await selectedDirectory.OnSelect();
+			}
+			multiselectItems.Add(e);
 		}
+		multiselectMode = false;
 	}
 	private async Task OnExpanded(IDirectory e)
 	{
@@ -112,5 +136,27 @@
 		}
 
 	}
+	private async Task OnSubmitHandler()
+	{
+		Filter.RecordsId.Clear();
+		Filter.RecordsId.AddRange(multiselectItems.Select(i=>i.Id));
 
+		await OnFilterSubmit.InvokeAsync(Filter);
+	}
+	private static RenderFragment GetChipRenderFragment(int id, string value) => builder =>
+	{
+		builder.OpenElement(0, "span");
+		builder.SetKey(id);
+		builder.AddAttribute(1, "record-id", id);
+		builder.AddAttribute(2, "class", "hx-chip-list-label");
+		builder.AddContent(3, id);
+		builder.AddContent(4, ": ");
+		builder.CloseElement();
+		builder.AddContent(5, value);
+	};
+	/// <summary>
+	/// TODO: Chip remove
+	/// List with endpoint records
+	/// When submit then all subrecords to Filter
+	/// </summary>
 }

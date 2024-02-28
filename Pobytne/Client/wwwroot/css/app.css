@@ -3,13 +3,18 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
-
+body{
+    overflow-y:hidden;
+}
 h1:focus {
     outline: none;
 }
 
 a, .btn-link {
     cursor : pointer;
+}
+.pointer {
+    cursor: pointer;
 }
 a.no-link {
     color: inherit !important;
@@ -102,4 +107,28 @@ a.no-link {
 
 .loading-text:after {
     content: var(--blazor-load-percentage-text, "Loading");
+}
+
+/*CUSTOM CSS*/
+::-webkit-scrollbar {
+    width: 20px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #d6dee1;
+    border-radius: 20px;
+    border: 6px solid transparent;
+    background-clip: content-box;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: #a8bbbf;
+    }
+
+.dark {
+    background-color: #061726;
 }

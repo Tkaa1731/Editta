@@ -17,7 +17,8 @@ namespace Pobytne.Client.Extensions.IDirectory
             License = license;
             Users = new UserDir(service, License.LicenseNumber);
         }
-        public Pobytne.Shared.Procedural.License License { get; set; }
+        public License License { get; set; }
+        public int Id => License.Id;
         public List<IDirectory> Modules { get; set; }
         public IDirectory Users { get; set; }
         public List<IListItem> ItemsList { 
@@ -35,7 +36,7 @@ namespace Pobytne.Client.Extensions.IDirectory
             }
         }
 
-        public string Name { get { return $"{License.NameOfOrganization} | {License.LicenseNumber}"; } }
+        public string Name => $"{License.NameOfOrganization} | {License.LicenseNumber}";
         public IconBase Icon { get { return BootstrapIcon.Folder; } }
 
         public async Task AddNew() => await LoadData();

@@ -67,6 +67,14 @@ namespace Pobytne.Server.Service
         {
             return await _userTable.Delete(it);
         }
+        public async Task<int> Update(Permition updatePermition)
+        {
+            return await _permitionTable.Update(updatePermition);
+        }
+        public async Task<int?> Insert(Permition insertPermition)
+        {
+            return await _permitionTable.Insert(insertPermition);
+        }
         private string GeneratePassword()
         {
             return "heslo";

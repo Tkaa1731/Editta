@@ -5,22 +5,22 @@
 
         <div class="row align-items-start">
             <div class="col">
-                <HxInputText @bind-Value="moduleCopy.ModuleName" Label="Name of module" Type="InputType.Text" InputCssClass=@((module.ModuleName!= moduleCopy.ModuleName)?"input_changed":"")/>
+                <HxInputText @bind-Value="moduleCopy.ModuleName" Label="Název modulu" Type="InputType.Text" InputCssClass=@((module.ModuleName!= moduleCopy.ModuleName)?"input_changed":"")/>
             </div>
             <div class="col">
-                <HxInputText @bind-Value="moduleCopy.ModuleShortName" Label="ShortName" Type="InputType.Text" />
+                <HxInputText @bind-Value="moduleCopy.ModuleShortName" Label="Zkrácený název" Type="InputType.Text" />
             </div>
         </div>
         <div class="row align-items-start">
             <div class="col">
-                <HxInputNumber Label="License Number" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="moduleCopy.LicenseNumber" Enabled="false" />
+                <HxInputNumber Label="Číslo licence" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="moduleCopy.LicenseNumber" Enabled="false" />
             </div>
             <div class="col">
-                <HxInputNumber Label="Evidence type" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="moduleCopy.EvidenceType"/>
+                <HxInputNumber Label="Typ evidence" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="moduleCopy.EvidenceType"/>
             </div>
         </div>
 
-        <HxSwitch Text="Only users by ID of module" @bind-Value="@moduleCopy.OnlyUsersByIdOfModule" />
+        <HxSwitch Text="Zobrazit pouze uživatele modulu" @bind-Value="@moduleCopy.OnlyUsersByIdOfModule" />
 
         <div class="d-grid gap-2">
             <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
@@ -44,8 +44,8 @@
     {
         get
         {
-            if (formType == EForm.Insert) return "Insert";
-            return "Update";
+            if (formType == EForm.Insert) return "Vložit";
+            return "Aktualizovat";
         }
     }
     private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);

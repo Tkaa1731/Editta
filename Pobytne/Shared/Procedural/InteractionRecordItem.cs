@@ -13,7 +13,8 @@ namespace Pobytne.Shared.Procedural
         public required int Order { get; set; }
         public required bool IsBalanceCheck {  get; set; }
         public required bool IsClientRequired {  get; set; }
-        public required ERecordType RecordType { get; set; }
+        public required bool IsSeasonTicket {  get; set; }
+		public required ERecordType RecordType { get; set; }
         public float PriceAmount 
         { 
             get 

@@ -4,7 +4,7 @@
 
 <ModuleNav idModule="@idModule"></ModuleNav>
 
-<div class="row">
+<div class="row h-100">
 	<div class="col">
 
 		<HxListLayout TFilterModel="HxListLayout.NoFilter">
@@ -15,8 +15,10 @@
 				<HxGrid @ref="grid" 
 						TItem="Evidence"
 						DataProvider="GetGridData"
-						PageSize="20"
 						Responsive="true"
+						ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
+						TableContainerCssClass="scrollable-table-container"
+						HeaderRowCssClass="sticky-top"
 						>
 					<Columns>
 						@if (ShowGroups)
@@ -25,7 +27,7 @@
 							<HxGridColumn HeaderText="Název" ItemTextSelector="evidence => evidence.RecordName" SortKeySelector="evidence => evidence.RecordName"/>
 							<HxGridColumn HeaderText="Kusy" ItemTextSelector="evidence => evidence.Quantity.ToString()" />
 							<HxGridColumn HeaderText="Dospělí" ItemTextSelector="evidence => evidence.Adult.ToString()" />
-							<HxGridColumn HeaderText="Dítě" ItemTextSelector="evidence => evidence.Child.ToString()" />							<HxGridColumn HeaderText="Název vlastnosti" ItemTextSelector="evidence => evidence.RecordPropertyName" SortKeySelector="evidence=>evidence.RecordPropertyName"/>						
+							<HxGridColumn HeaderText="Dítě" ItemTextSelector="evidence => evidence.Child.ToString()" />	
 							<HxGridColumn HeaderText="ÚčetA" ItemTextSelector="evidence => evidence.AccountA.ToString()" SortKeySelector="evidence=>evidence.AccountA"/>						
 							<HxGridColumn HeaderText="ÚčetS" ItemTextSelector="evidence => evidence.AccountS.ToString()" SortKeySelector="evidence=>evidence.AccountS"/>	
 						}
@@ -49,7 +51,7 @@
 		</HxListLayout>
 
 	</div>
-	<div class="col-4" style="max-width:500px">
+	<div class="col-4 d-flex flex-column overflow-hidden mh-100" style="max-width:500px">
 		<div class="p-3 border rounded mb-3">
 			<div class="row">
 				<h5 class="col">Kusy</h5>
@@ -75,36 +77,39 @@
 			ExcelEnable="@(reportsList.Count > 0)"
 		>
 			<FilterTemplate>
-				@*More Filter *@
-				<div class="row">
-				<HxSelect TItem="Radio"
-							  TValue="int?"
-							  Label="OSPOD"
-							  Data="OSPODList"
-							  @bind-Value="filter.OSPOD"
-							  Nullable="true"
-							  TextSelector="@(m => m.Name)"
-							  ValueSelector="@(m => m.Id)" 
-							  CssClass="col"/>
-				<HxSelect TItem="Radio"
-							  TValue="int?"
-							  Label="Typ dohody"
-							  Data="typeList"
-							  @bind-Value="filter.ContractType"
-							  Nullable="true"
-							  TextSelector="@(m => m.Name)"
-							  ValueSelector="@(m => m.Id)" 
-							  CssClass="col"/>
-				</div>
-				<div class="row">
-					<HxInputText Label="Uzivatel" Enabled="false" CssClass="col" InputCssClass="bg-white border-right-0" @bind-Value="clientName">
-						<InputGroupEndTemplate>
-							@if (selectedClient is not null)
-							{
-								<HxButton Icon="@BootstrapIcon.XLg" style="color:red;" Color="ThemeColor.Link" OnClick="()=>selectedClient = null" CssClass="border-top border-bottom" />
-							}
-							<HxButton Text="" Color="ThemeColor.Primary" Outline="true" Icon="BootstrapIcon.Search" OnClick="async()=>await clientsModal.ShowAsync()" />
-						</InputGroupEndTemplate>
+				<div>			
+					@*More Filter *@
+	@* 				<div class="row">
+					<HxSelect TItem="Radio"
+								  TValue="int?"
+								  Label="OSPOD"
+								  Enabled="false"
+								  Data="radioList"
+								  @bind-Value="filter.OSPOD"
+								  Nullable="true"
+								  TextSelector="@(m => m.Name)"
+								  ValueSelector="@(m => m.Id)" 
+								  CssClass="col"/>
+					<HxSelect TItem="Radio"
+								  TValue="int?"
+								  Label="Typ dohody"
+								  Enabled="false"
+								  Data="radioList"
+								  @bind-Value="filter.ContractType"
+								  Nullable="true"
+								  TextSelector="@(m => m.Name)"
+								  ValueSelector="@(m => m.Id)" 
+								  CssClass="col"/>
+					</div> *@
+
+					<HxInputText Label="Uzivatel" Enabled="false" CssClass="col" InputCssClass="bg-white border-end-0" @bind-Value="clientName">
+							<InputGroupEndTemplate>
+								@if (selectedClient is not null)
+								{
+									<HxButton Icon="@BootstrapIcon.XLg" style="color:red;" Color="ThemeColor.Link" OnClick="()=>selectedClient = null" CssClass="border-top border-bottom text-danger" />
+								}
+								<HxButton Text="" Color="ThemeColor.Primary" Outline="true" Icon="BootstrapIcon.Search" OnClick="async()=>await clientsModal.ShowAsync()" />
+							</InputGroupEndTemplate>
 					</HxInputText>
 				</div>
 
@@ -136,13 +141,9 @@
 	</FooterTemplate>
 </HxModal>
 <style>
-	div.dark {
-		background-color: #0a1725;
-		color: #fff;
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-	}
-	.border-right-0{
-		border-right: none;
+	.scrollable-table-container {
+		max-height: 60vh;
+		overflow: auto;
 	}
 </style>
 @code 
@@ -168,7 +169,6 @@
 	{
 		ModuleId = null,// change
 		ClientId = null,
-		RecordId = null,
 		From = DateTime.Today,
 		To = DateTime.Today.AddDays(1),
 		OSPOD = null,
@@ -182,23 +182,6 @@
 		new() { Id = 2, Name = "Dle vlastnosti" },
 		new() { Id = 3, Name = "Dle uživatele" },
 	};
-
-	private readonly List<Radio> OSPODList = new()
-	{
-		new() { Id = 1, Name = "Karviná" },
-		new() { Id = 2, Name = "Třinec" },
-		new() { Id = 3, Name = "Jabluňkov" },
-		new() { Id = 4, Name = "Havířov" },
-		new() { Id = 5, Name = "Orlová" },
-		new() { Id = 6, Name = "Český Těšín" },
-	};
-	private readonly List<Radio> typeList = new()
-	{
-		new() { Id = 1, Name = "RodinyVRozvodu" },
-		new() { Id = 2, Name = "OhrozeneRodiny" },
-		new() { Id = 3, Name = "VychovaAPece" },
-		new() { Id = 4, Name = "Ostatni" }
-	};
 	private bool compareCheckBox = false;
 	/// <summary>
 	/// Functions
@@ -206,6 +189,7 @@
 	protected override async Task OnInitializedAsync()
 	{
 		moduleWorkplace.ModuleId = idModule;
+		filter.ModuleId = moduleWorkplace.Id;
 
 		await ApplyFilter(filter);
 	}
@@ -275,7 +259,7 @@
 		if(_filter is EvidenceFilter f)
 		{
 			f.ClientId = selectedClient?.Id;
-
+			// filter prepared
 			var response = await _service.GetFilteredReports<EvidenceFilter,Evidence>(f,moduleWorkplace.Id);
 
 			if (response is null)

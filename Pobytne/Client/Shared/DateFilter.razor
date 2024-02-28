@@ -1,5 +1,5 @@
 ﻿@using Havit
-<div class="my-3">
+<div class="my-2">
 	<div class="form-label">Obdobi</div>
 	<div class="form-check form-check-inline" >
 		<input class="form-check-input" type="radio" name="dateRadios" id="radio1" @onchange="@(() => RadioChanged("today"))" checked>
@@ -33,12 +33,12 @@
 			Vyber obdobi
 		</label>
 	</div>
-	<div class="row">
+	<div class="row pt-1">
 		<div class="col">
-			<HxInputDate Enabled="@(selectedOption == "date")" CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Filter.From" Label="Od" CssClass="ml-0" />
+			<HxInputDate Enabled="@(selectedOption == "date")" CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Filter.From" />
 		</div>
 		<div class="col">
-			<HxInputDate Enabled="@(selectedOption == "date")" CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Filter.To" MinDate=Filter.From Label="Do" />
+			<HxInputDate Enabled="@(selectedOption == "date")" CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Filter.To" MinDate=Filter.From/>
 		</div>
     </div>
 </div>

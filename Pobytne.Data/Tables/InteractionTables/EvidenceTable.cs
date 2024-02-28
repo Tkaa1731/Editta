@@ -35,7 +35,7 @@ namespace Pobytne.Data.Tables.InteractionTables
                                     zv.Nazev AS RecordPropertyName, zv.UcetA AS AccountA, zv.UcetS AS AccountS
                                 FROM P_Evidence e
                                 JOIN P_Interakce i ON i.IDInterakce = e.IDInterakce
-                                JOIN S_Uzivatele u ON i.IDUzivatele = u.IDUzivatele	
+                                LEFT JOIN S_Uzivatele u ON i.IDUzivatele = u.IDUzivatele	
                                 JOIN S_Zaznamy z ON e.IDZaznamu = z.IDZaznamu
                                 JOIN S_LoginUser l ON l.IDLogin = e.Kdo 
                                 LEFT JOIN S_ZaznamyVlastnosti zv ON zv.IDZaznamuVlastnosti = z.IDZaznamuVlastnosti";
@@ -53,15 +53,18 @@ namespace Pobytne.Data.Tables.InteractionTables
             result.Add("@DateEnd", filter.To);
             strBuilder.Append(" Datum BETWEEN @DateStart AND @DateEnd ");
 
-            if(filter.ModuleId is not null && filter.ModuleId > 0)
-            {
-				result.Add("@IDMudulu", filter.ModuleId);
-				strBuilder.Append(" AND i.IDModulu = @IDMudulu ");
-			}
+            result.Add("@IDMudulu", filter.ModuleId);
+            strBuilder.Append(" AND i.IDModulu = @IDMudulu ");
+
 			if (filter.ClientId is not null && filter.ClientId > 0)
 			{
 				result.Add("@IDUzivatele", filter.ClientId);
 				strBuilder.Append(" AND i.IDUzivatele = @IDUzivatele ");
+			}
+			if (filter.RecordsId.Count > 0)
+			{
+				result.Add("@RecordId", filter.RecordsId);
+				strBuilder.Append(" AND p.IDZaznamu IN @RecordId ");
 			}
 
 			strBuilder.Append(';');

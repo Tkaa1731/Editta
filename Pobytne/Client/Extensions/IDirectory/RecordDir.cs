@@ -3,26 +3,20 @@ using Havit.Blazor.Components.Web.Bootstrap;
 using Pobytne.Client.Services;
 using Pobytne.Shared.Procedural;
 using Pobytne.Shared.Struct;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace Pobytne.Client.Extensions.IDirectory
 {
-    public class RecordDir : IDirectory
+	public class RecordDir(PobytneService service, Record record) : IDirectory
     {
-        private readonly PobytneService _service;
-        public RecordDir( PobytneService service, Record record ) 
-        {
-            _service = service;
-            _record = record;
-        }
-        public Record _record {  get; set; }
+        private readonly PobytneService _service = service;
+		public readonly Record Record = record;
 
-        public string Name => _record.Name;
 
+        public int Id => Record.Id;
+		public string Name => Record.Name;
         public IconBase Icon { get; set; } = BootstrapIcon.Folder2Open;
-        private List<Record> subRecords { get; set; } = [];
-        private List<Record> SubRecords 
+        private List<Record> subRecords = [];
+        public List<Record> SubRecords //Vsechny podzaznamy o jednu vrstvu nize
         { 
             get { 
                 return subRecords; 
@@ -39,9 +33,9 @@ namespace Pobytne.Client.Extensions.IDirectory
             } 
         }
 
-        public List<IDirectory> SubDirectories { get; set; } = [];
+        public List<IDirectory> SubDirectories { get; set; } = [];//Slozky typu RecordDir
 
-        public List<IListItem> ItemsList => SubRecords.Select(r => r as IListItem).ToList();
+        public List<IListItem> ItemsList => SubRecords.Select(r => r as IListItem).ToList();// IListItem Pro Zobrazeni v listu
 
         public Task AddNew()
         {
@@ -51,12 +45,12 @@ namespace Pobytne.Client.Extensions.IDirectory
         public IListItem GetNew() => new Record()
         {
             Id = 0,
-            ParentId = _record.Id,
-            RootId = _record.RootId,
-            ModuleId = _record.ModuleId,
-            StructDepth = _record.StructDepth + 1,
+            ParentId = Record.Id,
+            RootId = Record.RootId,
+            ModuleId = Record.ModuleId,
+            StructDepth = Record.StructDepth + 1,
             Order = this.subRecords.Count,
-            //CreationDate = DateTime.Now,
+            //CreationDate = DateTime.Now, //Implementovano v databazi
             //CreationUserId = 1,// TODO: author id
             ValidFrom = DateTime.Now,
             ValidTo = DateTime.Now.AddYears(1),
@@ -67,11 +61,11 @@ namespace Pobytne.Client.Extensions.IDirectory
             if(SubRecords.Count <= 0)
             {
                 object? response;
-                if(_record.Id <= 0)// root
-                    response = await _service.GetAllAsync<Record>($"RecordsRoot?moduleId={_record.ModuleId}",_record.ModuleId);
+                if(Record.Id <= 0)// root
+                    response = await _service.GetAllAsync<Record>($"RecordsRoot?moduleId={Record.ModuleId}",Record.ModuleId);
 
                 else
-                    response = await _service.GetAllAsync<Record>($"RecordsBranch?parentId={_record.Id}",_record.ModuleId);
+                    response = await _service.GetAllAsync<Record>($"RecordsBranch?parentId={Record.Id}",Record.ModuleId);
 
                 if (response is null)
                     Console.WriteLine($"NO RESPONSE");
