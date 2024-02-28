@@ -13,7 +13,7 @@ namespace Pobytne.Server.Controllers
     [Authorize]
     public class UserController : ControllerBase
     {
-        private UserService _userService;
+        private readonly UserService _userService;
 		public const EPermition permition = EPermition.LoginUser;
 
 		public UserController(UserService userService)

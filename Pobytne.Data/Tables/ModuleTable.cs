@@ -46,7 +46,37 @@ namespace Pobytne.Data.Tables
                 return result.FirstOrDefault();
             }
         }
-        public async Task<int?> Insert(Module item)
+		public async Task<int> InsUpTran(DynamicParameters param)
+		{
+			string cashRegisterSQL = "p_sp_Moduly_InsUp";
+			using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+			int success = await cnn.ExecuteAsync(cashRegisterSQL, param, commandType: CommandType.StoredProcedure);
+
+			if (success == 1)
+				return 1;
+
+			throw new Exception($"Failed 'p_sp_Moduly_InsUp' {success}");
+		}
+		public DynamicParameters GetParamsForTrans(Module module, bool delete)
+		{
+			var result = new DynamicParameters();
+			result.Add("@IDModulu", module.Id, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
+			object? template = new
+			{
+				Nazev = module.Name,
+				ZkracenyNazev = module.ModuleShortName,
+				CisloLicence = module.LicenseNumber,
+				TypEvidence = module.EvidenceType,
+				JenUzivatelDleIDModulu = module.OnlyUsersByIdOfModule,
+				Kdo = module.CreationUserId,
+				Kdy = module.CreationDate,
+
+				Smazat = delete ? 1 : 0,
+			};
+			result.AddDynamicParams(template);
+			return result;
+		}
+		public async Task<int?> Insert(Module item)
         {
             using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
             return await cnn.InsertAsync(item);

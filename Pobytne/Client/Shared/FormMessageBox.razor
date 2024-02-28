@@ -9,7 +9,7 @@
         @switch (formItem)
         {
             case User user:
-                @if(user.AccessPermition is null)
+                @if(user.AccessPermition is null || user.AccessPermition.Count == 0)
                 {
                     <UserForm user=user formType=formType OnValidSubmit="Request" ></UserForm>
                     break;
@@ -55,11 +55,11 @@
         formType = EForm.Insert;
         await myModal.ShowAsync();
     }
-    private void HandleHideClick()
+    private async Task HandleHideClick()
     {
         headerText = "";
         headerStyle = "";
-        // await myModal.HideAsync();
+        await myModal.HideAsync();
     }
     private async Task GetAuthor()
     {
@@ -103,7 +103,7 @@
         if(formItem is not null)
         {   
             headerStyle = "text-danger";
-            await GetAuthor();
+            await GetAuthor();// nastavi creation date a creationUserId 
 
             switch (formItem)
             {
@@ -111,7 +111,12 @@
                     if (user.AccessPermition is null)
                         await CompleteReq(request, user);
                     else
-                        await CompleteReq(request, user.AccessPermition.First());// je jenom jedna, jedna konkretniho modulu
+                    {
+                        var permition = user.AccessPermition.First();// je jenom jedna, jedna konkretniho modulu
+                        permition.CreationDate = user.CreationDate;// kopie nastavenzch hodnot
+                        permition.CreationUserId = user.CreationUserId;
+                        await CompleteReq(request,permition);
+                    }
                     break;
                 case Module module:
                     await CompleteReq(request, module);
@@ -126,7 +131,7 @@
 
             await Task.Delay(1000);
 
-            HandleHideClick();
+            await HandleHideClick();
         }
     }
 //TODO: pri failu obnovit hodnoty // kopie?

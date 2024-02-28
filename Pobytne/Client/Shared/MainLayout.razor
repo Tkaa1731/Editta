@@ -4,50 +4,34 @@
 <div class="page">
     <AuthorizeView>
         <Authorized>
-            <div class="sidebar  w-auto" style="background-color:#061726">
+            <div class="sidebar w-auto dark shadow">
                 <NavMenu OnLogout="Logout" />
             </div>
-        </Authorized>
-    </AuthorizeView>
 
-    <main>
-        <AuthorizeView >
-            <NotAuthorized>
-                <Pobytne.Client.Pages.Login />
-            </NotAuthorized>
-            <Authorized>
+            <main>
 
                 <TokenExpirationCounter/>
+
                 <CascadingValue Value="moduleWorkplace">
-                    <div class="p-4 h-100">
+                    <div class="p-4" style="height:100svh;">
                         @Body 
                     </div>
                 </CascadingValue>
 
-            </Authorized>
-        </AuthorizeView>
-    </main>
+            </main>
+        
+        </Authorized>
+        <Authorizing>
+
+        </Authorizing>
+        <NotAuthorized>
+            <main>
+                <Pobytne.Client.Pages.Login/>
+            </main>
+        </NotAuthorized>
+    </AuthorizeView>
 </div>
-<style>
-    ::-webkit-scrollbar {
-        width: 20px;
-    }
 
-    ::-webkit-scrollbar-track {
-        background-color: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background-color: #d6dee1;
-        border-radius: 20px;
-        border: 6px solid transparent;
-        background-clip: content-box;
-    }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background-color: #a8bbbf;
-        }
-</style>
 @code {
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;

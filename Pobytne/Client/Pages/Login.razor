@@ -11,23 +11,23 @@
 				<div class="card shadow-2-strong" style="border-radius: 1rem;">
 					<div class="card-body p-5 text-center">
 
-						<h3 class="mb-5">Sign in</h3>
+						<h3 class="mb-5">Pobytné přihlášení</h3>
                         <EditForm Model="@logRequest" OnValidSubmit=Authenticate>
                             <DataAnnotationsValidator />
 
                             <div class="row align-items-start">
                                 <div class="col">
-                                    <HxInputText @bind-Value="logRequest.Name" Label="User login" Type="InputType.Text" />
+                                    <HxInputText @bind-Value="logRequest.Name" Label="Login" Type="InputType.Text" />
                                 </div>
                                 <div class="col">
-                                    <HxInputText @bind-Value="logRequest.Password" Label="Password" Type="InputType.Password" />
+                                    <HxInputText @bind-Value="logRequest.Password" Label="Heslo" Type="InputType.Password" />
                                 </div>
                             </div>
                             <div class="error-message">
                                 <p>@errorMessage</p>
                             </div>
                             <div class="d-grid gap-2">
-                                <HxSubmit Color="ThemeColor.Success">Login</HxSubmit>
+                                <HxSubmit Color="ThemeColor.Success">Přihlásit se</HxSubmit>
                             </div>
                         </EditForm>
 					</div>

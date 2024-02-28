@@ -33,13 +33,13 @@ namespace Pobytne.Data.Tables.InteractionTables
 		{
 			using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))// TODO: Odstranit Top 20
 			{
-				string sql = @" SELECT TOP 20 
+				string sql = @" SELECT TOP 25 
 									p.*,i.NazevInterakce, i.IDUzivatele, i.Datum, i.IDModulu, i.IDTypuPlatby, 
 									z.Nazev, z.IDZaznamuVlastnosti AS RecordPropertyId,u.JmenoUzivatele,l.JmenoUser AS CreationUserName,
 									zv.Nazev AS RecordPropertyName, zv.UcetA AS AccountA, zv.UcetS AS AccountS
 								FROM P_Pokladna p
 								JOIN P_Interakce i ON i.IDInterakce = p.IDInterakce
-								JOIN S_Uzivatele u ON i.IDUzivatele = u.IDUzivatele	
+								LEFT JOIN S_Uzivatele u ON i.IDUzivatele = u.IDUzivatele	
 								JOIN S_Zaznamy z ON p.IDZaznamu = z.IDZaznamu
 								JOIN S_LoginUser l ON l.IDLogin = p.Kdo 
 								LEFT JOIN S_ZaznamyVlastnosti zv ON zv.IDZaznamuVlastnosti = z.IDZaznamuVlastnosti";
@@ -55,20 +55,26 @@ namespace Pobytne.Data.Tables.InteractionTables
 
 			result.Add("@DateStart", filter.From);
 			result.Add("@DateEnd", filter.To);
-			strBuilder.Append(" Datum BETWEEN @DateStart AND @DateEnd ");
+			strBuilder.Append(" i.Datum BETWEEN @DateStart AND @DateEnd ");
 
-				if (filter.ModuleId is not null && filter.ModuleId > 0)
-				{
-					result.Add("@IDMudulu", filter.ModuleId);
-					strBuilder.Append(" AND i.IDModulu = @IDMudulu ");
-				}
-				if (filter.ClientId is not null && filter.ClientId > 0)
-				{
-					result.Add("@IDUzivatele", filter.ClientId);
-					strBuilder.Append(" AND i.IDUzivatele = @IDUzivatele ");
-				}
+            result.Add("@PaymentId", filter.PaymentId);
+            strBuilder.Append(" AND i.IDTypuPlatby = @PaymentId ");
 
-			strBuilder.Append(';');
+			result.Add("@IDMudulu", filter.ModuleId);
+			strBuilder.Append(" AND i.IDModulu = @IDMudulu ");
+
+			if (filter.ClientId is not null && filter.ClientId > 0)
+			{
+				result.Add("@IDUzivatele", filter.ClientId);
+				strBuilder.Append(" AND i.IDUzivatele = @IDUzivatele ");
+			}
+            if (filter.RecordsId.Count > 0)
+            {
+                result.Add("@RecordId", filter.RecordsId);
+                strBuilder.Append(" AND p.IDZaznamu IN @RecordId ");
+            }
+
+            strBuilder.Append(';');
 			condition = strBuilder.ToString();
 			return result;
 		}

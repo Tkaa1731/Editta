@@ -4,7 +4,7 @@
 
 <ModuleNav idModule="@idModule"></ModuleNav>
 
-<div class="row overflow-hidden">
+<div class="row h-100">
 	<div class="col">
 
 		<HxListLayout TFilterModel="HxListLayout.NoFilter">
@@ -18,7 +18,8 @@
 						PageSize="20"
 						Responsive="true"
 						ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
-						TableContainerCssClass="h-75 overflow-auto"
+						TableContainerCssClass="scrollable-table-container"
+						HeaderRowCssClass="sticky-top"
 						>
 					<Columns>
 						@if (ShowGroups)
@@ -46,8 +47,8 @@
 		</HxListLayout>
 
 	</div>
-	<div class="col-4" style="max-width:500px">
-		<div class="p-3 border rounded mb-3" style="text-align:right;">
+	<div class="col-4" style="display: flex;max-width:500px;flex-direction: column;overflow-y: hidden;max-height: 100%;">
+		<div class="p-3 border rounded mb-3">
 			@* Porovnani k pokladne *@
 			<h2>@reportsList.Sum(r => r.Price) Kč</h2>
 		</div>
@@ -60,28 +61,31 @@
 		>
 			<FilterTemplate>
 				@* Payment Filter *@
-				<HxSelect TItem="Payment"
-						  TValue="int?"
-						  Label="Platba"
-						  Data="paymentList"
-						  @bind-Value="filter.PaymentId"
-						  Nullable="false"
-						  TextSelector="@(p => p.Name)"
-						  ValueSelector="@(p => p.Id)"
-						  NullDataText="Načítání..."
-						  />
+				<div>
 
-				<div class="w-100 pt-3"/>
-				@*Client Filter *@
-				<HxInputText Enabled="false" InputCssClass="bg-white border-right-0" @bind-Value="clientName" Label="Uživatel">
-					<InputGroupEndTemplate>
-						@if (selectedClient is not null)
-						{
-							<HxButton Icon="@BootstrapIcon.XLg" style="color:red;" Color="ThemeColor.Link" OnClick="()=>selectedClient = null" CssClass="border-top border-bottom" />
-						}
-						<HxButton Text="" Color="ThemeColor.Primary" Outline="true" Icon="BootstrapIcon.Search" OnClick="async()=>await clientsModal.ShowAsync()" />
-					</InputGroupEndTemplate>
-				</HxInputText>
+					<HxSelect TItem="Payment"
+							  TValue="int?"
+							  Label="Platba"
+							  Data="paymentList"
+							  @bind-Value="filter.PaymentId"
+							  Nullable="false"
+							  TextSelector="@(p => p.Name)"
+							  ValueSelector="@(p => p.Id)"
+							  NullDataText="Načítání..."
+							  />
+
+					<div class="w-100 pt-1"/>
+					@*Client Filter *@
+					<HxInputText Label="Uzivatel" Enabled="false" CssClass="col" InputCssClass="bg-white border-end-0" @bind-Value="clientName">
+							<InputGroupEndTemplate>
+								@if (selectedClient is not null)
+								{
+									<HxButton Icon="@BootstrapIcon.XLg" Color="ThemeColor.Link" OnClick="()=>selectedClient = null" CssClass="border-top border-bottom text-danger" />
+								}
+								<HxButton Text="" Color="ThemeColor.Primary" Outline="true" Icon="BootstrapIcon.Search" OnClick="async()=>await clientsModal.ShowAsync()" />
+							</InputGroupEndTemplate>
+					</HxInputText>
+				</div>
 
 			</FilterTemplate>
 			<GroupByTemplate>
@@ -109,13 +113,9 @@
 	</FooterTemplate>
 </HxModal>
 <style>
-	div.dark {
-		background-color: #0a1725;
-		color: #fff;
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-	}
-	.border-right-0{
-		border-right: none;
+	.scrollable-table-container {
+		height: 100%;
+		overflow: auto;
 	}
 </style>
 @code {
@@ -142,7 +142,6 @@
 		PaymentId = null,// change
 		ModuleId = null,// change
 		ClientId = null,
-		RecordId = null,
 		From = DateTime.Today,
 		To = DateTime.Today.AddDays(1),
 	};
@@ -159,6 +158,7 @@
 	protected override async Task OnInitializedAsync()
 	{
 		moduleWorkplace.ModuleId = idModule;
+		filter.ModuleId = moduleWorkplace.Id;
 		//load payment enum
 		var response = await _service.GetAllAsync<Payment>($"?moduleNumber={moduleWorkplace.Id}", moduleWorkplace.Id);
 
@@ -169,7 +169,7 @@
 		else if (response is List<Payment> list)
 		{
 			paymentList = list;
-			filter.PaymentId = list.FirstOrDefault().Id;
+			filter.PaymentId = list.FirstOrDefault()?.Id;
 		}
 
 		await ApplyFilter(filter);
@@ -220,9 +220,8 @@
 		if(_filter is CashRegisterFilter f)
 		{
 			f.ClientId = selectedClient?.Id;
-			f.ModuleId = moduleWorkplace.Id;
-
 			//Filter prepared
+
 			var response = await _service.GetFilteredReports<CashRegisterFilter,CashRegister>(f,moduleWorkplace.Id);
 
 			if (response is null)

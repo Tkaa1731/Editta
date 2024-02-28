@@ -23,6 +23,7 @@ namespace Pobytne.Client.Extensions
 				return active;
 			} 
 		}
+		public bool SeasonTickedSelected = false;
 		public RecordTreeView(PobytneService service)
 		{
 			_service = service;

@@ -28,6 +28,9 @@
 	</NotAuthorized>
 </AuthorizeView>
 @code {
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkplace { get; set; } = default!;
+
     private IDirectory? selectedDirectory;
     private IListItem? selectedItem;
     private IListItem? formItem;
@@ -56,6 +59,7 @@
     }
     protected override async Task OnInitializedAsync()
     {
+        moduleWorkplace.Id = -1;
         fileSystem = new List<Directory>() { new Directory(service, "Pobytne licence") };
         await fileSystem[0].OnSelect();
     }

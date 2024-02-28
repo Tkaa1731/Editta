@@ -12,7 +12,7 @@
             <div class="col custom-scrollbar" style="overflow-y: scroll;max-height:90vh; min-width:14rem; "> 
                 @for(int j = 0; j < records[i].Count; j++)
                 {
-                    <RecordComponent Source=@records[i][j] OnClick=OnSelect></RecordComponent>
+                    <RecordComponent Source=@records[i][j] OnClick=OnSelect CssClass="@((recordPath[i]==records[i][j].Record.Id)?"record-active":"")"></RecordComponent>
                 }
             </div>
         }
@@ -82,12 +82,11 @@
 </HxModal>
 <style>
     .record-container:hover{
-        background: #f3f3f3;
+        background: #f6f6f6;
     }
     .record-container{
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-        
-    }
+    }    
     .blue{
         border-top:2px solid lightblue;
     }
@@ -99,6 +98,11 @@
     }
     .orange{
         border-top:2px solid orange;
+    }
+    .record-active.orange{
+        border-top:none;
+        background: #FFDB99;
+        @* color:white; *@
     }
     .virtualized-table-container {
 		height: 400px;
@@ -122,6 +126,7 @@
     private int maxDepth = 0;
     private Interaction interaction = new();
     private Dictionary<int,List<RecordTreeView>> records = new();
+    private int[] recordPath;
 
     private IListItem? selectedClient;
     private List<IListItem> AllClients = [];
@@ -137,7 +142,7 @@
             return interaction.Records.Sum(sr => sr.PriceAmount);
         }
     }
-    private string[] cardColor = {"#ADD8E6","#FFA500","#B576D5","#97D85A"};
+    private string[] cardColor = {"#ADD8E6","#FFA500","#B576D5","#ACE07B"};
     private IconBase[] cardIcon = { BootstrapIcon.CashCoin, BootstrapIcon.CreditCard, BootstrapIcon.Bank, BootstrapIcon.TicketPerforated };
 
     protected async override Task OnInitializedAsync()
@@ -149,6 +154,7 @@
         if (ServiceRequest<int>(depth) && depth is int d)
         {
             maxDepth = d+1;
+            recordPath = new int[d+1];
             for (int i = 0; i < maxDepth; i++)
                 records[i] = new();
 
@@ -177,9 +183,10 @@
         return false;
     }
     private async Task OnSelect(RecordTreeView rtv)
-    {
+    {  
         if(rtv.Record.RecordType == ERecordType.Folder)
         {
+            recordPath[rtv.Depth] = rtv.Record.Id;
             await rtv.LoadData();
             var selectedActive = rtv.SubRecords.Where(r => r.Active).ToList();
 
@@ -187,25 +194,45 @@
                 records[rtv.Depth + 1] = selectedActive;
 
             for (int i = rtv.Depth + 2; i < maxDepth; i++)
+            {
                 records[i].Clear();
+                recordPath[i] = -1;
+            }
         }
         else
         {
             var r = rtv.Record;
-            //TODO: Doresit pernamentky
-            interaction.Records.Add(
-                new() {
-                        RecordId = r.Id,
-                        Name = r.Name,
-                        Quantity = r.Quantity,
-                        Price = r.Price,
-                        Adult = r.Adult,
-                        Child = r.Child,
-                        Order = interaction.Records.Count,
-                        IsBalanceCheck = r.IsBalanceCheck,
-                        IsClientRequired = r.IsClientRequired,
-                        RecordType = r.RecordType
-                });
+            if(rtv.SeasonTickedSelected)
+                //TODO: Doresit pernamentky
+                interaction.Records.Add(
+                    new() {
+                            RecordId = r.Id,
+                            Name = r.Name,
+                            Quantity = r.GroupQuantity,
+                            Price = r.GroupPrice,
+                            Adult = r.Adult,
+                            Child = r.Child,
+                            Order = interaction.Records.Count,
+                            IsBalanceCheck = r.IsBalanceCheck,
+                            IsClientRequired = r.IsClientRequired,
+                            IsSeasonTicket = true,
+                            RecordType = r.RecordType
+                    });
+            else
+                interaction.Records.Add(
+                    new() {
+                            RecordId = r.Id,
+                            Name = r.Name,
+                            Quantity = r.Quantity,
+                            Price = r.Price,
+                            Adult = r.Adult,
+                            Child = r.Child,
+                            Order = interaction.Records.Count,
+                            IsBalanceCheck = r.IsBalanceCheck,
+                            IsClientRequired = r.IsClientRequired,
+                            IsSeasonTicket = false,
+                            RecordType = r.RecordType
+                    });
         }
     }
     private async Task SubmitHandler()// submit po zadani cele objednavky
@@ -255,6 +282,7 @@
             await js.InvokeAsync<string>("alert",$"Successfully inserted");
             //clear
             interaction = new();
+            recordPath = new int[maxDepth];
             for (int i = 1; i < maxDepth; i++)
                 records[i].Clear();
         }

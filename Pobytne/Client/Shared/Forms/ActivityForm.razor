@@ -66,8 +66,8 @@
     {
         get
         {
-            if (formType == EForm.Insert) return "Insert";
-            return "Update";
+            if (formType == EForm.Insert) return "Vložit";
+            return "Aktualizovat";
         }
     }
     private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);

@@ -3,62 +3,62 @@
     <EditForm Model="@license" OnValidSubmit=OnValidSubmitHandler>
         <DataAnnotationsValidator />
 
-        <div class="row align-items-start">
-            <div class="col-sm-7">
-                <HxInputText @bind-Value="license.NameOfOrganization" Label="Name of organization" Type="InputType.Text" />
+        <div class="row">
+            <div class="col-7">
+                <HxInputText @bind-Value="license.NameOfOrganization" Label="Název organizace" Type="InputType.Text" />
             </div>
-            <div class="col-sm">
+            <div class="col">
                 <HxInputNumber Label="ICO" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="license.ICO" @oninput="ICOChangedHandler" Enabled="formType == EForm.Insert" />
             </div>
-            <div class="col-sm">
-                <HxInputNumber Label="License Number" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="@license.ICO" Enabled="false"/>
+            <div class="col">
+                <HxInputNumber Label="Číslo licence" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="license.ICO" Enabled="false"/>
             </div>
         </div>
         <div class="row align-items-center">
             <div class="col">
-                <HxInputNumber Label="Version" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="license.VersionType" />
+                <HxInputNumber Label="Typ verze" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="license.VersionType" />
             </div>
             <div class="col">
-                <HxSwitch CssClass="mt-3" Text="Demo" @bind-Value="@license.IsDemo" />
+                <HxSwitch Text="Demo" @bind-Value="@license.IsDemo" />
             </div>
             <div class="col">
-                <HxSwitch CssClass="mt-3" Text="Blocked" @bind-Value="@license.IsBlocked" />
+                <HxSwitch Text="Blokovaná" @bind-Value="@license.IsBlocked" />
             </div>
             <div class="col">
-                <HxSwitch CssClass="mt-3" Text="Payed" @bind-Value="@license.IsPayed" />
+                <HxSwitch Text="Zaplacená" @bind-Value="@license.IsPayed" />
             </div>
         </div>
-        <div class="row align-items-start">
+        <div class="row">
             <div class="col">
-                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidTo" MinDate="DateTime.Now.AddDays(1)" Label="Valid To" />
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidTo" MinDate="DateTime.Now.AddDays(1)" Label="Platná od" />
             </div>
             <div class="col">
-                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.DateOfPayment"  Label="Date of payment" Enabled="license.IsPayed" />
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.DateOfPayment"  Label="Datum platby" Enabled="license.IsPayed" />
             </div>
         </div>
         <hr style="height: 2px;color: #999;">
-        <div class="row align-items-start">
+        <div class="row">
             <div class="col">
-                <HxInputText @bind-Value="license.ContactPerson" Label="Name of contact person" Type="InputType.Text" />
+                <HxInputText @bind-Value="license.ContactPerson" Label="Jméno kontaktní osoby" Type="InputType.Text" />
             </div>
         </div>
-        <div class="row align-items-start">
-            <div class="col-sm-7">
+        <div class="row">
+            <div class="col-7">
                 <HxInputText @bind-Value="license.Email" Label="Email" Type="InputType.Email" />
             </div>
-            <div class="col-sm">
-                <HxInputText @bind-Value="license.PhoneNumber" Label="Phone number" Type="InputType.Tel" />
+            <div class="col">
+                <HxInputText @bind-Value="license.PhoneNumber" Label="Telefonní číslo" Type="InputType.Tel" />
             </div>
         </div>
-        <div class="row align-items-start">
-            <div class="col-sm">
-                <HxInputText @bind-Value="license.City" Label="City" Type="InputType.Text" />
+        <div class="row">
+            <div class="col">
+                <HxInputText @bind-Value="license.City" Label="Obec" Type="InputType.Text" />
             </div>
-            <div class="col-sm">
-                <HxInputText @bind-Value="license.Street" Label="Street" Type="InputType.Text" />
+            <div class="col">
+                <HxInputText @bind-Value="license.Street" Label="Ulice" Type="InputType.Text" />
             </div>
-            <div class="col-sm-3">
-                <HxInputText @bind-Value="license.PostNumber" Label="Post number" Type="InputType.Text" />
+            <div class="col-3">
+                <HxInputText @bind-Value="license.PostNumber" Label="PSČ" Type="InputType.Text" />
             </div>
         </div>
         <div class="d-grid gap-2 mt-3">
@@ -79,8 +79,8 @@
     {
         get
         {
-            if (formType == EForm.Insert) return "Insert";
-            return "Update";
+            if (formType == EForm.Insert) return "Vložit";
+            return "Aktualizovat";
         }
     }
     private async Task OnValidSubmitHandler()

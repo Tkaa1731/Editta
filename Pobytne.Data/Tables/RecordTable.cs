@@ -7,21 +7,21 @@ namespace Pobytne.Data.Tables
 {
     public class RecordTable
     {
-        public async Task<IEnumerable<Record>> GetBranch(object conditions)
-        {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
-            {
-                string sql = @"SELECT z.*, sz.*, u.JmenoUser AS CreationUserName, zv.Nazev AS RecordPropertiesName
+		public async Task<IEnumerable<Record>> GetSubRecords(object conditions)
+		{
+			using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+			{
+				string sql = @"SELECT z.*, sz.*, u.JmenoUser AS CreationUserName, zv.Nazev AS RecordPropertiesName
                                 FROM S_Zaznamy z
                                 JOIN S_StrukturaZaznamu sz ON z.IDZaznamu = sz.IDZaznamu
 								LEFT JOIN S_ZaznamyVlastnosti zv ON z.IDZaznamuVlastnosti = zv.IDZaznamuVlastnosti
                                 JOIN S_LoginUser u ON z.Kdo = u.IDLogin
-                                WHERE sz.IDParent = @ParentID;";
+                                WHERE sz.IDParent IN @ParentID;";
 
-                return await cnn.QueryAsync<Record>(sql, conditions);
-            }
-        }
-        public async Task<IEnumerable<Record>> GetRoot(object conditions)
+				return await cnn.QueryAsync<Record>(sql, conditions);
+			}
+		}
+		public async Task<IEnumerable<Record>> GetRoot(object conditions)
         {
             using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
             {
@@ -53,7 +53,18 @@ namespace Pobytne.Data.Tables
                 return await cnn.QueryFirstAsync<int>(sql,conditions);
             }
         }
-        public async Task<int?> Insert(Record record)
+		public async Task<int> InsUpTran(DynamicParameters param)
+		{
+			string cashRegisterSQL = "p_sp_Zaznamy_InsUp";
+			using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+			int success = await cnn.ExecuteAsync(cashRegisterSQL, param, commandType: CommandType.StoredProcedure);
+
+			if (success == 1)
+				return 1;
+
+			throw new Exception($"Failed 'p_sp_Zaznamy_InsUp' {success}");
+		}
+		public async Task<int?> Insert(Record record)
         {
             using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
             return await cnn.InsertAsync(record);

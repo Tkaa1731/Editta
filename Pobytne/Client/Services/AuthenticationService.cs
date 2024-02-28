@@ -27,7 +27,7 @@ namespace Pobytne.Client.Services
 			{
 				await SaveUserAccount(user);
 				// var customAuthStateProvider = new CustomAuthenticationStateProvider(this);
-				(sp.GetService<AuthenticationStateProvider>() as CustomAuthenticationStateProvider).UpdateAuthenticationState();
+				(sp.GetService<AuthenticationStateProvider>() as CustomAuthenticationStateProvider)!.UpdateAuthenticationState();
 			}
 			return Task.CompletedTask;
 		} // update Token
@@ -42,7 +42,7 @@ namespace Pobytne.Client.Services
 				await SaveUserAccount(user);
 				//var customAuthStateProvider = new CustomAuthenticationStateProvider(this);
 				//customAuthStateProvider.UpdateAuthenticationState();
-				(sp.GetService<AuthenticationStateProvider>() as CustomAuthenticationStateProvider).UpdateAuthenticationState();
+				(sp.GetService<AuthenticationStateProvider>() as CustomAuthenticationStateProvider)!.UpdateAuthenticationState();
 				return true;
 			}
 			return false;
@@ -52,7 +52,7 @@ namespace Pobytne.Client.Services
 			await Revoke();// odhlas ze serveru a odstran ze storage
 
 			//var customAuthStateProvider = new CustomAuthenticationStateProvider(this);
-			(sp.GetService<AuthenticationStateProvider>() as CustomAuthenticationStateProvider).UpdateAuthenticationState();// odhlas od klienta
+			(sp.GetService<AuthenticationStateProvider>() as CustomAuthenticationStateProvider)!.UpdateAuthenticationState();// odhlas od klienta
 		}
 
 		public async Task Revoke()

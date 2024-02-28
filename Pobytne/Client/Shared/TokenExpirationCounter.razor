@@ -1,8 +1,8 @@
 ﻿@inject AuthenticationService service
 
-<div style="position: fixed; bottom: 0; right: 0; z-index: 1500;">
-	<div class="m-5 dark @Rounded" style="display: flex; flex-direction: row;" @onmouseenter="()=>OnMouseEvent(false)" @onmouseleave="()=>OnMouseEvent(true)">
-        <div class="p-2" style="width:58px; display:flex; justify-content:center; " >
+<div class="position-fixed bottom-0 end-0 " style="z-index:1500;">
+    <div class="mb-5 me-5 shadow dark text-white @Rounded d-flex flex-row" @onmouseenter="()=>OnMouseEvent(false)" @onmouseleave="()=>OnMouseEvent(true)">
+        <div class="p-2 mx-2 w-auto justify-content-center flex-row" >
             <HxIcon Icon="BootstrapIcon.Stopwatch" CssClass="fs-3"/>
         </div>
         <div class="collapse collapse-horizontal @Show p-2" id="timerCollapse">
@@ -10,13 +10,6 @@
         </div>
     </div>
 </div>
-<style>
-    div.dark{
-        background-color: #0a1725;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        color: white;
-    }
-</style>
 @code {
     private System.Threading.Timer? timer;
     private TimeSpan ExpiresIn;

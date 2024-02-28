@@ -14,12 +14,14 @@ namespace Pobytne.Server.Service
         private readonly InteractionTable _interTable;
         private readonly EvidenceTable _evidTable;
         private readonly CashRegisterTable _cashTable;
+        private readonly RecordService _recordService;
 
-        public InteractionService(InteractionTable interactiontable,EvidenceTable evidenceTable, CashRegisterTable cashRegisterTable)
+        public InteractionService(InteractionTable interactiontable,EvidenceTable evidenceTable, CashRegisterTable cashRegisterTable, RecordService recordService)
         {
             _interTable = interactiontable;
             _evidTable = evidenceTable;
             _cashTable = cashRegisterTable;
+            _recordService = recordService;
         }
 
         public async Task<int?> Insert(Interaction interaction)
@@ -47,7 +49,7 @@ namespace Pobytne.Server.Service
                         Kdo = interaction.CreationUserId,
                         Kdy = interaction.CreationDate,
                     };
-                    foreach (var r in interaction.Records.Where(r => r.RecordType == ERecordType.Ware && r.Quantity != 0))
+                    foreach (var r in interaction.Records.Where(r => r.Adult != 0 || r.Child != 0 || r.Quantity != 0 || r.IsSeasonTicket))// KDY Evidence
                     {
                         param = _evidTable.GetParamsForTrans(r, delete);
                         param.AddDynamicParams(interactionParam);
@@ -82,11 +84,21 @@ namespace Pobytne.Server.Service
         }
         public async Task<IEnumerable<CashRegister>> GetFilteredReports(CashRegisterFilter filter)
         {
+            var recordsId = await _recordService.GetAllSubRecords(filter.RecordsId);// Get All SubRecords
+            filter.RecordsId.Clear();
+            if(recordsId is not null)
+                filter.RecordsId.AddRange(recordsId);
+
 			var condition = _cashTable.HandleCondition(filter, out string SQL_Where);
 			return await _cashTable.SelectByCondition(condition, SQL_Where);
         }
 		public async Task<IEnumerable<Evidence>> GetFilteredReports(EvidenceFilter filter)
 		{
+			var recordsId = await _recordService.GetAllSubRecords(filter.RecordsId);// Get All SubRecords
+			filter.RecordsId.Clear();
+			if (recordsId is not null)
+				filter.RecordsId.AddRange(recordsId);
+
 			var condition = _evidTable.HandleCondition(filter, out string SQL_Where);
 			return await _evidTable.SelectByCondition(condition, SQL_Where);
 		}
