@@ -8,7 +8,7 @@ namespace Pobytne.Client.Authentication
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
         private readonly AuthenticationService _service;
-        private ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
+        private readonly ClaimsPrincipal _anonymous = new(new ClaimsIdentity());
         public CustomAuthenticationStateProvider(AuthenticationService service)
         {
             _service = service;

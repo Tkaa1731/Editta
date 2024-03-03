@@ -3,8 +3,9 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
-body{
-    overflow-y:hidden;
+body {
+    overflow-y: hidden;
+    background-color: #f9fafd !important;
 }
 h1:focus {
     outline: none;
@@ -115,7 +116,7 @@ a.no-link {
 }
 
 ::-webkit-scrollbar-track {
-    background-color: transparent;
+    background-color: inherit;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -131,4 +132,20 @@ a.no-link {
 
 .dark {
     background-color: #061726;
+}
+.card.floating-card, .floating-card >.card {
+    box-shadow: 0px 0px 35px 0px rgba(154, 161, 171, 0.15)!important;
+    border:0;
+}
+
+.btn.btn-danger.btn-custom{
+    background-color: #ea7c90 !important;
+    border:none;
+}
+.btn.btn-success.btn-custom {
+    background-color: #50a732 !important;
+    border: none;
+}
+.bg-orange {
+    background-color: #f5c75d !important;
 }

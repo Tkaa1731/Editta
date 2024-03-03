@@ -22,6 +22,9 @@
             case License license:
                 <LicenseForm license=license formType=formType OnValidSubmit="Request"></LicenseForm>
                 break;
+            case Client client:
+                <ClientForm client="client" formType="formType" OnValidSubmit="Request"/>
+                break;
         }
     </BodyTemplate>
 </HxModal>
@@ -29,15 +32,13 @@
 @code
 {
     [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; } = default!;
-    [CascadingParameter]
-    private ModuleWorkplace moduleWorkplace { get; set; } = default!;
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
 
     [Parameter]
     public EventCallback OnSuccessRequest{ get; set; }
     [Parameter]
     [EditorRequired]
-    public IListItem? formItem{ get; set; }
+    public required IListItem formItem{ get; set; }
     private EForm formType;
 
     public HxModal myModal = new();
@@ -47,11 +48,13 @@
 
     public async Task UpdateForm()
     {
+        var t = formItem;
         formType = EForm.Update;
         await myModal.ShowAsync();
     }
     public async Task InsertForm()
     {
+        var t = formItem;
         formType = EForm.Insert;
         await myModal.ShowAsync();
     }
@@ -61,27 +64,14 @@
         headerStyle = "";
         await myModal.HideAsync();
     }
-    private async Task GetAuthor()
-    {
-        var authState = await authenticationState;
-        if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated && formItem is not null)
-        {
-            formItem.CreationDate = DateTime.Now;
-            ClaimsPrincipal cp = authState.User;
-            string? id = cp.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
-            if (id is not null)
-                formItem.CreationUserId = Int32.Parse(id); 
-            else
-                Console.WriteLine("PRBLEM WITH AUTHORIZATION");
-        }
-    }
+
     private async Task  CompleteReq<T>(EForm e,T obj)
     {
         object? response = null;
         if(e == EForm.Update)
-            response = await service.UpdateAsync(obj, moduleWorkplace.Id);
+            response = await service.UpdateAsync(obj, moduleWorkspace.Id);
         else if(e == EForm.Insert)
-            response = await service.InsertAsync(obj, moduleWorkplace.Id);
+            response = await service.InsertAsync(obj, moduleWorkspace.Id);
 
         if (response is null || response is ErrorResponse)
         {
@@ -103,7 +93,9 @@
         if(formItem is not null)
         {   
             headerStyle = "text-danger";
-            await GetAuthor();// nastavi creation date a creationUserId 
+
+            formItem.CreationDate = DateTime.Now;
+            formItem.CreationUserId = moduleWorkspace.UserId;
 
             switch (formItem)
             {
@@ -134,5 +126,5 @@
             await HandleHideClick();
         }
     }
-//TODO: pri failu obnovit hodnoty // kopie?
+//TODO: zobrazovani modulu nefingije, zobrazuje vzdy predposledni
 }

@@ -6,19 +6,19 @@
 <AuthorizeView>
     <Authorized>
 
-    <div class="row">
-        <div class="col-lg-3">
+    <div class="row h-100">
+        <div class="col-lg-3 mh-100 overflow-hidden">
             <HxTreeView TItem="IDirectory"
                         SelectedItemChanged="OnSelect"
                         Items="@fileSystem"
-                        CssClass="border rounded p-2"
+                        CssClass="p-3 card floating-card h-auto"
                         ItemTitleSelector="@(p => p.Name)"
                         ItemIconSelector="@(p => p.Icon)"
                         ItemInitialExpandedSelector=@(p => p.Name=="Pobytne licence")
                         ItemChildrenSelector="@(p => p.SubDirectories)" />
         </div>
-        <div class="col-lg-9">
-            <ListCustom ListItems=@listOfItems selectedItem=selectedItem selectedItemChanged=OnItemSelect EventNewItem="OnNewItem"></ListCustom>
+        <div class="col-lg-9 mh-100 overflow-hidden">
+            <ListCustom ListTitle="@listTitle" ListItems=@listOfItems selectedItem=selectedItem selectedItemChanged=OnItemSelect EventNewItem="OnNewItem"></ListCustom>
         </div>
     </div>
 		    <FormMessageBox formItem="formItem" @ref=formMessageBox OnSuccessRequest="OnSuccessRequestHandler"></FormMessageBox>
@@ -27,17 +27,42 @@
 		JSTE V NOACCESS MODU PRO  PRISTUP - APLICATION
 	</NotAuthorized>
 </AuthorizeView>
+<style>
+    .scrollable-table-container {
+		max-height: 80svh;
+		overflow: auto;
+	}
+</style>
 @code {
     [CascadingParameter]
-    private ModuleWorkplace moduleWorkplace { get; set; } = default!;
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
 
     private IDirectory? selectedDirectory;
     private IListItem? selectedItem;
     private IListItem? formItem;
     private List<IListItem>? listOfItems;
     private List<Directory> fileSystem = new();
-    private FormMessageBox formMessageBox = new();
+    private FormMessageBox formMessageBox;
 
+    private string listTitle
+    {
+        get
+        {
+            switch (listOfItems?.FirstOrDefault())
+            {
+                case License l:
+                    return "Počet licencí";
+                case Module m:
+                    return "Počet modulů";
+                case User u:
+                    if (u.AccessPermition is null || u.AccessPermition.Count == 0)
+                        return "Počet uživatelů";
+                    return "Počet oprávnění";
+                default:
+                    return string.Empty;
+            }
+        }
+    }
 
     private async Task OnSelect(IDirectory e)
     {
@@ -59,8 +84,8 @@
     }
     protected override async Task OnInitializedAsync()
     {
-        moduleWorkplace.Id = -1;
-        fileSystem = new List<Directory>() { new Directory(service, "Pobytne licence") };
+        moduleWorkspace.Id = -1;
+        fileSystem = new List<Directory>() { new Directory(service, "Pobytné licence") };
         await fileSystem[0].OnSelect();
     }
     private async Task OnNewItem()

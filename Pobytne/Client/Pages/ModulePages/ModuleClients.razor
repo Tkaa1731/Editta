@@ -1,34 +1,25 @@
 ﻿@page "/{idModule}/Clients"
 @inject PobytneService _service
 
-<ModuleNav idModule="@idModule"></ModuleNav>
-<div class="container-fluid">
-<ListCustom  ListItems="AllClients"/>
+<ModuleNav idModule="@idModule" PageTitle="Evidence klientů"></ModuleNav>
+<div class="container-fluid mh-100">
+    <ClientList/>
 </div>
+<style>
+	.scrollable-table-container {
+		max-height: 80svh;
+		overflow: auto;
+	}
+</style>
 @code {
     [CascadingParameter]
-    private ModuleWorkplace moduleWorkplace { get; set; } = default!;
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
     [EditorRequired]
     [Parameter]
     public string idModule { get; set; } = "-1";
 
-    private List<IListItem> AllClients = new List<IListItem>();
-
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        moduleWorkplace.ModuleId = idModule;
-        //update moduleWorkpalce
-
-        var response = await _service.GetAllAsync<Client>($"ClientsList?moduleNumber={idModule}", moduleWorkplace.Id);
-        List<Client> clients = new();
-        if (response is null)
-            Console.WriteLine($"NO RESPONSE");
-        else if (response is ErrorResponse response1)
-            Console.WriteLine($"{response1.ErrorMessage}");
-        else if (response is List<Client> list)
-            clients = list;
-
-        if (clients is not null)
-            AllClients = clients.Select(c => c as IListItem).ToList();
+        moduleWorkspace.ModuleId = idModule;
     }
 }

@@ -2,14 +2,14 @@
 @inject PobytneService _service
 @inject IJSRuntime js
 
-<ModuleNav idModule="@idModule"></ModuleNav>
+<ModuleNav idModule="@idModule" PageTitle="Evidence"></ModuleNav>
 
 <div class="row h-100">
     @if(maxDepth > 0)
     {   
         @for (int i = 0; i < maxDepth; i++)
         {
-            <div class="col custom-scrollbar" style="overflow-y: scroll;max-height:90vh; min-width:14rem; "> 
+            <div class="col custom-scrollbar overflow-auto h-100" style="min-width:14rem; "> 
                 @for(int j = 0; j < records[i].Count; j++)
                 {
                     <RecordComponent Source=@records[i][j] OnClick=OnSelect CssClass="@((recordPath[i]==records[i][j].Record.Id)?"record-active":"")"></RecordComponent>
@@ -17,52 +17,41 @@
             </div>
         }
         //interakce komponenta
-        //TODO: presunout do komponenty
-        <div class="col h-100">
-            <div class="p-3" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-top:2px solid #AAA;">
+        //TODO: presunout do komponenty   
+        <div class="col card p-3 mh-100 d-flex flex-column justify-content-between border-top border-2 floating-card" style="min-width:fit-content;">
+            <div  class="overflow-hidden d-flex flex-column" style="flex:1;">
+                <!--Kalendar-->
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="interaction.InteractionDate" InputSize="InputSize.Large" Label="Datum interakce"/>
                 <!-- Seznam položek -->
-                <div class="row" style="z-index:1021; position:relative;">
-                    <!--Kalendar-->
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="interaction.InteractionDate" InputSize="InputSize.Large"/>
+                <div  class="custom-grid-overflow overflow-hidden mt-3">
+                    <InteractionComponent @bind-Records="interaction.Records"></InteractionComponent>
                 </div>
-                <div class="row">
-                    <div class="col h-75">
-                        <InteractionComponent @bind-Records="interaction.Records"></InteractionComponent>
-                    </div>
-                </div>
+            </div>
+            <div>
+                <hr class="my-3" style="height: 2px;color: #999;">
                 <div>
-                    <div class="row mb-3">
-                        <div class="col-5">
-                            <span style="font-size:1.5rem">
-                                <b>CELKEM: </b>@sum ,-
-                            </span>
-                        </div>
-                        <div class="col">
-                            <HxInputTextArea Placeholder="Poznamka" @bind-Value="interaction.InteractionName" />
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col" style="display:flex; flex-direction:column;">
-                            <HxButton CssClass="row-cols-1 mb-1" Text="Potvrdit" Color=ThemeColor.Success OnClick="SubmitHandler" Enabled="(interaction.Records.Count>0)"></HxButton>
-                            <HxButton CssClass="row-cols-1" Text="Smazat vse" Color=ThemeColor.Danger Enabled="(interaction.Records.Count>0)" OnClick="()=>{interaction.Records.Clear();interaction.InteractionName = string.Empty;}"></HxButton>
-                        </div>
-                    </div>
+                    <span><b>Celkem:</b></span>
+                    <p class="ms-2 fw-normal h3">@interaction.Records.Sum( r => r.Price) Kč</p>
                 </div>
+                <HxInputTextArea Label="Poznámka" LabelType="LabelType.Floating" MaxLength="200" @bind-Value="interaction.InteractionName" CssClass="my-2" />
+            
+                <HxButton CssClass="w-100 my-1 btn-custom" Text="Potvrdit" Color=ThemeColor.Success OnClick="SubmitHandler" Enabled="(interaction.Records.Count>0)"></HxButton>
+                <HxButton CssClass="w-100 btn-custom" Text="Smazat vse" Color=ThemeColor.Danger Enabled="(interaction.Records.Count>0)" OnClick="()=>{interaction.Records.Clear();interaction.InteractionName = string.Empty;}"></HxButton>
             </div>
         </div>
 
     }
 </div>
 
-<HxModal @ref="clientsModal" Centered=true Title="Klienti"  Backdrop="ModalBackdrop.Static" Size="ModalSize.Large">
+<HxModal @ref="clientsModal" Title="Vyberte klienta" Centered=true Backdrop="ModalBackdrop.Static" Size="ModalSize.Large">
 	<BodyTemplate>
-		    <ListCustom ListItems="AllClients" @bind-selectedItem="selectedClient" PageSize="10" Editable=false />
+        <ClientList @bind-Value="selectedClient" Editable="false"/>
 	</BodyTemplate>
 	<FooterTemplate>
-        <HxButton Text="Potvrdit" OnClick="HandleModalSubmit" Color="ThemeColor.Primary" />
+        <HxButton Text="Potvrdit" OnClick="HandleModalSubmit" Color="ThemeColor.Primary" CssClass="btn-custom w-100"/>
 	</FooterTemplate>
 </HxModal>
-<HxModal @ref="paymentsModal" Centered=true Title="Typ platby"  Backdrop="ModalBackdrop.Static" Size="ModalSize.Large">
+<HxModal @ref="paymentsModal" Centered=true Title="Vyberte typ platby"  Backdrop="ModalBackdrop.Static" Size="ModalSize.Large">
 	<BodyTemplate>
         <div class="container">
 		    <div class="row justify-content-center">
@@ -82,38 +71,34 @@
 </HxModal>
 <style>
     .record-container:hover{
-        background: #f6f6f6;
+        background: #e3e6ef;
     }
-    .record-container{
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-    }    
-    .blue{
-        border-top:2px solid lightblue;
+    .bt-red{
+        border-top:2px solid #ea7c90 !important;
     }
-    .green{
-        border-top:2px solid #97D85A;
+    .bt-green{
+        border-top:2px solid #75d2a9 !important;
     }
-    .purple{
-        border-top:2px solid #b576d5;
+    .bt-purple{
+        border-top:2px solid #747ced !important;
     }
-    .orange{
-        border-top:2px solid orange;
+    .bt-orange{
+        border-top:2px solid orange !important;
     }
-    .record-active.orange{
+    .record-active.bt-orange{
         border-top:none;
         background: #FFDB99;
-        @* color:white; *@
     }
-    .virtualized-table-container {
-		height: 400px;
-		overflow: auto;
-	}
     .center{
         text-align:center;
     }
     .p-0{
         padding:0;
     }
+    .scrollable-table-container {
+		max-height: 40svh;
+		overflow: auto;
+	}
 </style>
 
 @code {
@@ -121,7 +106,7 @@
     [Parameter]
     public string idModule { get; set; } = "-1";
     [CascadingParameter]
-    private ModuleWorkplace moduleWorkplace { get; set; } = default!;
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
 
     private int maxDepth = 0;
     private Interaction interaction = new();
@@ -129,7 +114,6 @@
     private int[] recordPath;
 
     private IListItem? selectedClient;
-    private List<IListItem> AllClients = [];
     private List<Payment> AllPayments = [];
 
     private HxModal clientsModal = new();
@@ -147,10 +131,10 @@
 
     protected async override Task OnInitializedAsync()
     {
-        moduleWorkplace.ModuleId = idModule;
-        //update moduleWorkplace
+        moduleWorkspace.ModuleId = idModule;
+        //update moduleWorkspace
 
-        var depth = await _service.GetCountAsync<Record>($"RecordsMaxDepth?moduleId={moduleWorkplace.Id}", moduleWorkplace.Id);
+        var depth = await _service.GetCountAsync<Record>($"RecordsMaxDepth?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
         if (ServiceRequest<int>(depth) && depth is int d)
         {
             maxDepth = d+1;
@@ -158,7 +142,7 @@
             for (int i = 0; i < maxDepth; i++)
                 records[i] = new();
 
-            var root = await _service.GetAllAsync<Record>($"RecordsRoot?moduleId={moduleWorkplace.Id}", moduleWorkplace.Id);
+            var root = await _service.GetAllAsync<Record>($"RecordsRoot?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
             if (ServiceRequest<List<Record>>(root) && root is List<Record> r)
             {
                 List<RecordTreeView> rootTV = [];
@@ -240,17 +224,6 @@
         bool customerRequired = interaction.Records.Exists(r => r.IsClientRequired);
         if (customerRequired)
         {
-            var response = await _service.GetAllAsync<Client>($"ClientsList?moduleNumber={moduleWorkplace.Id}", moduleWorkplace.Id);
-            List<Client> clients = new();
-            if (response is null)
-                Console.WriteLine($"NO RESPONSE");
-            else if (response is ErrorResponse response1)
-                Console.WriteLine($"{response1.ErrorMessage}");
-            else if (response is List<Client> list)
-                clients = list;
-
-            if (clients.Count > 0)
-                AllClients = clients.Where(c => c.Id != 0).Select(c => c as IListItem).ToList();
             // modal
             await clientsModal.ShowAsync();
             return;
@@ -271,7 +244,7 @@
     }
     private async Task InsertInteraction()
     {
-        var response = await _service.InsertAsync<Interaction>(interaction, moduleWorkplace.Id);
+        var response = await _service.InsertAsync<Interaction>(interaction, moduleWorkspace.Id);
 
         if (response is null)
             await js.InvokeAsync<string>("alert",$"NO RESPONSE");
@@ -295,14 +268,15 @@
         interaction.ModuleId = int.Parse(idModule);
         interaction.ClientId = (selectedClient is null)? 0 : selectedClient.Id;
         interaction.TimeStamp = DateTime.Now;
-        interaction.CreationUserId = 1;//TODO:AuthState UserID
+        interaction.CreationUserId = moduleWorkspace.UserId;
+        interaction.InteractionDate = DateTime.Now;
         interaction.PaymentId = paymentId;
 
         await InsertInteraction();
     }
     private async Task LoadPayments()
     {
-        var response = await _service.GetAllAsync<Payment>($"?moduleNumber={moduleWorkplace.Id}", moduleWorkplace.Id);
+        var response = await _service.GetAllAsync<Payment>($"?moduleNumber={moduleWorkspace.Id}", moduleWorkspace.Id);
         List<Payment> payments = new();
         if (response is null)
             Console.WriteLine($"NO RESPONSE");

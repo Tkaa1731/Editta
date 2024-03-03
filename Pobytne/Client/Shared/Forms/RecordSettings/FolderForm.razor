@@ -1,0 +1,54 @@
+﻿@if (Folder is not null)
+{
+    <EditForm Model="@Folder" OnValidSubmit=OnValidSubmitHandler>
+        <DataAnnotationsValidator />
+        <div class="mx-3 mt-3">
+            <div class="row">
+                <div class="col">
+                    <HxInputText @bind-Value="Folder.Name" Label="Název položky" Type="InputType.Text" />
+                </div>
+                <div class="col-3">
+                    <HxInputNumber Label="Pořadí položky v seznamu" TValue="int" @bind-Value="Folder.Order"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <HxInputText @bind-Value="Folder.Note" Label="Poznámka" Type="InputType.Text" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Folder.ValidFrom"  Label="Plati od" />
+                </div>
+                <div class="col">
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Folder.ValidTo" MinDate=Folder.ValidFrom.AddDays(1) Label="Plati do" />
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        </div>
+
+    </EditForm>
+}
+@code {
+    [Parameter]
+    [EditorRequired]
+    public IFolder_Record? Folder { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public EForm formType { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public EventCallback<EForm> OnValidSubmit { get; set; }
+    private string ButtonText
+    {
+        get
+        {
+            if (formType == EForm.Insert) return "Vložit";
+            return "Aktualizovat";
+        }
+    }
+    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
+}

@@ -15,6 +15,9 @@ namespace Pobytne.Shared.Struct
         string RecordPropertiesName { get; set; }
         int Quantity { get; set; }
         float Price { get; set; }
+        bool IsSeasonTicket { get; set; }
+        int GroupQuantity { get; set; }
+        float GroupPrice { get; set; }
         bool IsClientRequired { get; set; }
         bool IsPriceRequired { get; set; }
         bool IsBalanceCheck {  get; set; }

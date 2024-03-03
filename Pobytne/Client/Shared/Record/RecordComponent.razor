@@ -1,6 +1,6 @@
 ﻿@if(Source is not null)
 {
-	<div @onclick="async()=> await OnClick.InvokeAsync(Source)" class="px-3 mb-2 record-container @color pointer @CssClass">
+	<div @onclick="async()=> await OnClick.InvokeAsync(Source)" class="card floating-card px-3 mb-2 record-container @color @CssClass">
 		<div class="row align-items-center">
 			@switch (Source.Record.RecordType)
 			{
@@ -77,16 +77,16 @@
 			switch (Source.Record.RecordType)
 			{
 				case ERecordType.Folder:
-					c = "orange";
+					c = "bt-orange";
 					break;
 				case ERecordType.Ware:
-					c = "blue";
+					c = "bt-red";
 					break;
 				case ERecordType.Activity:
-					c = "purple";
+					c = "bt-purple";
 					break;
 				case ERecordType.EmployeeTasks:
-					c = "green";
+					c = "bt-green";
 					break;
 			}
 			return c;

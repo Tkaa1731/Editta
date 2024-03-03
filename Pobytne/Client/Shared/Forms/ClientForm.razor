@@ -1,0 +1,79 @@
+﻿
+@if (client is not null)
+{
+    <EditForm Model="@client" OnValidSubmit=OnValidSubmitHandler>
+        <DataAnnotationsValidator />
+		<div class="mx-3 mt-3">
+			<div class="row align-items-center">
+				<div class="col">
+					<HxInputText @bind-Value="client.Name" Label="Login" Type="InputType.Text" />
+				</div>
+				<div class="col-auto">
+			        <HxSwitch Text="Je platný" @bind-Value="client.Valid" />
+				</div>
+                <div class="col-auto">
+			        <HxSwitch Text="Je společný pro organizaci" @bind-Value="client.ThroughoutOrganization" />
+				</div>
+			</div>
+            <div class="row">
+                <div class="col">
+                    <HxInputText @bind-Value="client.Email" Label="Email" Type="InputType.Email" />
+                </div>
+                <div class="col">
+                    <HxInputText @bind-Value="client.PhoneNumber" Label="Telefonní číslo" Type="InputType.Tel" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <HxInputText @bind-Value="client.City" Label="Obec" Type="InputType.Text" />
+                </div>
+                <div class="col">
+                    <HxInputText @bind-Value="client.Street" Label="Ulice" Type="InputType.Text" />
+                </div>
+                <div class="col-3">
+                    <HxInputText @bind-Value="client.PostNumber" Label="PSČ" Type="InputType.Text" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <HxInputText @bind-Value="client.Description" Label="Poznámka" Type="InputType.Text" />
+                </div>
+            </div>
+			<div class="row">
+				<div class="col">
+					<HxInputDate CalendarIcon="BootstrapIcon.Calendar" Label="Platný od" @bind-Value="client.ValidFrom" />
+				</div>
+				<div class="col">
+					<HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="client.ValidTo" MinDate=DateTime.Now.AddDays(1) Label="Platný do" />
+				</div>
+			</div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        </div>
+
+    </EditForm>
+}
+
+@code {
+    [EditorRequired]
+    [Parameter]
+    public Client? client { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public EForm formType { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public EventCallback<EForm> OnValidSubmit { get; set; }
+    private string ButtonText
+    {
+        get
+        {
+            if (formType == EForm.Insert) return "Vložit";
+            return "Aktualizovat";
+        }
+    }
+    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
+
+}

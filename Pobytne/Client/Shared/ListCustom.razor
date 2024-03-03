@@ -1,25 +1,33 @@
 ﻿@inject IJSRuntime js
-<HxListLayout TFilterModel="FilterModelDto">
+<HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card">
         <TitleTemplate>
-            List of items <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@ListItems?.Count</HxBadge>
+            @ListTitle <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@ListItems?.Count</HxBadge>
         </TitleTemplate>
         <SearchTemplate>
         <HxCheckbox @bind-Value="ShowAll" @bind-Value:after="gridComponent.RefreshDataAsync" Text="Zobrazit vše" Enabled="ListItems is not null"/>
-        <HxInputText Placeholder="Search" Type="InputType.Search" @bind-Value="SearchText" @bind-Value:after="gridComponent.RefreshDataAsync" Enabled="ListItems is not null" />
+        <HxInputText Placeholder="Hledat" Type="InputType.Search" @bind-Value="SearchText" @bind-Value:after="gridComponent.RefreshDataAsync" Enabled="ListItems is not null" />
         </SearchTemplate>
         <CommandsTemplate>
             @if(Editable){
-                <HxButton Text="New item" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="NewItemClicked" Enabled="ListItems is not null" />
+                <HxButton Text="Nová položka" CssClass="btn-custom" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="NewItemClicked" Enabled="ListItems is not null" />
             }
         </CommandsTemplate>
-    
+    @* TODO:Infinite scroll LAZY-LOADING *@
     <DataTemplate>
-        <HxGrid @ref="gridComponent" ContentNavigationMode="GridContentNavigationMode.Pagination" Responsive="true" TItem="IListItem" PageSize="PageSize" DataProvider="LoadDataItems" SelectedDataItem="selectedItem" SelectedDataItemChanged="HandleSelectedDataItemChanged">
+        <HxGrid @ref="gridComponent" 
+            ContentNavigationMode="GridContentNavigationMode.InfiniteScroll" 
+            TableContainerCssClass="scrollable-table-container"
+            Responsive="true" 
+            TItem="IListItem" 
+            DataProvider="LoadDataItems" 
+            SelectedDataItem="selectedItem" 
+            SelectedDataItemChanged="HandleSelectedDataItemChanged"
+        >
             <Columns>
                 <HxGridColumn HeaderText="Id" ItemTextSelector="@(item => item.Id.ToString())" SortKeySelector="@(item => item.Id)" IsDefaultSortColumn="true" />
-                <HxGridColumn HeaderText="Name" ItemTextSelector="@(item => item.Name)" SortKeySelector="@(item => item.Name)" />
-                <HxGridColumn HeaderText="Description" ItemTextSelector="@(item => item.Description)" SortKeySelector="@(item => item.Description)" />
-                <HxGridColumn HeaderText="Cretiondate" ItemTextSelector="@(item => item.CreationDate.ToString())" SortKeySelector="@(item => item.CreationDate)" />
+                <HxGridColumn HeaderText="Název" ItemTextSelector="@(item => item.Name)" SortKeySelector="@(item => item.Name)" />
+                <HxGridColumn HeaderText="Popis" ItemTextSelector="@(item => item.Description)" SortKeySelector="@(item => item.Description)" />
+                <HxGridColumn HeaderText="Poslední úprava" ItemTextSelector="@(item => item.CreationDate.ToString())" SortKeySelector="@(item => item.CreationDate)" />
                 @if (Editable)
                 {
                     <HxContextMenuGridColumn Context="item">
@@ -30,7 +38,6 @@
         </HxGrid>
     </DataTemplate>
 </HxListLayout>
-
 @code {
     [Parameter]
     [EditorRequired]
@@ -57,9 +64,10 @@
     [Parameter]
     public EventCallback EventNewItem{ get; set; }
     [Parameter]
-    public int PageSize { get; set; } = 15;
-    [Parameter]
     public bool Editable { get; set; } = true;
+    [Parameter]
+    [EditorRequired]
+    public required string ListTitle{ get; set; } 
     private bool ShowAll = false;
     private string SearchText = string.Empty;
 
@@ -96,7 +104,4 @@
         // await dataItemEditComponent.ShowAsync();
         await EventNewItem.InvokeAsync();
     }
-
-    public record FilterModelDto { }
-
 }
