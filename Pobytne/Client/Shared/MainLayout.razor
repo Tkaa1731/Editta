@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject AuthenticationService service
+@inject NavigationManager navManager
+@inject ILocalStorageService _storage
 
 <div class="page">
     <AuthorizeView>
@@ -12,7 +14,7 @@
 
                 <TokenExpirationCounter/>
 
-                <CascadingValue Value="moduleWorkplace">
+                <CascadingValue Value="moduleWorkspace">
                     <div class="p-4" style="height:100svh;">
                         @Body 
                     </div>
@@ -26,20 +28,41 @@
         </Authorizing>
         <NotAuthorized>
             <main>
-                <Pobytne.Client.Pages.Login/>
+                <CascadingValue Value="moduleWorkspace">
+                        <LoginForm/>
+                </CascadingValue>
             </main>
         </NotAuthorized>
     </AuthorizeView>
 </div>
 
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; } = default!;
+        [CascadingParameter]
+        private Task<AuthenticationState> authenticationState { get; set; } = default!;
+        [CascadingParameter]
+        private ModuleWorkplace moduleWorkspace { get; set; } = default!;
 
-    private ModuleWorkplace moduleWorkplace { get; set; } = new ModuleWorkplace();
-
-    private async Task Logout()
+        private async Task Logout()
+        {
+            await service.Logout();
+        }
+        private void RefreshFailureHandler() {
+            navManager.Refresh();
+        }
+    protected override async Task OnInitializedAsync()
     {
-        await service.Logout();
+        AuthenticationService.OnTokenRefreshFailure = EventCallback.Factory.Create(this, RefreshFailureHandler);
+
+        var authState = await authenticationState;
+        if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
+        {
+            var user = await _storage.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
+            if (user is not null)
+            {
+                moduleWorkspace.UserId = user.User.Id;
+                moduleWorkspace.LicenseNumber = user.User.LicenseNumber;
+                moduleWorkspace.ModulesDic = user.User.AccessPermition.ToDictionary(p => p.ModuleId, p => p.ModuleName);
+            }
+        }
     }
 }

@@ -1,7 +1,7 @@
 ﻿@inject PobytneService _service
 
-	<HxTabPanel InitialActiveTabId="tab_filter" CssClass=""> 
-		<HxTab Title="Filtr" Id="tab_filter" ContentCssClass="px-4 py-2 border rounded-bottom border-top-0" TitleCssClass="text-secondary">
+	<HxTabPanel InitialActiveTabId="tab_filter" CssClass="tab-custom"> 
+		<HxTab Title="Filtr" Id="tab_filter" ContentCssClass="px-4 py-2 card border-0 rounded-top-0" TitleCssClass="text-secondary">
 			<Content>
 				@FilterTemplate
 				<DateFilter @bind-Filter="Filter"/>
@@ -30,33 +30,35 @@
 				</div>
 
 				<div class="w-100 py-1 d-flex">
-						<HxButton CssClass="flex-fill me-2" Color="ThemeColor.Primary" OnClick="OnSubmitHandler">Potvrdit vyber</HxButton>
-						<HxButton CssClass="flex-fill ms-2" Color="ThemeColor.Primary" OnClick="async()=>{await OnExcelTransmit.InvokeAsync();await Task.Delay(2000);}" Enabled="ExcelEnable">Export do excelu</HxButton>
+						<HxButton CssClass="flex-fill me-2 btn-custom" Color="ThemeColor.Success" OnClick="OnSubmitHandler">Potvrdit vyber</HxButton>
+						<HxButton CssClass="flex-fill ms-2 btn-custom" Color="ThemeColor.Primary" OnClick="async()=>{await OnExcelTransmit.InvokeAsync();await Task.Delay(2000);}" Enabled="ExcelEnable">Export do excelu</HxButton>
 				</div>
 			</Content>
 		</HxTab>
-		<HxTab Title="Souhrny" Id="tab_group"  ContentCssClass="p-4 border rounded-bottom border-top-0"  TitleCssClass="text-secondary">
+		<HxTab Title="Souhrny" Id="tab_group"  ContentCssClass="p-4 card border-0 rounded-top-0"  TitleCssClass="text-secondary">
 			<Content>
 				@GroupByTemplate
 				<div style="display:flex; justify-content:center;">
-					<HxButton CssClass="w-50 my-3" Color="ThemeColor.Primary" OnClick="async()=>await OnGroupBySubmit.InvokeAsync()" Enabled="ExcelEnable">Zobrazit souhrny</HxButton>
+					<HxButton CssClass="w-50 mt-3 btn-custom" Color="ThemeColor.Primary" OnClick="async()=>await OnGroupBySubmit.InvokeAsync()" Enabled="ExcelEnable">Zobrazit souhrny</HxButton>
 				</div>
 			</Content>
 		</HxTab>
 	</HxTabPanel>
 	<style>
+	.nav.nav-tabs.tab-custom>.nav-link.active{
+		box-shadow: 0px 0px 35px 0px rgba(154, 161, 171, 0.15)!important;
+		border:0;
+		background-color:#fff!important;
+	}
 	.tab-content{
 		overflow-y:hidden !important;
-		/* flex:1; */
+		box-shadow: 0px 0px 35px 0px rgba(154, 161, 171, 0.15)!important;
+
 	}
 	div.tab-pane.active{
-		
 		height: 100%;
-		/* max-height: 100%; */
-		/* overflow: hidden; */
 		display: flex;
 		flex-direction: column;
-
 	}
 	.btn-plus:hover{
 		background: #dae5ff;
@@ -64,7 +66,7 @@
 	</style>
 @code {
 	[CascadingParameter]
-	public ModuleWorkplace moduleWorkplace { get; set; } = new();
+	public ModuleWorkplace moduleWorkspace { get; set; } = new();
 
 	[Parameter]
 	public RenderFragment? FilterTemplate { get; set; }
@@ -101,7 +103,7 @@
 					{
 						Name = "Evidence",
 						Id = 0,
-						ModuleId = moduleWorkplace.Id,
+						ModuleId = moduleWorkspace.Id,
 						RootId = 0,
 						ParentId = 0,
 						StructDepth = 0,

@@ -1,24 +1,24 @@
 ﻿@page "/{idModule}/RecordSettings"
 @inject PobytneService service
 
-<ModuleNav idModule="@idModule"></ModuleNav>
+<ModuleNav idModule="@idModule" PageTitle="Evidence položek"></ModuleNav>
 
 <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Record,EAccess.ReadOnly,idModule)>
     <Authorized>
 
-        <div class="row">
-            <div class="col-lg-3">
+        <div class="row h-100">
+            <div class="col-lg-3 mh-100 overflow-hidden">
                 <HxTreeView TItem="IDirectory"
                             SelectedItemChanged="OnSelect"
                             OnItemExpanded="OnExpanded"
                             Items="@fileSystem"
-                            CssClass="border rounded p-2"
+                            CssClass="p-3 card floating-card h-auto"
                             ItemTitleSelector="@(p => p.Name)"
                             ItemIconSelector="@(p => p.Icon)"
                             ItemChildrenSelector="@(p => p.SubDirectories)" />
             </div>
-            <div class="col-lg-9">
-                <ListCustom ListItems=@listOfItems selectedItem=selectedItem selectedItemChanged=OnItemSelect EventNewItem="OnNewItem" PageSize="20"></ListCustom>
+            <div class="col-lg-9 mh-100 overflow-hidden">
+                <ListCustom ListTitle="Počet záznamů" ListItems=@listOfItems selectedItem=selectedItem selectedItemChanged=OnItemSelect EventNewItem="OnNewItem"></ListCustom>
             </div>
         </div>
         <RecordMessageBox formItem="formItem" @ref=messageBox OnSuccessRequest="OnSuccessRequestHandler"/>
@@ -27,7 +27,12 @@
         JSTE V NOACCESS MODU PRO  PRISTUP - APLICATION
     </NotAuthorized>
 </AuthorizeView>
-
+<style>
+    .scrollable-table-container {
+		max-height: 70svh;
+		overflow: auto;
+	}
+</style>
 @code {
     [EditorRequired]
     [Parameter]
@@ -40,7 +45,6 @@
     private List<RecordDir> fileSystem = [];
 
     private RecordMessageBox messageBox = new();
-
 
     private async Task OnSelect(IDirectory e)
     {

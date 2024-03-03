@@ -2,12 +2,12 @@
 @inject PobytneService _service
 @inject ExcelExportService _csvService
 
-<ModuleNav idModule="@idModule"></ModuleNav>
+<ModuleNav idModule="@idModule" PageTitle="Souhrny pokladna"></ModuleNav>
 
 <div class="row h-100">
-	<div class="col">
+	<div class="col mh-100 overflow-hidden">
 
-		<HxListLayout TFilterModel="HxListLayout.NoFilter">
+		<HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card">
 			<TitleTemplate>
 				Souhrny pokladna <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1 fs-6">@reportsList.Count</HxBadge>
 			</TitleTemplate>
@@ -15,11 +15,9 @@
 				<HxGrid @ref="grid" 
 						TItem="CashRegister"
 						DataProvider="GetGridData"
-						PageSize="20"
 						Responsive="true"
 						ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
-						TableContainerCssClass="scrollable-table-container"
-						HeaderRowCssClass="sticky-top"
+						TableContainerCssClass="scrollable-table-container_2"
 						>
 					<Columns>
 						@if (ShowGroups)
@@ -45,10 +43,9 @@
 				</HxGrid>
 			</DataTemplate>
 		</HxListLayout>
-
 	</div>
-	<div class="col-4" style="display: flex;max-width:500px;flex-direction: column;overflow-y: hidden;max-height: 100%;">
-		<div class="p-3 border rounded mb-3">
+	<div class="col-4 d-flex flex-column overflow-hidden mh-100	" style="max-width:500px;">
+		<div class="p-3 mb-3 card floating-card">
 			@* Porovnani k pokladne *@
 			<h2>@reportsList.Sum(r => r.Price) Kč</h2>
 		</div>
@@ -104,17 +101,21 @@
 
 	</div>
 </div>
-<HxModal @ref="clientsModal" Centered=true Title="Klienti" Backdrop="ModalBackdrop.Static" Size="ModalSize.Large">
+<HxModal @ref="clientsModal" Centered=true Backdrop="ModalBackdrop.Static" Size="ModalSize.Large">
 	<BodyTemplate>
 		<ClientList Editable="false" @bind-Value="selectedClient"/>
 	</BodyTemplate>
 	<FooterTemplate>
-		<HxButton Text="Potvrdit" OnClick="async()=>await clientsModal.HideAsync()" Color="ThemeColor.Primary" />
+		<HxButton Text="Potvrdit" OnClick="async()=>await clientsModal.HideAsync()" Color="ThemeColor.Primary" CssClass="btn-custom w-100" />
 	</FooterTemplate>
 </HxModal>
 <style>
-	.scrollable-table-container {
-		height: 100%;
+    .scrollable-table-container {
+		max-height: 40svh;
+		overflow: auto;
+	}
+		.scrollable-table-container_2 {
+		max-height: 70svh;
 		overflow: auto;
 	}
 </style>
@@ -123,7 +124,7 @@
 	[Parameter]
 	public string idModule { get; set; } = "-1";
 	[CascadingParameter]
-	private ModuleWorkplace moduleWorkplace { get; set; } = default!;
+	private ModuleWorkplace moduleWorkspace { get; set; } = default!;
 	/// <summary>
 	///  Properties
 	/// </summary>
@@ -157,10 +158,10 @@
 	/// </summary>
 	protected override async Task OnInitializedAsync()
 	{
-		moduleWorkplace.ModuleId = idModule;
-		filter.ModuleId = moduleWorkplace.Id;
+		moduleWorkspace.ModuleId = idModule;
+		filter.ModuleId = moduleWorkspace.Id;
 		//load payment enum
-		var response = await _service.GetAllAsync<Payment>($"?moduleNumber={moduleWorkplace.Id}", moduleWorkplace.Id);
+		var response = await _service.GetAllAsync<Payment>($"?moduleNumber={moduleWorkspace.Id}", moduleWorkspace.Id);
 
 		if (response is null)
 			Console.WriteLine($"NO RESPONSE");
@@ -222,7 +223,7 @@
 			f.ClientId = selectedClient?.Id;
 			//Filter prepared
 
-			var response = await _service.GetFilteredReports<CashRegisterFilter,CashRegister>(f,moduleWorkplace.Id);
+			var response = await _service.GetFilteredReports<CashRegisterFilter,CashRegister>(f,moduleWorkspace.Id);
 
 			if (response is null)
 				Console.WriteLine($"NO RESPONSE");

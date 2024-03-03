@@ -1,22 +1,23 @@
 ﻿@inject PobytneService _service
-	<ListCustom ListItems="AllClients" selectedItemChanged="HandleSelectedDataItemChanged" selectedItem="Value" PageSize="PageSize" Editable=Editable />
+
+	<ListCustom ListTitle="Počet klientů" ListItems="AllClients" selectedItemChanged="HandleSelectedDataItemChanged" EventNewItem="OnNewItem" selectedItem="Value" Editable="Editable" />
+	<FormMessageBox formItem="Value" @ref=formMessageBox OnSuccessRequest="StateHasChanged"></FormMessageBox>
+
 @code {
 	[CascadingParameter]
-	private ModuleWorkplace moduleWorkplace { get; set; } = default!;
+	private ModuleWorkplace moduleWorkspace { get; set; } = default!;
 	[Parameter]
 	public bool Editable { get; set; } = true;
 	[Parameter]
 	public required IListItem Value { get; set; }
 	[Parameter]
 	public EventCallback<IListItem?> ValueChanged { get; set; }
-	[Parameter]
-	public int PageSize { get; set; } = 10;
 
 	private List<IListItem> AllClients = [];
-
+	private FormMessageBox formMessageBox;
 	protected override async Task OnInitializedAsync()
 	{
-		var response = await _service.GetAllAsync<Client>($"ClientsList?moduleNumber={moduleWorkplace.Id}", moduleWorkplace.Id);
+		var response = await _service.GetAllAsync<Client>($"ClientsList?moduleNumber={moduleWorkspace.Id}", moduleWorkspace.Id);
 		List<Client> clients = new();
 		if (response is null)
 			Console.WriteLine($"NO RESPONSE");
@@ -32,5 +33,18 @@
 	{
 		Value = selection;
 		await ValueChanged.InvokeAsync(Value);
+		if (Editable)
+			await formMessageBox.UpdateForm();
+	}
+	private async Task OnNewItem()
+	{
+		Value = new Client()
+			{
+				ModuleId = moduleWorkspace.Id,
+				Valid = true,
+				ValidFrom = DateTime.Now,
+				ValidTo = DateTime.Now.AddYears(1)
+			};
+		await formMessageBox.InsertForm();
 	}
 }

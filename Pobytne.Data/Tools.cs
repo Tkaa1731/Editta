@@ -2,7 +2,7 @@
 
 namespace Pobytne.Data
 {
-    internal static class Tools // TODO: Local a Test nejsou stejne ... jine columns napr v Modulech, Uzivatel
+    internal static class Tools
     {
         public static string GetConnectionString(string name = "PobytneTest")
         {

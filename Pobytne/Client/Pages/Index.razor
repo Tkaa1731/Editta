@@ -1,67 +1,28 @@
 ﻿@page "/"
-@inject IJSRuntime js
-@inject ILocalStorageService localStorage
-@inject PobytneService service
-@inject NavigationManager navManager
-
 
 <PageTitle>Home</PageTitle>
-<AuthorizeView>
-    <NotAuthorized>
 
-        <p>Pravdepodobne nejste prihlasen</p>
-    </NotAuthorized>
-    <Authorized>
-        <div class="container mt-5">
-            <div class="row">
-                @if (permitions is not null)
+    <div class="container mt-5">
+        <div class="d-flex flex-row flex-wrap">
+            @if (moduleWorkspace is not null)
+            {
+
+                @foreach (var module in moduleWorkspace.ModulesDic)
                 {
-                    @foreach (var module in permitions)
-                    {
-                        <div class="col">
-                            <a href="/@module.ModuleId/" class="no-link">
-                                <div class="card" style="height:130px">
-                                    <div class="card-body">
-                                        <h5 class="card-title">@module.ModuleName</h5>
-                                    </div>
+                        <a href="/@module.Key/" class="no-link">
+                            <div class="card floating-card m-2" style="height:10rem; width:18rem;">
+                            <div class="card-body p-5 text-center">
+                                    <h4 class="card-title">@module.Value</h4>
                                 </div>
-                            </a>
-                        </div>
-                    }
+                            </div>
+                        </a>
                 }
-            </div>
+            }
         </div>
-    </Authorized>
+    </div>
 
-</AuthorizeView>
 
 @code {
     [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; } = default!;
-    [CascadingParameter]
-    private ModuleWorkplace moduleWorkplace { get; set; } = default!;
-
-    private List<Permition>? permitions => _user?.AccessPermition;
-    private User? _user;
-
-    protected async override Task OnInitializedAsync()
-    {
-        var authState = await authenticationState;
-        if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
-        {
-            var user = await localStorage.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
-            if (user is not null)
-            {
-                _user = user.User;
-                moduleWorkplace.LicenseNumber = user.User.LicenseNumber;
-                moduleWorkplace.ModulesDic = user.User.AccessPermition.ToDictionary(p => p.ModuleId, p => p.ModuleName);
-            }
-        }
-        // else
-        // {
-        //     navManager.NavigateTo("/Login", true);
-        // }
-
-        return;
-    }
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
 }

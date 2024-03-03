@@ -1,54 +1,80 @@
-﻿@inject AuthenticationService _service
+﻿@attribute [AllowAnonymous]
+@inject AuthenticationService authService
 @inject NavigationManager navManager
+@inject ILocalStorageService localStorage
 
-@if (Visible)
-{
-    <section class="vh-100" style="background-color: rgba(255,255,255,0.8); opacity:@Opacity;">
-        <div class="container py-5 h-100">
-            <div class="row d-flex justify-content-center align-items-center h-100">
-                <div class="col-12 col-md-8 col-lg-6 col-xl-5">
-                    <div class="card shadow-2-strong" style="border-radius: 1rem;">
-                        <div class="card-body p-5 text-center">
 
-                            <h3 class="mb-5">Sign in</h3>
-                            <form>
-                                <!-- Email input -->
-                                <div class="form-outline mb-4">
-                                    <input type="text" id="form2Example1" class="form-control" @bind="logRequest.Name" />
-                                    <label class="form-label" for="form2Example1">Login name</label>
+
+
+    <div class="container py-5" style="height: 100svh"> 
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                <div class="card floating-card">
+                    <div class="card-body p-5 text-center">
+
+                        <h3 class="mb-5">Pobytné přihlášení</h3>
+                        <EditForm Model="@logRequest" OnValidSubmit=Authenticate>
+                            <DataAnnotationsValidator />
+
+                            <div class="row align-items-start">
+                                <div class="col">
+                                    <HxInputText @bind-Value="logRequest.Name" Label="Login" Type="InputType.Text" />
                                 </div>
-
-                                <!-- Password input -->
-                                <div class="form-outline mb-4">
-                                    <input type="password" id="form2Example2" class="form-control" @bind="logRequest.Password" />
-                                    <label class="form-label" for="form2Example2">Password</label>
+                                <div class="col">
+                                    <HxInputText @bind-Value="logRequest.Password" Label="Heslo" Type="InputType.Password" />
                                 </div>
-
-                                <!-- Submit button -->
-                                <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Authenticate">Login</button>
-
-                            </form>
-                        </div>
+                            </div>
+                            <div class="error-message">
+                                <p>@errorMessage</p>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <HxSubmit Color="ThemeColor.Primary" CssClass="btn-custom">Přihlásit se</HxSubmit>
+                            </div>
+                        </EditForm>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-}
+    </div>
+
+
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; } = default!;
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
+
     private LoginRequest logRequest = new();
-    private bool Visible { get; set; } = true;
-    private float Opacity { get; set; } = 0;
+    private string errorMessage = String.Empty;
     private async Task Authenticate()
     {
-        await _service.Login(logRequest);
+        var logResponse = await authService.Login(logRequest);
+        if (logResponse.IsCompleted)
+        {
+            var authState = await authenticationState;
+            if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
+            {
+                var user = await localStorage.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
+                if (user is not null)
+                {
+                    moduleWorkspace.UserId = user.User.Id;
+                    moduleWorkspace.LicenseNumber = user.User.LicenseNumber;
+                    moduleWorkspace.ModulesDic = user.User.AccessPermition.ToDictionary(p => p.ModuleId, p => p.ModuleName);
+                }
+            }
+            navManager.NavigateTo("/", true);
+        }
+        else
+        {
+            var errorResponse = logResponse.AsyncState as ErrorResponse;
+            if (errorResponse is not null)
+                errorMessage = errorResponse.ErrorMessage;
+            else
+                errorMessage = "Unknow error occured";
+            logRequest = new();
+            return;
+        }
     }
-    public void Show()
-    {
-        Visible = !Visible;
-        Opacity = 0;
-        if (Visible)
-            Opacity = 1;
-    }
+
 }

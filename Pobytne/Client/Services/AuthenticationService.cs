@@ -1,22 +1,21 @@
 ﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Pobytne.Client.Authentication;
 using Pobytne.Shared.Authentication;
+using System.Security.Claims;
 
 namespace Pobytne.Client.Services
 {
-	public class AuthenticationService
-	{
-		private readonly ILocalStorageService _storageService;
-		private readonly PobytneService _pobytneService;
-		private IServiceProvider sp;
-		public AuthenticationService(ILocalStorageService storageService, PobytneService pobytneService, IServiceProvider sp/* AuthenticationStateProvider authenticationStateProvider*/)
-		{
-			_storageService = storageService;
-			_pobytneService = pobytneService;
-			this.sp = sp;
-		}
-		public async Task<Task> Login(LoginRequest logRequest)
+	public class AuthenticationService(ILocalStorageService storageService, PobytneService pobytneService, IServiceProvider sp)
+    {
+		private readonly ILocalStorageService _storageService = storageService;
+		private readonly PobytneService _pobytneService = pobytneService;
+		private readonly IServiceProvider sp = sp;
+
+		public static EventCallback OnTokenRefreshFailure { get; set; }
+
+        public async Task<Task> Login(LoginRequest logRequest)
 		{
 			var logResponse = await _pobytneService.LoginAsync(logRequest);
 			if (logResponse is ErrorResponse)
@@ -26,7 +25,6 @@ namespace Pobytne.Client.Services
 			if (logResponse is UserAccount user)
 			{
 				await SaveUserAccount(user);
-				// var customAuthStateProvider = new CustomAuthenticationStateProvider(this);
 				(sp.GetService<AuthenticationStateProvider>() as CustomAuthenticationStateProvider)!.UpdateAuthenticationState();
 			}
 			return Task.CompletedTask;
@@ -40,22 +38,20 @@ namespace Pobytne.Client.Services
 			if (logResponse is UserAccount user)
 			{
 				await SaveUserAccount(user);
-				//var customAuthStateProvider = new CustomAuthenticationStateProvider(this);
-				//customAuthStateProvider.UpdateAuthenticationState();
 				(sp.GetService<AuthenticationStateProvider>() as CustomAuthenticationStateProvider)!.UpdateAuthenticationState();
 				return true;
 			}
-			return false;
+            await RemoveUserAccount();
+            await OnTokenRefreshFailure.InvokeAsync(null);// refresh se nezdaril => odhlas uzivatele
+            return false;
 		}
 		public async Task Logout()
 		{
 			await Revoke();// odhlas ze serveru a odstran ze storage
-
-			//var customAuthStateProvider = new CustomAuthenticationStateProvider(this);
 			(sp.GetService<AuthenticationStateProvider>() as CustomAuthenticationStateProvider)!.UpdateAuthenticationState();// odhlas od klienta
-		}
 
-		public async Task Revoke()
+		}
+        public async Task Revoke()
 		{
 			var user = await ReadUserAccount();
 			if (user is not null)
@@ -72,7 +68,7 @@ namespace Pobytne.Client.Services
 			if (user.ExpiryTimeStamp < DateTime.UtcNow)
 			{
 				if (await Refresh()) return await GetValidUser();// refresh se podaril
-				return null;// refresh se nezdaril => odhlas uzivatele
+				return null;
 			}
 			return user;
 		}

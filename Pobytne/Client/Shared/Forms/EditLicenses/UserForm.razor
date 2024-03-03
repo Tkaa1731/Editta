@@ -1,0 +1,70 @@
+﻿@using System.ComponentModel.DataAnnotations;
+
+@if(user is not null)
+{
+    <EditForm Model="@user" OnValidSubmit=OnValidSubmitHandler>
+	    <DataAnnotationsValidator />
+		<div class="mx-3 mt-3">
+			<div class="row">
+				<div class="col">
+					<HxInputText @bind-Value="user.UserLogin" Label="Login" Type="InputType.Text" />
+				</div>
+				<div class="col">
+					<HxInputText @bind-Value="user.UserName" Label="Jméno uživatele" Type="InputType.Text" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="col">
+					<HxInputText @bind-Value="user.Email" Label="Email" Type="InputType.Email" />
+				</div>
+				<div class="col">
+					<HxInputText @bind-Value="user.PhoneNumber" Label="Telefonní číslo" Type="InputType.Tel" />
+				</div>
+			</div>
+			<div class="row align-items-center">
+				<div class="col">
+			        <HxSwitch Text="Je aktivní" @bind-Value="user.Valid" />
+				</div>
+				<div class="col">
+					<HxInputNumber Label="Číslo licence" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="user.LicenseNumber" Enabled="false" />
+				</div>
+			</div>
+			<div class="row">
+                <div class="col">
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="user.ValidFrom" MinDate="DateTime.Now.AddDays(1)" Label="Platní od" />
+                </div>
+                <div class="col">
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="user.ValidTo"  Label="Platí do"/>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="d-grid gap-2">
+            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        </div>
+
+    </EditForm>
+}
+
+@code {
+    [EditorRequired]
+    [Parameter]
+    public User? user { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public EForm formType { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public EventCallback<EForm> OnValidSubmit{ get; set; }
+    private string ButtonText
+    {
+        get
+        {
+            if (formType == EForm.Insert) return "Vložit";
+            return "Aktualizovat";
+        }
+    }
+    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
+
+}

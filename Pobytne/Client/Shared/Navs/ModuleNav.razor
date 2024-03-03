@@ -15,7 +15,7 @@
 					</a>
 					<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
 						<li><a class="dropdown-item" href=@($"{idModule}/Clients")>Evidence klientů</a></li>
-						@* <li><a class="dropdown-item disabled" href="#">Pernamentky</a></li> *@
+						<li><a class="dropdown-item" href=@($"{idModule}/SeasonTicket")>Pernamentky</a></li>
 					</ul>
 				</li>
 	@* 			<li class="nav-item dropdown">
@@ -47,9 +47,9 @@
 					</a>
 					<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
 						<li><a class="dropdown-item" href=@($"{idModule}/RecordSettings")>Evidence položek</a></li>
-						<li><a class="dropdown-item disabled" href="#">Evidence stavu zásob</a></li>
-						<li><a class="dropdown-item disabled" href="#">Číselník typu platby</a></li>
-						@* <li><a class="dropdown-item disabled" href="#">Číselník konstatnt</a></li> *@
+		@* 				<li><a class="dropdown-item disabled" href="#">Evidence stavu zásob</a></li>
+						<li><a class="dropdown-item disabled" href="#">Číselník typu platby</a></li> 
+						<li><a class="dropdown-item disabled" href="#">Číselník konstatnt</a></li> *@
 					</ul>
 				</li>
 				<li class="nav-item dropdown">
@@ -60,7 +60,7 @@
 					<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
 						<li><a class="dropdown-item" href=@($"{idModule}/CashRegisterReports")>Souhrny plateb</a></li>
 						<li><a class="dropdown-item" href=@($"{idModule}/EvidenceReports")>Souhrny evidence</a></li>
-						<li><a class="dropdown-item disabled" href="#">Souhrny čerpání pernamentky</a></li>@* 
+						@* <li><a class="dropdown-item disabled" href="#">Souhrny čerpání pernamentky</a></li>@*  
 						<li><a class="dropdown-item" href=@($"{idModule}/RecordReports")>Souhrny stavu zásob</a></li> *@
 					</ul>
 				</li>
@@ -75,6 +75,17 @@
 		</a>
 	</div>
 </div>
+@* <div class="top-0 w-100 card floating-card mb-3 d-flex flex-row justify-content-between">
+	<div class="p-3">
+		@PageTitle
+	</div>
+	@if (moduleWorkspace.ModulesDic.ContainsKey(IdModule))
+	{
+		<div class="text-capitalize p-3">
+			@moduleWorkspace.ModulesDic[IdModule]
+		</div>
+	}
+</div> *@
 <style>
 	a{
 		color:white;	
@@ -90,5 +101,11 @@
 	[Parameter]
 	[EditorRequired]
 	public string idModule { get; set; } = "-1";
+	private int IdModule => int.Parse(idModule);
+	[Parameter]
+	[EditorRequired]
+	public string PageTitle { get; set; } = string.Empty;
+	[CascadingParameter]
+	public ModuleWorkplace moduleWorkspace { get; set; } = default!;
 
 }

@@ -3,9 +3,9 @@
 @inject IJSRuntime js
 
 
-@* <AuthorizeView>
+<AuthorizeView>
 	<Authorized>
-        <HxCard >
+        <HxCard CssClass="floating-card">
             <BodyTemplate>
                 <HxCardTitle>Můj účet</HxCardTitle>
                 <HxCardSubtitle CssClass="mb-2 text-muted">@context.User.Claims.FirstOrDefault(c => c.Type == "License")?.Value</HxCardSubtitle>
@@ -19,63 +19,15 @@
         </HxCard>
         <div class="w-100 m-2"/>
 	</Authorized>
-</AuthorizeView> *@
+</AuthorizeView>
 
 
 
-<HxCard>
-    <BodyTemplate>
-        <EditForm Model="model" OnValidSubmit="@(async()=> await js.InvokeAsync<string>("alert", "ValidSubmit"))" OnInvalidSubmit="@(async()=> await js.InvokeAsync<string>("alert", "InvalidSubmit"))">
-            <DataAnnotationsValidator />
 
-            <HxSelect TItem="UserRecord"
-                      TValue="int?"
-                      Label="Uživatel"
-                      Data="userList"
-                      @bind-Value="model.userId"
-                      TextSelector="@(u => u.userName)"
-                      ValueSelector="@(u => u.id)"
-                      NullText="-Vyber uživatele-"
-                      NullDataText="Načítám data..." />
-
-            <HxSubmit>Submit</HxSubmit>
-        </EditForm>
-
-    </BodyTemplate>
-</HxCard>
 
 
 @code {
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
 
-
-    private record UserRecord(string userName, int id);
-    private List<UserRecord> userList = new();
-    private UserModel model = new();
-    private class UserModel
-    {
-        [Required(ErrorMessage = "Zvolte uživatele")]
-        public int? userId { get; set; } = null;
-    }
-    protected override async Task OnInitializedAsync()
-    {
-        var response = await service.GetAllAsync<User>($"GetRest?moduleId=1", -1);
-
-        if (response is null)
-            Console.WriteLine($"NO RESPONSE");
-        else if (response is ErrorResponse response1)
-            Console.WriteLine($"{response1.ErrorMessage}");
-        else if (response is List<User> list)
-        {
-            foreach (var u in list)
-            {
-                userList.Add(new UserRecord(u.UserName, u.Id));
-            }
-        }
-    }
-    private async Task OnSubmitHandler()
-    {
-        await js.InvokeAsync<string>("alert", "Inserted");
-    }
 }

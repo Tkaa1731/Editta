@@ -6,6 +6,7 @@
     	           Placeholder="Vyhledat podle názvu.."
     	           TItem="PermitionRecord"
     	           TValue="int?"
+                   MinimumLength="0"
     	           Value="@selected"
                    ValueChanged='async(value)=>{selected = value;await js.InvokeVoidAsync("focusElementById", $"code-{value}");}'
                    ValueExpression="()=>selected"
@@ -196,7 +197,13 @@
         validationErrorMessage = string.Empty;
         return true;
     }
-    private Task<AutosuggestDataProviderResult<PermitionRecord>> ProvideSuggestions(AutosuggestDataProviderRequest request) => Task.FromResult( new AutosuggestDataProviderResult<PermitionRecord> { Data = permition.Where(p => p.Name.ToLower().StartsWith(request.UserInput.ToLower())) }); 
+    private Task<AutosuggestDataProviderResult<PermitionRecord>> ProvideSuggestions(AutosuggestDataProviderRequest request) {
+        if (request.UserInput?.Length > 0)
+		{
+           return Task.FromResult( new AutosuggestDataProviderResult<PermitionRecord> { Data = permition.Where(p => p.Name.ToLower().StartsWith(request.UserInput.ToLower())) }); 
+		}
+        return Task.FromResult( new AutosuggestDataProviderResult<PermitionRecord> { Data = permition }); 
+    }
     private Task<PermitionRecord?> ItemValueResolver(int? value)
     {
         if (value.HasValue)

@@ -1,18 +1,17 @@
 ﻿@inherits ComponentBase
 
 
-<HxGrid @ref="grid"
+    <HxGrid @ref="grid"
             TItem="InteractionRecordItem"
-            Responsive="true"
             DataProvider="LoadDataItems"
             ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
-            PageSize="15"
-            TableContainerCssClass="virtualized-table-container"
-            HeaderRowCssClass="sticky-top"
+           
+            TableContainerCssClass="mh-100 overflow-auto"
+            HeaderRowCssClass="sticky-top top-0"
             SelectedDataItem="selectedItem"
             SelectedDataItemChanged="HandleSelectedItemChanged">
         <Columns>
-            <HxGridColumn HeaderText="Název" ItemTextSelector="@(item => item.Name)" />
+            <HxGridColumn HeaderText="Název" ItemTextSelector="@(item => item.Name)"/>
             <HxGridColumn HeaderText="Cena" ItemCssClass="center">
                 <ItemTemplate Context="item">
                     @if (selectedItem is not null && selectedItem == item)
@@ -90,7 +89,12 @@
             </HxContextMenuGridColumn>
         </Columns>
     </HxGrid>
-
+<style>
+    div.custom-grid-overflow    >
+    div.hx-progress-overlay{
+        height:100%;
+    }
+</style>
 @code {
     [EditorRequired]
     [Parameter]

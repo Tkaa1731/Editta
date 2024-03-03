@@ -1,0 +1,87 @@
+﻿@if(Ware is not null)
+{
+    <EditForm Model="@Ware" OnValidSubmit=OnValidSubmitHandler>
+        <DataAnnotationsValidator />
+        <div class="mx-3 mt-3">
+            <div class="row">
+                <div class="col">
+                    <HxInputText @bind-Value="@Ware.Name" Label="Název položky" Type="InputType.Text" />
+                </div>
+                <div class="col-3">
+                    <HxInputNumber Label="Pořadí položky v seznamu" TValue="int" @bind-Value="Ware.Order"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <HxInputNumber @bind-Value="Ware.Quantity" Label="Počet kusů"TValue="int" />
+                </div>
+                <div class="col">
+                    <HxInputNumber @bind-Value="Ware.Price" Label="Částka" TValue="float" Decimals="2"/>
+                </div>
+                <div class="col-6">
+                    <HxInputText @bind-Value="@Ware.RecordPropertiesName" Label="Účetní specifikace" Type="InputType.Text" />
+                </div>
+            </div>
+            <div class="row pt-3">
+                <div class="col">
+                    <HxSwitch Text="Kontrola na zůstatek" @bind-Value="@Ware.IsBalanceCheck" />
+                </div>
+                <div class="col">
+                    <HxSwitch Text="Částka je vyžadována" @bind-Value="@Ware.IsPriceRequired" />
+                </div>
+                <div class="col">
+                    <HxSwitch Text="Klient je povinný" @bind-Value="@Ware.IsClientRequired" />
+                </div>
+            </div>
+            <hr style="height: 2px;color: #999;">
+            <div class="row align-items-center">
+                <div class="col">
+                    <HxSwitch Text="Používat permanentky" @bind-Value="@Ware.IsSeasonTicket"/>
+                </div>
+                <div class="col">
+                    <HxInputNumber @bind-Value="Ware.GroupQuantity" Label="Počet jednotek"TValue="int" Enabled="Ware.IsSeasonTicket"/>
+                </div>
+                <div class="col">
+                    <HxInputNumber @bind-Value="Ware.GroupPrice" Label="Částka celkem" TValue="float" Decimals="2" Enabled="Ware.IsSeasonTicket"/>
+                </div>
+            </div>       
+            <div class="row">
+                <div class="col">
+                    <HxInputText @bind-Value="Ware.Note" Label="Poznámka" Type="InputType.Text" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Ware.ValidFrom" MinDate="DateTime.Now.AddDays(1)" Label="Platní od" />
+                </div>
+                <div class="col">
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Ware.ValidTo"  Label="Platí do"/>
+                </div>
+            </div>
+        </div>
+        <div class="d-grid gap-2">
+            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        </div>
+
+    </EditForm>
+}
+@code {
+	[Parameter]
+	[EditorRequired]
+	public IWare_Record? Ware { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public EForm formType { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public EventCallback<EForm> OnValidSubmit { get; set; }
+    private string ButtonText
+    {
+        get
+        {
+            if (formType == EForm.Insert) return "Vložit";
+            return "Aktualizovat";
+        }
+    }
+    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
+}

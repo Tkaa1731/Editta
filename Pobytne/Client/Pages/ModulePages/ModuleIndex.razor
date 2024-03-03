@@ -2,13 +2,12 @@
 @inject ILocalStorageService localStorage
 @inject PobytneService service
 
-<h3>@modulePermition.ModuleName</h3>
-<div class="container">
+<div class="container mt-5">
     <div class="row">
-        <div class="col ">
+        <div class="col">
             <a href="@idModule/Records" class="no-link">
-                <div class="card">
-                    <div class="card-body">
+                <div class="card floating-card">
+                    <div class="card-body p-5 text-center">
                         <HxIcon Icon="@BootstrapIcon.Book" />
                         <h5 class="card-title">Evidence</h5>
                     </div>
@@ -17,8 +16,8 @@
         </div>
         <div class="col">
             <a href="@idModule/Clients" class="no-link">
-                <div class="card">
-                    <div class="card-body">
+                <div class="card floating-card">
+                    <div class="card-body p-5 text-center">
                         <HxIcon Icon="@BootstrapIcon.People" />
                         <h5 class="card-title">Klienti</h5>
                     </div>
@@ -26,31 +25,20 @@
             </a>
         </div>
         <div class="col">
-            <a href="@idModule/Contracts" class="no-link disabled">
-                <div class="card">
-                    <div class="card-body ">
+            <a href="@idModule/SeasonTicket" class="no-link disabled">
+                <div class="card floating-card">
+                    <div class="card-body p-5 text-center">
                         <HxIcon  Icon="@BootstrapIcon.Clipboard2Check" />
-                        <h5 class="card-title">Smlouvy</h5>
+                        <h5 class="card-title">Permanentky</h5>
                     </div>
                 </div>
             </a>
         </div>
-    </div>
-    <div class="row mt-5">
-        <div class="col">
-            <a href="@idModule/CashRegister" class="no-link disabled">
-                <div class="card">
-                    <div class="card-body">
-                        <HxIcon Icon="@BootstrapIcon.Wallet" />
-                        <h5 class="card-title">Pokladna</h5>
-                    </div>
-                </div>
-            </a>
-        </div>
+    <div class="w-100 mt-3"/>
         <div class="col">
             <a href="@idModule/RecordSettings" class="no-link">
-                <div class="card">
-                    <div class="card-body">
+                <div class="card floating-card">
+                    <div class="card-body p-5 text-center">
                         <HxIcon Icon="@BootstrapIcon.Gear" />
                         <h5 class="card-title">Evidence položek</h5>
                     </div>
@@ -58,18 +46,27 @@
             </a>
         </div>
         <div class="col">
+            <a href="@idModule/EvidenceReports" class="no-link disabled">
+                <div class="card floating-card">
+                    <div class="card-body p-5 text-center">
+                        <HxIcon Icon="@BootstrapIcon.Wallet" />
+                        <h5 class="card-title">Souhrny pokladna</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col">
             <a href="@idModule/CashRegisterReports" class="no-link">
-                <div class="card">
-                    <div class="card-body">
+                <div class="card floating-card">
+                    <div class="card-body p-5 text-center">
                         <HxIcon Icon="@BootstrapIcon.CalculatorFill" />
-                        <h5 class="card-title">Souhrny</h5>
+                        <h5 class="card-title">Souhrny evidence</h5>
                     </div>
                 </div>
             </a>
         </div>
     </div>
 </div>
-<style></style>
 @code {
     [EditorRequired]
     [Parameter]
@@ -78,7 +75,7 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
     [CascadingParameter]
-    public ModuleWorkplace moduleWorkplace { get; set; } = default!;// TODO: pri zmene v URL se neprojevi zmena v ModuleWorkspace
+    public ModuleWorkplace moduleWorkspace { get; set; } = default!;
 
 
     private Permition modulePermition = new Permition();
@@ -98,7 +95,7 @@
 
         }
 
-        moduleWorkplace.ModuleId = idModule;
+        moduleWorkspace.ModuleId = idModule;
 
         return;
     }

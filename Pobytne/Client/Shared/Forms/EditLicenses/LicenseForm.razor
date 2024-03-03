@@ -1,0 +1,112 @@
+﻿@if(license is not null)
+{
+    <EditForm Model="@license" OnValidSubmit=OnValidSubmitHandler>
+        <DataAnnotationsValidator />
+        <div class="mx-3">
+            <div class="row">
+                <div class="col-7">
+                    <HxInputText @bind-Value="license.NameOfOrganization" Label="Název organizace" Type="InputType.Text" />
+                </div>
+                <div class="col">
+                    <HxInputNumber Label="ICO" Decimals="0" TValue="int" @bind-Value="license.ICO" @oninput="ICOChangedHandler" Enabled="formType == EForm.Insert" />
+                </div>
+                <div class="col">
+                    <HxInputNumber Label="Číslo licence" Decimals="0" TValue="int" @bind-Value="license.ICO" Enabled="false"/>
+                </div>
+            </div>
+            <div class="row align-items-center">
+                <div class="col">
+                    <HxInputNumber Label="Typ verze" Decimals="0" TValue="int" @bind-Value="license.VersionType" />
+                </div>
+                <div class="col">
+                    <HxSwitch Text="Demo" @bind-Value="@license.IsDemo" />
+                </div>
+                <div class="col">
+                    <HxSwitch Text="Blokovaná" @bind-Value="@license.IsBlocked" />
+                </div>
+                <div class="col">
+                    <HxSwitch Text="Zaplacená" @bind-Value="@license.IsPayed" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidTo" MinDate="DateTime.Now.AddDays(1)" Label="Platná od" />
+                </div>
+                <div class="col">
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.DateOfPayment"  Label="Datum platby" Enabled="license.IsPayed" />
+                </div>
+            </div>
+            <hr style="height: 2px;color: #999;">
+            <div class="row">
+                <div class="col">
+                    <HxInputText @bind-Value="license.ContactPerson" Label="Jméno kontaktní osoby" Type="InputType.Text" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-7">
+                    <HxInputText @bind-Value="license.Email" Label="Email" Type="InputType.Email" />
+                </div>
+                <div class="col">
+                    <HxInputText @bind-Value="license.PhoneNumber" Label="Telefonní číslo" Type="InputType.Tel" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <HxInputText @bind-Value="license.City" Label="Obec" Type="InputType.Text" />
+                </div>
+                <div class="col">
+                    <HxInputText @bind-Value="license.Street" Label="Ulice" Type="InputType.Text" />
+                </div>
+                <div class="col-3">
+                    <HxInputText @bind-Value="license.PostNumber" Label="PSČ" Type="InputType.Text" />
+                </div>
+            </div>
+        </div>
+        <div class="d-grid gap-2">
+            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        </div>
+
+    </EditForm>
+}
+@code {
+    [EditorRequired]
+    [Parameter]
+    public License? license{ get; set; }
+    [Parameter]
+    public EForm formType { get; set; }
+    [Parameter]
+    public EventCallback<EForm> OnValidSubmit { get; set; }
+    private string ButtonText
+    {
+        get
+        {
+            if (formType == EForm.Insert) return "Vložit";
+            return "Aktualizovat";
+        }
+    }
+    private async Task OnValidSubmitHandler()
+    {
+        if(license is not null)
+        {            
+            license.LicenseNumber = license.ICO;
+
+            await OnValidSubmit.InvokeAsync(formType);
+        }
+
+    }
+
+    private void ICOChangedHandler(ChangeEventArgs e)
+    {
+        if(e.Value is not null && license is not null)
+        {
+            if (int.TryParse(e.Value.ToString(), out int newValue))
+            {
+                license.ICO = newValue;
+            }
+            else
+            {
+                license.ICO = 0;
+            }            
+        }
+    }
+}
