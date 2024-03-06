@@ -1,5 +1,4 @@
-﻿using Pobytne.Shared.Procedural;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Data;
@@ -8,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using Dapper;
+using Pobytne.Shared.Procedural.DTO;
 
 namespace Pobytne.Data.Tables
 {
@@ -16,7 +16,7 @@ namespace Pobytne.Data.Tables
         public async Task<IEnumerable<Payment>> GetPayments(int moduleId)
         {
             var conditions = new { IDModulu = moduleId };
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = Database.CreateConnection())
             {
                 string sql = @"  SELECT p.*, u.JmenoUser AS CreationUserName
                                   FROM S_TypyPlatby p
@@ -26,16 +26,20 @@ namespace Pobytne.Data.Tables
                 return await cnn.QueryAsync<Payment>(sql, conditions);
             }
         }
-		public async Task<int> InsUpTran(DynamicParameters param)
-		{
-			string cashRegisterSQL = "p_sp_TypPlatby_InsUp";
-			using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
-			int success = await cnn.ExecuteAsync(cashRegisterSQL, param, commandType: CommandType.StoredProcedure);
-
-			if (success == 1)
-				return 1;
-
-			throw new Exception($"Failed 'p_sp_TypPlatby_InsUp' {success}");
-		}
-	}
+        public async Task<int?> Insert(Payment payment)
+        {
+            using IDbConnection cnn = Database.CreateConnection();
+            return await cnn.InsertAsync(payment);
+        }
+        public async Task<int> Update(Payment payment)
+        {
+            using IDbConnection cnn = Database.CreateConnection();
+            return await cnn.UpdateAsync(payment);
+        }
+        public async Task<int> Delete(int id)
+        {
+            using IDbConnection cnn = Database.CreateConnection();
+            return await cnn.DeleteAsync(id);
+        }
+    }
 }

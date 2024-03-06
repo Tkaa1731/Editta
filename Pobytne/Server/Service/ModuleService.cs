@@ -1,10 +1,10 @@
 ﻿using Pobytne.Data;
 using Pobytne.Data.Tables;
-using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Procedural.DTO;
 
 namespace Pobytne.Server
 {
-	public class ModuleService
+    public class ModuleService
 	{
         private readonly UserTable _userTable;
         private readonly LicenseTable _licenseTable;
@@ -25,7 +25,8 @@ namespace Pobytne.Server
 		{
 			return await _moduleTable.GetByUser(userId);
 		}
-		public async Task<int> Update(Module updateModule)
+        //---------------------------- InsUpDel-------------------------------
+        public async Task<int> Update(Module updateModule)
         {
             return await _moduleTable.Update(updateModule);
         }

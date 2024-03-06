@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Pobytne.Server.Service;
 using Pobytne.Shared.Authentication;
+using Pobytne.Shared.Extensions;
 
 namespace Pobytne.Server.Controllers
 {
@@ -18,12 +19,13 @@ namespace Pobytne.Server.Controllers
 		[HttpPost]
 		[AllowAnonymous]
 		[Route("Login")]
-		public async Task<ActionResult<UserAccount>> Login([FromBody] LoginRequest request)
+		public async Task<ActionResult<object>> Login([FromBody] LoginRequest request)
 		{
+
 			var user = await _authService.Login(request);
-			if(user is null)		
-				return Unauthorized();
-			return user;
+			if(user is ErrorResponse error)		
+				return Unauthorized(error);
+			return Ok(user);
 		}
 		[HttpPost]
 		[AllowAnonymous]

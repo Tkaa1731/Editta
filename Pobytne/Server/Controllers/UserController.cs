@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pobytne.Server.Service;
-using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Procedural.DTO;
 using Pobytne.Shared.Struct;
 
 
@@ -46,20 +46,15 @@ namespace Pobytne.Server.Controllers
         [HttpGet]
         [PermissionAuthorize(permition, EAccess.ReadOnly)]
         [Route("UsersList")]
-        public ActionResult<IEnumerable<User>> GetByLicOrMod([FromQuery]int licenseNumber = -1, [FromQuery]int userOfModule = -1)
+        public async Task<IEnumerable<User>> GetByLicense([FromQuery]int licenseNumber)//, [FromQuery]int userOfModule = -1
         {
-            if(licenseNumber > 0)
-                return _userService.GetUsersByLicense(licenseNumber).Result.ToList();
-            if(userOfModule > 0)
-                return _userService.GetUsersByModule(userOfModule).Result.ToList();
-            else
-                return new List<User>();
+            return await _userService.GetUsersByLicense(licenseNumber);
         }
 
         [HttpGet]
         [PermissionAuthorize(permition, EAccess.ReadOnly)]
         [Route("GetRest")]//GetRest?moduleId={module}"
-        public ActionResult<IEnumerable<User>> GetRest([FromQuery] int moduleId)
+        public ActionResult<IEnumerable<User>> GetRestOfModule([FromQuery] int moduleId)
         {
             return _userService.GetUsersExsModule(moduleId).Result.ToList();
         }
@@ -85,8 +80,9 @@ namespace Pobytne.Server.Controllers
         // DELETE api/<ItemsController>/5
         [PermissionAuthorize(permition, EAccess.FullAccess)]
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<bool> Delete(int id)
         {
+            return await _userService.Delete(id) > 0; 
         }
         // POST api/<ItemsController>
         [HttpPost]

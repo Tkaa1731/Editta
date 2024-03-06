@@ -21,7 +21,7 @@
                 <ListCustom ListTitle="Počet záznamů" ListItems=@listOfItems selectedItem=selectedItem selectedItemChanged=OnItemSelect EventNewItem="OnNewItem"></ListCustom>
             </div>
         </div>
-        <RecordMessageBox formItem="formItem" @ref=messageBox OnSuccessRequest="OnSuccessRequestHandler"/>
+        <FormModal @ref=formModal formItem="formItem" OnSuccessRequest="OnSuccessRequestHandler"/>
     </Authorized>
     <NotAuthorized>
         JSTE V NOACCESS MODU PRO  PRISTUP - APLICATION
@@ -44,7 +44,7 @@
     private List<IListItem>? listOfItems;
     private List<RecordDir> fileSystem = [];
 
-    private RecordMessageBox messageBox = new();
+    private FormModal? formModal;
 
     private async Task OnSelect(IDirectory e)
     {
@@ -70,10 +70,10 @@
     }
     private async Task OnItemSelect(IListItem i)
     {
-        if (i is not null)
+        if (i is not null && formModal is not null)
         {
             formItem = i;
-            await messageBox.UpdateForm();
+            await formModal.UpdateForm();
         }
         selectedItem = null;
     }
@@ -100,10 +100,10 @@
     }
     private async Task OnNewItem()
     {
-        if (selectedDirectory is not null)
+        if (selectedDirectory is not null && formModal is not null)
         {
             formItem = selectedDirectory.GetNew();
-            await messageBox.InsertForm();
+            await formModal.InsertForm();
         }
     }
     private async Task OnSuccessRequestHandler()
@@ -115,6 +115,5 @@
         }
         StateHasChanged();
     }
-    //TODO: form
 }
 

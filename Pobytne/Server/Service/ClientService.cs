@@ -1,22 +1,31 @@
 ﻿using Pobytne.Data.Tables;
-using Pobytne.Shared;
+using Pobytne.Shared.Procedural.DTO;
+using System.Reflection;
+
 
 namespace Pobytne.Server.Service
 {
-    public class ClientService
+    public class ClientService(ClientTable clientTable)
     {
         
-        private readonly ClientTable _clientTable;
+        private readonly ClientTable _clientTable = clientTable;
 
-        public ClientService(ClientTable clientTable)
+        public async Task<IEnumerable<Shared.Procedural.DTO.Client>> GetClientsByModule(int moduleNumber)
         {
-            _clientTable = clientTable;
+            return await _clientTable.GetAll(new { ModuleNumber = moduleNumber});
         }
-
-        public async Task<IEnumerable<Shared.Procedural.Client>> GetClientsByModule(int moduleNumber)
+        //---------------------------- InsUpDel-------------------------------
+        public async Task<int> Update(Shared.Procedural.DTO.Client updateLicense)
         {
-            var users = await _clientTable.GetAll(new { ModuleNumber = moduleNumber});
-            return users;
+            return await _clientTable.Update(updateLicense);
+        }
+        public async Task<int?> Insert(Shared.Procedural.DTO.Client insertLicense)
+        {
+            return await _clientTable.Insert(insertLicense);
+        }
+        public async Task<int> Delete(int it)
+        {
+            return await _clientTable.Delete(it);
         }
     }
 }

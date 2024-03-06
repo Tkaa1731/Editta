@@ -1,13 +1,12 @@
 ﻿using Pobytne.Shared.Struct;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Pobytne.Shared.Procedural
+namespace Pobytne.Shared.Procedural.DTO
 {
-    public class Payment :ICreation
+    [Serializable]
+    [Table("S_TypyPlatby")]
+    public class Payment : ACreation
     {
         public int Id { get; set; } //IDTypuPlatby
         public string Name { get; set; } = string.Empty; //NazevDokladu
@@ -16,15 +15,9 @@ namespace Pobytne.Shared.Procedural
         public string FacturePrefix { get; set; } = string.Empty; //PrefixDokladu
         public int FactureNumber { get; set; } //CisloDokladu
         public int DefaultPayment { get; set; } //VychoziPlatba
-
-        public DateTime ValidFrom { get; set; } //PlatiOd
-
-        public DateTime ValidTo { get; set; } //PlatiDo
-
-        public int CreationUserId { get; set; } //Kdo
-
-        public DateTime CreationDate { get; set;} //Kdy
-
-        public string CreationUserName { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Vyplňte datum")]
+        public DateTime ValidFrom { get; set; } = DateTime.Now;
+        [Required(ErrorMessage = "Vyplňte datum")]
+        public DateTime ValidTo { get; set; } = DateTime.Now.AddYears(1);
     }
 }

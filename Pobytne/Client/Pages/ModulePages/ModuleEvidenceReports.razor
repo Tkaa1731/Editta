@@ -116,7 +116,7 @@
 			<GroupByTemplate>
 
 				<HxRadioButtonList Label="Souhrny podle:"
-				   TItem="Radio"
+				   TItem="RKeyValue"
 				   TValue="int"
 				   Data="@radioList"
 				   @bind-Value="@selectedRadio"
@@ -136,7 +136,7 @@
 		<ClientList Editable="false" @bind-Value="selectedClient"/>
 	</BodyTemplate>
 	<FooterTemplate>
-		<HxButton Text="Potvrdit" OnClick="async()=>{StateHasChanged();await clientsModal.HideAsync();}" Color="ThemeColor.Primary" CssClass="btn-custom w-100" />
+		<HxButton Text="Potvrdit" OnClick="async()=>{StateHasChanged();await clientsModal.HideAsync();}" Color="ThemeColor.Primary" CssClass="w-100" />
 	</FooterTemplate>
 </HxModal>
 <style>
@@ -179,7 +179,7 @@
 	};
 
 	private int selectedRadio = 1;
-	private readonly List<Radio> radioList = new() 
+	private readonly List<RKeyValue> radioList = new() 
 	{ 
 		new() { Id = 1, Name = "Dle položek" },
 		new() { Id = 2, Name = "Dle vlastnosti" },

@@ -5,10 +5,10 @@
         <div class="mx-3 mt-3">
             <div class="row">
                 <div class="col">
-                    <HxInputText @bind-Value="Folder.Name" Label="Název položky" Type="InputType.Text" />
+                    <HxInputText @bind-Value="Folder.Name" Label="Název položky" Type="InputType.Text" ValidationMessageMode="ValidationMessageMode.Regular" />
                 </div>
                 <div class="col-3">
-                    <HxInputNumber Label="Pořadí položky v seznamu" TValue="int" @bind-Value="Folder.Order"/>
+                    <HxInputNumber Label="Pořadí položky v seznamu" TValue="int" @bind-Value="Folder.Order" ValidationMessageMode="ValidationMessageMode.Regular" />
                 </div>
             </div>
             <div class="row">
@@ -18,10 +18,10 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Folder.ValidFrom"  Label="Plati od" />
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Folder.ValidFrom" Label="Plati od" ValidationMessageMode="ValidationMessageMode.Regular" />
                 </div>
                 <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Folder.ValidTo" MinDate=Folder.ValidFrom.AddDays(1) Label="Plati do" />
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Folder.ValidTo" MinDate=Folder.ValidFrom.AddDays(1) Label="Plati do" ValidationMessageMode="ValidationMessageMode.Regular" />
                 </div>
             </div>
         </div>

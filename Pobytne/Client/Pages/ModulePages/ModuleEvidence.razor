@@ -16,8 +16,7 @@
                 }
             </div>
         }
-        //interakce komponenta
-        //TODO: presunout do komponenty   
+        //interakce komponenta  
         <div class="col card p-3 mh-100 d-flex flex-column justify-content-between border-top border-2 floating-card" style="min-width:fit-content;">
             <div  class="overflow-hidden d-flex flex-column" style="flex:1;">
                 <!--Kalendar-->
@@ -35,8 +34,8 @@
                 </div>
                 <HxInputTextArea Label="Poznámka" LabelType="LabelType.Floating" MaxLength="200" @bind-Value="interaction.InteractionName" CssClass="my-2" />
             
-                <HxButton CssClass="w-100 my-1 btn-custom" Text="Potvrdit" Color=ThemeColor.Success OnClick="SubmitHandler" Enabled="(interaction.Records.Count>0)"></HxButton>
-                <HxButton CssClass="w-100 btn-custom" Text="Smazat vse" Color=ThemeColor.Danger Enabled="(interaction.Records.Count>0)" OnClick="()=>{interaction.Records.Clear();interaction.InteractionName = string.Empty;}"></HxButton>
+                <HxButton CssClass="w-100 my-1" Text="Potvrdit" Color=ThemeColor.Success OnClick="SubmitHandler" Enabled="(interaction.Records.Count>0)"></HxButton>
+                <HxButton CssClass="w-100" Text="Smazat vse" Color=ThemeColor.Danger Enabled="(interaction.Records.Count>0)" OnClick="()=>{interaction.Records.Clear();interaction.InteractionName = string.Empty;}"></HxButton>
             </div>
         </div>
 
@@ -48,7 +47,7 @@
         <ClientList @bind-Value="selectedClient" Editable="false"/>
 	</BodyTemplate>
 	<FooterTemplate>
-        <HxButton Text="Potvrdit" OnClick="HandleModalSubmit" Color="ThemeColor.Primary" CssClass="btn-custom w-100"/>
+        <HxButton Text="Potvrdit" OnClick="HandleModalSubmit" Color="ThemeColor.Primary" CssClass="w-100"/>
 	</FooterTemplate>
 </HxModal>
 <HxModal @ref="paymentsModal" Centered=true Title="Vyberte typ platby"  Backdrop="ModalBackdrop.Static" Size="ModalSize.Large">
@@ -74,7 +73,7 @@
         background: #e3e6ef;
     }
     .bt-red{
-        border-top:2px solid #ea7c90 !important;
+        border-top:2px solid #9EBAFB !important;
     }
     .bt-green{
         border-top:2px solid #75d2a9 !important;

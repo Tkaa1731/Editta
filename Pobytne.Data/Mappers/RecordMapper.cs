@@ -35,8 +35,8 @@ namespace Pobytne.Data.Mappers
 
             Map(r => r.ValidFrom).ToColumn("PlatiOd");
             Map(r => r.ValidTo).ToColumn("PlatiDo");
-            Map(r => r.CreationUserId).ToColumn("Kdo");
-            Map(r => r.CreationDate).ToColumn("Kdy");
+            Map(c => c.CreationUserId).ToColumn("Kdo");
+            Map(c => c.CreationDate).ToColumn("Kdy");
         }
     }
 }

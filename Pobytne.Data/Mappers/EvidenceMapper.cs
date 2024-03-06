@@ -23,8 +23,8 @@ namespace Pobytne.Data.Mappers
 			Map(c => c.CustomerId).ToColumn("IDUzivatele");
 			Map(c => c.CustomerName).ToColumn("JmenoUzivatele");
 
-			Map(c => c.CreationUserId).ToColumn("Kdo");
-			Map(c => c.CreationDate).ToColumn("Kdy");
-		}
+            Map(c => c.CreationUserId).ToColumn("Kdo");
+            Map(c => c.CreationDate).ToColumn("Kdy");
+        }
 	}
 }

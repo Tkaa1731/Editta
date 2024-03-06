@@ -1,6 +1,7 @@
 ﻿using Havit.Blazor.Components.Web;
 using Havit.Blazor.Components.Web.Bootstrap;
 using Pobytne.Client.Services;
+using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural;
 using Pobytne.Shared.Struct;
 
@@ -69,8 +70,8 @@ namespace Pobytne.Client.Extensions.IDirectory
 
                 if (response is null)
                     Console.WriteLine($"NO RESPONSE");
-                else if (response is ErrorResponse response1)
-                    Console.WriteLine($"{response1.ErrorMessage}");
+                else if (response is ErrorResponse error)
+                    Console.WriteLine($"{error.ErrorMessage}");
                 else if (response is List<Record> list)
                 {
                     SubRecords = list;

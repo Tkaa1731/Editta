@@ -1,8 +1,8 @@
-﻿using Pobytne.Shared.Procedural;
-using System.Data.SqlClient;
+﻿using System.Data.SqlClient;
 using System.Data;
 using Dapper;
 using System;
+using Pobytne.Shared.Procedural.DTO;
 
 namespace Pobytne.Data.Tables
 {
@@ -10,7 +10,7 @@ namespace Pobytne.Data.Tables
     {
         public async Task<IEnumerable<License>> GetAll(object condition)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = Database.CreateConnection())
             {
                 string sql = @"select l.*, c.JmenoUser AS CreationUserName
                                from S_Licence l
@@ -20,7 +20,7 @@ namespace Pobytne.Data.Tables
         }
         public async Task<bool> CheckLicense(int license_numb)// checking if license is active
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = Database.CreateConnection())
             {
                 string sql = @"select * from S_Licence where CisloLicence=@CisloLicence;";
                 var param = new { CisloLicence = license_numb };
@@ -33,7 +33,7 @@ namespace Pobytne.Data.Tables
 
         public async Task<IEnumerable<License>> Select(int id)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = Database.CreateConnection())
             {
                 string sql = @"SELECT * FROM S_Licence WHERE CisloLicence=@CisloLicence;";
                 var param = new { CisloLicence = id };
@@ -43,7 +43,7 @@ namespace Pobytne.Data.Tables
 		public async Task<int> InsUpTran(DynamicParameters param)
 		{
 			string cashRegisterSQL = "p_sp_Licence_InsUp";
-			using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+			using IDbConnection cnn = Database.CreateConnection();
 			int success = await cnn.ExecuteAsync(cashRegisterSQL, param, commandType: CommandType.StoredProcedure);
 
 			if (success == 1)
@@ -82,22 +82,21 @@ namespace Pobytne.Data.Tables
 			result.AddDynamicParams(template);
 			return result;
 		}
+        public async Task<int?> Insert(License license)
+        {
+            using IDbConnection cnn = Database.CreateConnection();
+            return await cnn.InsertAsync(license);
+        }
+
+        public async Task<int> Update(License license)
+        {
+            using IDbConnection cnn = Database.CreateConnection();
+            return await cnn.UpdateAsync(license);
+        }
 		public async Task<int> Delete(int id)
         {
-            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            using IDbConnection cnn = Database.CreateConnection();
             return await cnn.DeleteAsync(id);
-        }
-
-        public async Task<int?> Insert(License item)
-        {
-            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
-            return await cnn.InsertAsync(item);
-        }
-
-        public async Task<int> Update(License item)
-        {
-            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
-            return await cnn.UpdateAsync(item);
         }
     }
 }

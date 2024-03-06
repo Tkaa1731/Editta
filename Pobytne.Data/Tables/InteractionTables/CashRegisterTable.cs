@@ -31,7 +31,7 @@ namespace Pobytne.Data.Tables.InteractionTables
         }
 		public async Task<IEnumerable<CashRegister>> SelectByCondition(DynamicParameters parameters, string sqlCondition)
 		{
-			using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))// TODO: Odstranit Top 20
+			using (IDbConnection cnn = Database.CreateConnection())// TODO: Odstranit Top 20
 			{
 				string sql = @" SELECT TOP 25 
 									p.*,i.NazevInterakce, i.IDUzivatele, i.Datum, i.IDModulu, i.IDTypuPlatby, 

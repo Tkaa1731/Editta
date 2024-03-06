@@ -1,38 +1,24 @@
 ﻿using Pobytne.Data;
 using Pobytne.Data.Tables;
 using Pobytne.Shared.Authentication;
-using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Procedural.DTO;
 
 namespace Pobytne.Server.Service
 {
-    public class UserService
+    public class UserService(UserTable user, LicenseTable license)
     {
-        private readonly UserTable _userTable;
-        private readonly LicenseTable _licenseTable;
-        private readonly PermitionTable _permitionTable;
-        public UserService(UserTable user,LicenseTable license, PermitionTable permition) 
-        {
-            _userTable = user;
-            _licenseTable = license;
-            _permitionTable = permition;
-        }
+        private readonly UserTable _userTable = user;
+        private readonly LicenseTable _licenseTable = license;
 
         public async Task<UserAccount> GetAccount(LoginRequest userAccount)
         {
             var user = await _userTable.GetByLogin(userAccount.Name);
 
-            if (user == null) throw new Exception("UserAccount not found");
-            if (!user.CheckPassword(userAccount.Password)) throw new Exception("Wrong password");
-
-            if (!await _licenseTable.CheckLicense(user.LicenseNumber)) throw new Exception("Your license is now unavalible");
-
-            //var accessPermition = await PermitionTable.GetAll(new{ UserId = user.Id });
-            var accessPermition = await _permitionTable.GetAll(user.Id);
-
-            if (accessPermition.Count() == 0) throw new Exception("User does not have any valid AccessPermition");
+            if (user == null || user.Id <= 0) throw new Exception("Neplatné přihlašovací údaje");
+            if (!user.CheckPassword(userAccount.Password)) throw new Exception("Špatné heslo");
+            if (!await _licenseTable.CheckLicense(user.LicenseNumber)) throw new Exception("Neaktivní licence");
 
             UserAccount result = new(user);
-            result.User.AccessPermition = accessPermition.ToList();
             return result;
         }
         public async Task<IEnumerable<User>> GetUsersByLicense(int licenseNumber)
@@ -43,11 +29,6 @@ namespace Pobytne.Server.Service
         public async Task<IEnumerable<User>> GetUsersExsModule(int moduleNumber)
         {
             return await  _userTable.GetByLicenseExsModule(moduleNumber);
-        }
-        public async Task<IEnumerable<User>> GetUsersByModule(int moduleId)
-        {
-            var users = await _userTable.GetWithPermitions(new { IDModulu = moduleId});
-            return users;
         }
         public async Task<User> GetUserById(int id)
         {
@@ -67,17 +48,9 @@ namespace Pobytne.Server.Service
         {
             return await _userTable.Delete(it);
         }
-        public async Task<int> Update(Permition updatePermition)
-        {
-            return await _permitionTable.Update(updatePermition);
-        }
-        public async Task<int?> Insert(Permition insertPermition)
-        {
-            return await _permitionTable.Insert(insertPermition);
-        }
         private string GeneratePassword()
         {
             return "heslo";
         }
-    }
+    }// TODO: vyresit heslo
 }

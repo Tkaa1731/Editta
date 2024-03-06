@@ -1,0 +1,46 @@
+﻿
+<HxTabPanel ActiveTabId="@recordType">
+    <HxTab Id="Folder" Title="Slozka" Enabled=@(recordType == "Folder" || record?.Id <= 0) TitleCssClass="text-secondary">
+        <Content>
+            <FolderForm formType="formType" Folder="record as IFolder_Record" OnValidSubmit="OnValidSubmit" />
+        </Content>
+    </HxTab>
+    <HxTab Id="Ware" Title="Evidence zbozi" Enabled=@(recordType == "Ware" || record?.Id <= 0) TitleCssClass="text-secondary">
+        <Content>
+            <WareForm formType="formType" Ware="record as IWare_Record" OnValidSubmit="OnValidSubmit" />
+        </Content>
+    </HxTab>
+    <HxTab Id="Activity" Title="Evidence aktivit" Enabled=@(recordType == "Activity" || record?.Id <= 0) TitleCssClass="text-secondary">
+        <Content>
+            <ActivityForm formType="formType" Activity="record as IActivity_Record" OnValidSubmit="OnValidSubmit" />
+        </Content>
+    </HxTab>
+    @*<HxTab Id="EmployeeTasks" Title="Cinnosti" Enabled=@(recordType == "EmployeeTasks" || record?.Id <= 0)>
+        <Content>
+            !IMPLEMENT
+        </Content>
+    </HxTab> *@
+</HxTabPanel>
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public  Record? record{ get; set; }
+    [Parameter]
+    [EditorRequired]
+    public EForm formType { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public EventCallback<EForm> OnValidSubmit { get; set; }
+
+    private string recordType
+    {
+        get
+        {
+            if (record?.Id > 0)
+                return record.RecordType.ToString();
+            else
+                return "Folder";
+        }
+    }
+}

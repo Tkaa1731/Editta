@@ -60,15 +60,15 @@
 				@* Payment Filter *@
 				<div>
 
-					<HxSelect TItem="Payment"
-							  TValue="int?"
+					<HxSelect TItem="RKeyValue"
+							  TValue="int"
 							  Label="Platba"
 							  Data="paymentList"
 							  @bind-Value="filter.PaymentId"
 							  Nullable="false"
 							  TextSelector="@(p => p.Name)"
 							  ValueSelector="@(p => p.Id)"
-							  NullDataText="Načítání..."
+							  Enabled="filter.PaymentId > 0"
 							  />
 
 					<div class="w-100 pt-1"/>
@@ -88,7 +88,7 @@
 			<GroupByTemplate>
 
 				<HxRadioButtonList Label="Souhrny podle:"
-				   TItem="Radio"
+				   TItem="RKeyValue"
 				   TValue="int"
 				   Data="@radioList"
 				   @bind-Value="@selectedRadio"
@@ -106,7 +106,7 @@
 		<ClientList Editable="false" @bind-Value="selectedClient"/>
 	</BodyTemplate>
 	<FooterTemplate>
-		<HxButton Text="Potvrdit" OnClick="async()=>await clientsModal.HideAsync()" Color="ThemeColor.Primary" CssClass="btn-custom w-100" />
+		<HxButton Text="Potvrdit" OnClick="async()=>await clientsModal.HideAsync()" Color="ThemeColor.Primary" CssClass="w-100" />
 	</FooterTemplate>
 </HxModal>
 <style>
@@ -133,22 +133,22 @@
 	private List<CashRegister> reportsList = [];
 
 	private HxModal clientsModal = new();
-	private List<Payment> paymentList = [];
+	private List<RKeyValue> paymentList = new List<RKeyValue>() { new RKeyValue() { Name = "Načítání plateb...", Id = -1} };
 
 	private IListItem? selectedClient { get; set; }
 	private string clientName { get => (selectedClient is null) ? "" : selectedClient.Name; set{} }// jenom pro TextInput
 
 	private CashRegisterFilter filter = new()
 	{
-		PaymentId = null,// change
-		ModuleId = null,// change
+		PaymentId = -1,// change, default
+		// ModuleId = null,// change
 		ClientId = null,
 		From = DateTime.Today,
 		To = DateTime.Today.AddDays(1),
 	};
 
 	private int selectedRadio = 1;
-	private readonly List<Radio> radioList = new() 
+	private readonly List<RKeyValue> radioList = new() 
 	{ 
 		new() { Id = 1, Name = "Dle položek" }, 
 		new() { Id = 2, Name = "Dle vlastnosti" } 
@@ -169,8 +169,10 @@
 			Console.WriteLine($"{response1.ErrorMessage}");
 		else if (response is List<Payment> list)
 		{
-			paymentList = list;
-			filter.PaymentId = list.FirstOrDefault()?.Id;
+			paymentList = list.Select(p => new RKeyValue() { Name = p.Name, Id = p.Id }).ToList();
+			var selectedP = paymentList.FirstOrDefault();
+			if(selectedP is not null)
+				filter.PaymentId = selectedP.Id;
 		}
 
 		await ApplyFilter(filter);

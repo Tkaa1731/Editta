@@ -25,6 +25,7 @@ namespace Pobytne.Client
 			});
 			services.AddBlazoredLocalStorage();
             services.AddHxServices();
+            services.AddHxMessenger();
             services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
             services.AddScoped<ExcelExportService>();
 			services.AddScoped<IAuthorizationHandler, PermitionRequirementHandler>();

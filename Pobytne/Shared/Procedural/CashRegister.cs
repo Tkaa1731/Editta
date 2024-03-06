@@ -2,7 +2,7 @@
 
 namespace Pobytne.Shared.Procedural
 {
-	public class CashRegister : IRecordProperty
+	public class CashRegister : ACreation, IRecordProperty
 	{
 		public int Id { get; set; }
 		public int Order { get; set; }
@@ -20,10 +20,6 @@ namespace Pobytne.Shared.Procedural
 		// ZAZNAM
 		public int RecordId { get; set; }
 		public string RecordName { get; set; } = string.Empty;
-		// ICREATION
-		public int CreationUserId { get; set; }
-		public DateTime CreationDate { get; set; }
-		public string CreationUserName { get; set; } = string.Empty;
 		// IRecordProperty
 		public int RecordPropertyId { get; set; }
 		public string RecordPropertyName { get; set; } = string.Empty;

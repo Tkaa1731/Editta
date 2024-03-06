@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Pobytne.Shared.Struct
+﻿namespace Pobytne.Shared.Struct
 {
-    public interface IActivity_Record : ICreation
+    public interface IActivity_Record
     {
         string Name { get; set; }
         int Order { get; set; }
@@ -22,5 +16,7 @@ namespace Pobytne.Shared.Struct
         int GroupQuantity { get; set; }
         float GroupPrice { get; set; }
         string Note { get; set; }
+        DateTime ValidFrom { get; set; }
+        DateTime ValidTo { get; set; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿@attribute [AllowAnonymous]
 @inject AuthenticationService authService
 @inject NavigationManager navManager
-@inject ILocalStorageService localStorage
+@inject IHxMessengerService Messenger
 
 
 
@@ -24,11 +24,8 @@
                                     <HxInputText @bind-Value="logRequest.Password" Label="Heslo" Type="InputType.Password" />
                                 </div>
                             </div>
-                            <div class="error-message">
-                                <p>@errorMessage</p>
-                            </div>
                             <div class="d-grid gap-2">
-                                <HxSubmit Color="ThemeColor.Primary" CssClass="btn-custom">Přihlásit se</HxSubmit>
+                                <HxSubmit Color="ThemeColor.Primary">Přihlásit se</HxSubmit>
                             </div>
                         </EditForm>
                     </div>
@@ -41,8 +38,6 @@
 
 @code {
     [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; } = default!;
-    [CascadingParameter]
     private ModuleWorkplace moduleWorkspace { get; set; } = default!;
 
     private LoginRequest logRequest = new();
@@ -50,28 +45,21 @@
     private async Task Authenticate()
     {
         var logResponse = await authService.Login(logRequest);
-        if (logResponse.IsCompleted)
+        if (logResponse is UserAccount user)
         {
-            var authState = await authenticationState;
-            if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
-            {
-                var user = await localStorage.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
-                if (user is not null)
-                {
-                    moduleWorkspace.UserId = user.User.Id;
-                    moduleWorkspace.LicenseNumber = user.User.LicenseNumber;
-                    moduleWorkspace.ModulesDic = user.User.AccessPermition.ToDictionary(p => p.ModuleId, p => p.ModuleName);
-                }
-            }
+            moduleWorkspace.UserId = user.User.Id;
+            moduleWorkspace.LicenseNumber = user.User.LicenseNumber;
+            moduleWorkspace.ModulesDic = user.User.AccessPermition.ToDictionary(p => p.ModuleId, p => p.ModuleName);
             navManager.NavigateTo("/", true);
         }
         else
         {
-            var errorResponse = logResponse.AsyncState as ErrorResponse;
-            if (errorResponse is not null)
-                errorMessage = errorResponse.ErrorMessage;
+            if (logResponse is ErrorResponse error)
+                errorMessage = error.ErrorMessage;
             else
-                errorMessage = "Unknow error occured";
+                errorMessage = "Vyskytla se neočekávaná chyba";
+            Messenger.Clear();
+            Messenger.AddError(title: "Chyba při přihlašování", message: errorMessage );
             logRequest = new();
             return;
         }

@@ -1,4 +1,4 @@
-﻿using Pobytne.Shared.Procedural;
+﻿using Pobytne.Shared.Procedural.DTO;
 
 namespace Pobytne.Shared.Authentication
 {

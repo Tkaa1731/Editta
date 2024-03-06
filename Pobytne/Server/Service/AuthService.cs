@@ -1,15 +1,18 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
+using Pobytne.Client.Services;
 using Pobytne.Shared.Authentication;
-using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Extensions;
+using Pobytne.Shared.Procedural.DTO;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace Pobytne.Server.Service
 {
-	public class AuthService
+    public class AuthService
 	{
 		private readonly UserService _userService;
 		private readonly IConfiguration _configuration;
@@ -20,15 +23,11 @@ namespace Pobytne.Server.Service
 			_memoryCache = memoryCache;
 			_configuration = configuration;
 		}
-		public async Task<UserAccount?> Login(LoginRequest request)
+		public async Task<object> Login(LoginRequest request)
 		{
 			try
 			{
-				var userAccount = await _userService.GetAccount(
-					new LoginRequest { 
-						Name = request.Name, 
-						Password = request.Password}
-					);
+				var userAccount = await _userService.GetAccount(request);
 
 				userAccount.Refresh = GenerateRefreshToken();
 				StoreRefreshToken(userAccount.User.Id, userAccount.Refresh);
@@ -39,7 +38,7 @@ namespace Pobytne.Server.Service
 			catch (Exception ex)
 			{
 				Console.WriteLine(ex.Message);
-				return null;
+				return new ErrorResponse(HttpStatusCode.Unauthorized, ex.Message);
 			}
 		}
 		public async Task<UserAccount?> Refresh(RefreshRequest request)

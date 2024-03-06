@@ -22,12 +22,6 @@ a.no-link {
     text-decoration: inherit !important;
 }
 
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
-}
-
 .content {
     padding-top: 1.1rem;
 }
@@ -130,21 +124,28 @@ a.no-link {
         background-color: #a8bbbf;
     }
 
-.dark {
-    background-color: #061726;
+.bg-dark {
+    background-color: #061726!important;
 }
 .card.floating-card, .floating-card >.card {
     box-shadow: 0px 0px 35px 0px rgba(154, 161, 171, 0.15)!important;
     border:0;
 }
 
-.btn.btn-danger.btn-custom{
+.btn.btn-danger {
+    color: #fff;
     background-color: #ea7c90 !important;
-    border:none;
+    border-color: none;
 }
-.btn.btn-success.btn-custom {
+.btn.btn-success {
+    color: #fff;
     background-color: #50a732 !important;
-    border: none;
+    border-color: #52AD34;
+}
+.btn.btn-primary {
+    color: #fff;
+    background-color: #3C74F6 !important;
+    border-color: #2966F5;
 }
 .bg-orange {
     background-color: #f5c75d !important;

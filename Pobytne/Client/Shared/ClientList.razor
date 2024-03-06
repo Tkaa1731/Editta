@@ -1,7 +1,7 @@
 ﻿@inject PobytneService _service
 
 	<ListCustom ListTitle="Počet klientů" ListItems="AllClients" selectedItemChanged="HandleSelectedDataItemChanged" EventNewItem="OnNewItem" selectedItem="Value" Editable="Editable" />
-	<FormMessageBox formItem="Value" @ref=formMessageBox OnSuccessRequest="StateHasChanged"></FormMessageBox>
+	<FormModal formItem="Value" @ref=formModal OnSuccessRequest="StateHasChanged"></FormModal>
 
 @code {
 	[CascadingParameter]
@@ -14,7 +14,7 @@
 	public EventCallback<IListItem?> ValueChanged { get; set; }
 
 	private List<IListItem> AllClients = [];
-	private FormMessageBox formMessageBox;
+	private FormModal formModal;
 	protected override async Task OnInitializedAsync()
 	{
 		var response = await _service.GetAllAsync<Client>($"ClientsList?moduleNumber={moduleWorkspace.Id}", moduleWorkspace.Id);
@@ -34,7 +34,7 @@
 		Value = selection;
 		await ValueChanged.InvokeAsync(Value);
 		if (Editable)
-			await formMessageBox.UpdateForm();
+			await formModal.UpdateForm();
 	}
 	private async Task OnNewItem()
 	{
@@ -42,9 +42,7 @@
 			{
 				ModuleId = moduleWorkspace.Id,
 				Valid = true,
-				ValidFrom = DateTime.Now,
-				ValidTo = DateTime.Now.AddYears(1)
 			};
-		await formMessageBox.InsertForm();
+		await formModal.InsertForm();
 	}
 }
