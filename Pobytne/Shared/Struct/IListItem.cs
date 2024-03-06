@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Pobytne.Shared.Struct
+﻿namespace Pobytne.Shared.Struct
 {
     public interface IListItem
     {
@@ -13,6 +7,7 @@ namespace Pobytne.Shared.Struct
         string Description{  get; }
         DateTime CreationDate { get; set; }
         int CreationUserId { get; set; }
+        string CreationUserName { get; set; }
         bool Active { get; }
     }
 }

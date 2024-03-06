@@ -15,19 +15,15 @@ namespace Pobytne.Client.Services
 
 		public static EventCallback OnTokenRefreshFailure { get; set; }
 
-        public async Task<Task> Login(LoginRequest logRequest)
+        public async Task<object?> Login(LoginRequest logRequest)
 		{
 			var logResponse = await _pobytneService.LoginAsync(logRequest);
-			if (logResponse is ErrorResponse)
-			{
-				return Task.FromResult(logResponse);
-			}
 			if (logResponse is UserAccount user)
 			{
 				await SaveUserAccount(user);
 				(sp.GetService<AuthenticationStateProvider>() as CustomAuthenticationStateProvider)!.UpdateAuthenticationState();
 			}
-			return Task.CompletedTask;
+			return logResponse;
 		} // update Token
 		public async Task<bool> Refresh()
 		{

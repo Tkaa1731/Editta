@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 
 namespace Pobytne.Shared.Struct
 {
-    public interface IEmployeeTask_Record : ICreation
+    public interface IEmployeeTask_Record
     {
         string Name { get; }
         int Order { get; }
         int RecordPropertiesId { get; }
         string RecordPropertiesName { get; }
         string Note { get; }
+        DateTime ValidFrom { get; set; }
+        DateTime ValidTo { get; set; }
     }
 }

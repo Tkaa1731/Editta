@@ -30,8 +30,8 @@
 				</div>
 
 				<div class="w-100 py-1 d-flex">
-						<HxButton CssClass="flex-fill me-2 btn-custom" Color="ThemeColor.Success" OnClick="OnSubmitHandler">Potvrdit vyber</HxButton>
-						<HxButton CssClass="flex-fill ms-2 btn-custom" Color="ThemeColor.Primary" OnClick="async()=>{await OnExcelTransmit.InvokeAsync();await Task.Delay(2000);}" Enabled="ExcelEnable">Export do excelu</HxButton>
+						<HxButton CssClass="flex-fill me-2" Color="ThemeColor.Success" OnClick="OnSubmitHandler">Potvrdit vyber</HxButton>
+						<HxButton CssClass="flex-fill ms-2" Color="ThemeColor.Primary" OnClick="async()=>{await OnExcelTransmit.InvokeAsync();await Task.Delay(2000);}" Enabled="ExcelEnable">Export do excelu</HxButton>
 				</div>
 			</Content>
 		</HxTab>
@@ -39,7 +39,7 @@
 			<Content>
 				@GroupByTemplate
 				<div style="display:flex; justify-content:center;">
-					<HxButton CssClass="w-50 mt-3 btn-custom" Color="ThemeColor.Primary" OnClick="async()=>await OnGroupBySubmit.InvokeAsync()" Enabled="ExcelEnable">Zobrazit souhrny</HxButton>
+					<HxButton CssClass="w-50 mt-3" Color="ThemeColor.Primary" OnClick="async()=>await OnGroupBySubmit.InvokeAsync()" Enabled="ExcelEnable">Zobrazit souhrny</HxButton>
 				</div>
 			</Content>
 		</HxTab>

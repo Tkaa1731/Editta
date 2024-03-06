@@ -1,27 +1,27 @@
-﻿@if(moduleCopy is not null && module is not null)
+﻿@if(module is not null)
 {
-    <EditForm Model="@moduleCopy" OnValidSubmit=OnValidSubmitHandler>
+    <EditForm Model="@module" OnValidSubmit=OnValidSubmitHandler>
         <DataAnnotationsValidator />
         <div class="mx-3 mt-3">
             <div class="row">
                 <div class="col">
-                    <HxInputText @bind-Value="moduleCopy.ModuleName" Label="Název modulu" Type="InputType.Text" InputCssClass=@((module.ModuleName!= moduleCopy.ModuleName)?"input_changed":"")/>
+                    <HxInputText @bind-Value="module.ModuleName" Label="Název modulu" Type="InputType.Text" ValidationMessageMode="ValidationMessageMode.Regular" />
                 </div>
                 <div class="col">
-                    <HxInputText @bind-Value="moduleCopy.ModuleShortName" Label="Zkrácený název" Type="InputType.Text" />
+                    <HxInputText @bind-Value="module.ModuleShortName" Label="Zkrácený název" Type="InputType.Text" ValidationMessageMode="ValidationMessageMode.Regular" />
                 </div>
             </div>
             <div class="row">
                 <div class="col">
-                    <HxInputNumber Label="Číslo licence" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="moduleCopy.LicenseNumber" Enabled="false" />
+                    <HxInputNumber Label="Číslo licence" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="module.LicenseNumber" Enabled="false" />
                 </div>
                 <div class="col"/>
                 <div class="col-3">
-                    <HxInputNumber Label="Typ evidence" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="moduleCopy.EvidenceType"/>
+                    <HxInputNumber Label="Typ evidence" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="module.EvidenceType" ValidationMessageMode="ValidationMessageMode.Regular" />
                 </div>
             </div>
             <div class="my-2">
-                <HxSwitch Text="Zobrazit pouze uživatele modulu" @bind-Value="@moduleCopy.OnlyUsersByIdOfModule" />
+                <HxSwitch Text="Zobrazit pouze uživatele modulu" @bind-Value="@module.OnlyUsersByIdOfModule" />
             </div>
 
 		</div>
@@ -32,11 +32,10 @@
     </EditForm>
 }
 
-@code {//TODO: ymena barvy pri zmene, pred updatem kontrola zmen
+@code {
     [EditorRequired]
     [Parameter]
     public Module? module { get; set; }
-    private Module? moduleCopy;
     [EditorRequired]
     [Parameter]
     public EForm formType { get; set; }
@@ -51,10 +50,12 @@
             return "Aktualizovat";
         }
     }
-    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
-    protected override void OnInitialized()
+    private async Task OnValidSubmitHandler()
     {
         if(module is not null)
-            moduleCopy = module.Clone() as Module;
+        {    
+           await OnValidSubmit.InvokeAsync(formType);
+        }
     }
+
 }

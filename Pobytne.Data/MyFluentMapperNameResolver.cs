@@ -8,9 +8,9 @@ namespace Pobytne.Data
 
         public string ResolveColumnName(System.Reflection.PropertyInfo propertyInfo)
         {
-            if (!FluentMapper.EntityMaps.TryGetValue(propertyInfo.DeclaringType!, out var map))
+            if (!FluentMapper.EntityMaps.TryGetValue(propertyInfo.ReflectedType!, out var map))
             {
-                throw new NotImplementedException("Property DeclaringType not resolved!");
+                throw new NotImplementedException("Property ReflectedType not resolved!");
             }
             var property = map.PropertyMaps.FirstOrDefault(x => x.PropertyInfo == propertyInfo);
             if (property == null)

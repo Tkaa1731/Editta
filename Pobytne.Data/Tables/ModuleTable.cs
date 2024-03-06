@@ -1,7 +1,7 @@
-﻿using Pobytne.Shared.Procedural;
-using System.Data.SqlClient;
+﻿using System.Data.SqlClient;
 using System.Data;
 using Dapper;
+using Pobytne.Shared.Procedural.DTO;
 
 namespace Pobytne.Data.Tables
 {
@@ -10,7 +10,7 @@ namespace Pobytne.Data.Tables
 
         public async Task<IEnumerable<Module>> GetAll(object condition)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = Database.CreateConnection())
             {
                 string sql = @"select m.*, c.JmenoUser AS CreationUserName
                                from S_Moduly m
@@ -22,7 +22,7 @@ namespace Pobytne.Data.Tables
 		}
 		public async Task<IEnumerable<Module>> GetByUser(int userId)
 		{
-			using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+			using (IDbConnection cnn = Database.CreateConnection())
 			{
 				string sql = @"SELECT m.*
                                 FROM S_LoginUser l
@@ -35,7 +35,7 @@ namespace Pobytne.Data.Tables
 		}
 		public async Task<Module?> GetById(int id)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = Database.CreateConnection())
             {
                 string sql = @"select m.*, c.JmenoUser AS CreationUserName
                                from S_Moduly m
@@ -49,7 +49,7 @@ namespace Pobytne.Data.Tables
 		public async Task<int> InsUpTran(DynamicParameters param)
 		{
 			string cashRegisterSQL = "p_sp_Moduly_InsUp";
-			using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+			using IDbConnection cnn = Database.CreateConnection();
 			int success = await cnn.ExecuteAsync(cashRegisterSQL, param, commandType: CommandType.StoredProcedure);
 
 			if (success == 1)
@@ -78,18 +78,18 @@ namespace Pobytne.Data.Tables
 		}
 		public async Task<int?> Insert(Module item)
         {
-            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            using IDbConnection cnn = Database.CreateConnection();
             return await cnn.InsertAsync(item);
         }
 
         public async Task<int> Update(Module item)
         {
-            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            using IDbConnection cnn = Database.CreateConnection();
             return await cnn.UpdateAsync(item);
         }
         public async Task<int> Delete(int id)
         {
-            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            using IDbConnection cnn = Database.CreateConnection();
             return await cnn.DeleteAsync(id);
         }
     }

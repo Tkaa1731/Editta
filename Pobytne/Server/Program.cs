@@ -53,9 +53,10 @@ namespace Pobytne
 			builder.Services.AddSingleton<IAuthorizationHandler, PermitionRequirementHandler>();
 			builder.Services.AddHttpContextAccessor();
 
-			builder.Services.AddScoped<UserService>();
-			builder.Services.AddScoped<ModuleService>();
             builder.Services.AddScoped<LicenseService>();
+			builder.Services.AddScoped<ModuleService>();
+			builder.Services.AddScoped<UserService>();
+			builder.Services.AddScoped<PermitionService>();
             builder.Services.AddScoped<ClientService>();
             builder.Services.AddScoped<RecordService>();
             builder.Services.AddScoped<InteractionService>();
@@ -63,9 +64,9 @@ namespace Pobytne
             builder.Services.AddScoped<AuthService>();
 
 
-			builder.Services.AddScoped<UserTable>();
             builder.Services.AddScoped<LicenseTable>();
             builder.Services.AddScoped<ModuleTable>();
+			builder.Services.AddScoped<UserTable>();
             builder.Services.AddScoped<PermitionTable>();
             builder.Services.AddScoped<ClientTable>();
             builder.Services.AddScoped<RecordTable>();

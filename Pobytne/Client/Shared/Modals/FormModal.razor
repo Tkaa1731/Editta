@@ -6,24 +6,29 @@
         <h2 class=@headerStyle>@headerText</h2>
     </HeaderTemplate>
     <BodyTemplate>
+        @if (formType == EForm.Update && formItem is not null)
+        {
+         <div class="mb-2 text-end" style="font-size:smaller;"><b>Poslední úprava:</b> @formItem.CreationUserName  @formItem.CreationDate.ToShortDateString()</div>   
+        }
         @switch (formItem)
         {
             case User user:
-                @if(user.AccessPermition is null || user.AccessPermition.Count == 0)
-                {
-                    <UserForm user=user formType=formType OnValidSubmit="Request" ></UserForm>
-                    break;
-                }
-                <PermitionForm permition="user.AccessPermition.First()" formType="formType" OnValidSubmit="Request"></PermitionForm>
+                 <UserForm user="user" formType=formType OnValidSubmit="Request" ></UserForm>
+                 break;
+            case Permition permition:
+                <PermitionForm permition="permition" formType="formType" OnValidSubmit="Request"></PermitionForm>
                 break;
             case Module module:
-                <ModuleForm module=module formType=formType OnValidSubmit="Request"></ModuleForm>
+                <ModuleForm module="module" formType=formType OnValidSubmit="Request"></ModuleForm>
                 break;
             case License license:
-                <LicenseForm license=license formType=formType OnValidSubmit="Request"></LicenseForm>
+                <LicenseForm license="license" formType=formType OnValidSubmit="Request"></LicenseForm>
                 break;
             case Client client:
                 <ClientForm client="client" formType="formType" OnValidSubmit="Request"/>
+                break;
+            case Record record:
+                <RecordTabPanelForm record="record" formType="formType" OnValidSubmit="Request"/>
                 break;
         }
     </BodyTemplate>
@@ -82,7 +87,8 @@
         {
             headerText = "SUCCESS";
             headerStyle = "text-success";
-            await OnSuccessRequest.InvokeAsync();            
+            await OnSuccessRequest.InvokeAsync();       
+            //TODO: Set parameter only if request is success
         }
         StateHasChanged();// rerender componennt
         return;
@@ -93,28 +99,29 @@
         if(formItem is not null)
         {   
             headerStyle = "text-danger";
-
+            // ACreation
             formItem.CreationDate = DateTime.Now;
             formItem.CreationUserId = moduleWorkspace.UserId;
 
             switch (formItem)
             {
                 case User user:
-                    if (user.AccessPermition is null)
-                        await CompleteReq(request, user);
-                    else
-                    {
-                        var permition = user.AccessPermition.First();// je jenom jedna, jedna konkretniho modulu
-                        permition.CreationDate = user.CreationDate;// kopie nastavenzch hodnot
-                        permition.CreationUserId = user.CreationUserId;
-                        await CompleteReq(request,permition);
-                    }
+                    await CompleteReq(request, user);
+                    break;
+                case Permition permition:
+                    await CompleteReq(request,permition);
                     break;
                 case Module module:
                     await CompleteReq(request, module);
                     break;
                 case License license:
                     await CompleteReq(request, license);
+                    break;
+                case Client client:
+                    await CompleteReq(request, client);
+                    break;
+                case Record record:
+                    await CompleteReq(request, record);
                     break;
                 default:
                     await js.InvokeVoidAsync("alert", "neni implementovano");
@@ -126,5 +133,4 @@
             await HandleHideClick();
         }
     }
-//TODO: zobrazovani modulu nefingije, zobrazuje vzdy predposledni
 }

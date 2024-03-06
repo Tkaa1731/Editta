@@ -1,13 +1,13 @@
 ﻿using AuthRequirementsData.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Procedural.DTO;
 using Pobytne.Shared.Struct;
 
 namespace Pobytne.Server.Controllers
 {
 
-	[Route("Module")]
+    [Route("Module")]
   [ApiController]
   [Authorize]
 	public class ModuleController : ControllerBase

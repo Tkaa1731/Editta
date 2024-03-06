@@ -1,9 +1,10 @@
 ﻿using Havit.Blazor.Components.Web;
 using Havit.Blazor.Components.Web.Bootstrap;
 using Pobytne.Client.Services;
-using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Extensions;
+using Pobytne.Shared.Procedural.DTO;
 using Pobytne.Shared.Struct;
-using License = Pobytne.Shared.Procedural.License;
+using License = Pobytne.Shared.Procedural.DTO.License;
 
 namespace Pobytne.Client.Extensions.IDirectory
 {
@@ -12,7 +13,7 @@ namespace Pobytne.Client.Extensions.IDirectory
         private readonly PobytneService _service;
         public LicenseDir(PobytneService service, License license)
         {
-            Modules = new List<IDirectory>() { };
+            Modules = [];
             _service = service;
             License = license;
             Users = new UserDir(service, License.LicenseNumber);
@@ -24,15 +25,15 @@ namespace Pobytne.Client.Extensions.IDirectory
         public List<IListItem> ItemsList { 
             get {
                 List<ModuleDir?> modules = Modules.Select(m => m as ModuleDir).ToList();
-                return modules.Select(m => m.Module as IListItem).ToList();
+                return modules.Select(m => m!.Module as IListItem).ToList();
             } 
         }
         public List<IDirectory> SubDirectories
         {
             get
             {
-                List<IDirectory> result = new List<IDirectory>() { Users };
-                return Modules.Concat(result).ToList();
+                List<IDirectory> result = [Users];
+                return [.. Modules, .. result];
             }
         }
 
@@ -43,7 +44,7 @@ namespace Pobytne.Client.Extensions.IDirectory
         private async Task LoadData()
         {
             var response = await _service.GetAllAsync<Module>($"?licenseNumber={License.LicenseNumber}",-1);
-            List<Module> modules = new(); 
+            List<Module> modules = []; 
             if (response is null)
                 Console.WriteLine($"NO RESPONSE");
             else if (response is ErrorResponse response1)

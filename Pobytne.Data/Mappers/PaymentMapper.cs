@@ -1,10 +1,5 @@
 ﻿using Dapper.FluentMap.Mapping;
-using Pobytne.Shared.Procedural;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Pobytne.Shared.Procedural.DTO;
 
 namespace Pobytne.Data.Mappers
 {
@@ -22,8 +17,8 @@ namespace Pobytne.Data.Mappers
                 
             Map(p => p.ValidFrom).ToColumn("PlatiOd");
             Map(p => p.ValidTo).ToColumn("PlatiDo");
-            Map(p => p.CreationUserId).ToColumn("Kdo");
-            Map(p => p.CreationDate).ToColumn("Kdy");
+            Map(c => c.CreationUserId).ToColumn("Kdo");
+            Map(c => c.CreationDate).ToColumn("Kdy");
         }
     }
 }

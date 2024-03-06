@@ -5,21 +5,21 @@
         <div class="mx-3 mt-3">
             <div class="row">
                 <div class="col">
-                    <HxInputText @bind-Value="@Activity.Name" Label="Název položky" Type="InputType.Text" />
+                    <HxInputText @bind-Value="@Activity.Name" Label="Název položky" Type="InputType.Text" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
                 <div class="col-3">
-                    <HxInputNumber Label="Pořadí položky v seznamu" TValue="int" @bind-Value="Activity.Order"/>
+                    <HxInputNumber Label="Pořadí položky v seznamu" TValue="int" @bind-Value="Activity.Order" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
-                    <HxInputNumber @bind-Value="Activity.Adult" Label="Počet dospělých"TValue="int" />
+                    <HxInputNumber @bind-Value="Activity.Adult" Label="Počet dospělých"TValue="int" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
                 <div class="col">
-                    <HxInputNumber @bind-Value="Activity.Child" Label="Počet dětí" TValue="int"/>
+                    <HxInputNumber @bind-Value="Activity.Child" Label="Počet dětí" TValue="int" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
                 <div class="col">
-                    <HxInputNumber @bind-Value="Activity.Price" Label="Částka" TValue="float" Decimals="2"/>
+                    <HxInputNumber @bind-Value="Activity.Price" Label="Částka" TValue="float" Decimals="2" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
             </div>
             <div class="row align-items-center">
@@ -52,10 +52,10 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Activity.ValidFrom" MinDate="DateTime.Now.AddDays(1)" Label="Platní od" />
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Activity.ValidFrom" MinDate="DateTime.Now.AddDays(1)" Label="Platní od" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
                 <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Activity.ValidTo"  Label="Platí do"/>
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Activity.ValidTo"  Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
             </div>
         </div>

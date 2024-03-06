@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pobytne.Server.Service;
-using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Procedural.DTO;
 using Pobytne.Shared.Struct;
 
 namespace Pobytne.Server.Controllers
@@ -10,16 +10,19 @@ namespace Pobytne.Server.Controllers
     [Route("Permition")]
     [ApiController]
     [Authorize]
-    public class PermitionController : ControllerBase
+    public class PermitionController(PermitionService permitionService) : ControllerBase
     {
-        private readonly UserService _userService;
+        private readonly PermitionService _permitionService = permitionService;
         public const EPermition permition = EPermition.Permition;
 
-        public PermitionController(UserService userService)
-        {
-            _userService = userService;
-        }
 
+        [HttpGet]
+        [PermissionAuthorize(permition, EAccess.ReadOnly)]
+        [Route("PermitionList")]
+        public async Task<IEnumerable<Permition>> GetByModule([FromQuery] int idModule)
+        {
+            return await _permitionService.GetAllOfModule(idModule);
+        }
         [HttpPost]
         [PermissionAuthorize(permition, EAccess.FullAccess)]
         [Route("Insert")]
@@ -31,7 +34,7 @@ namespace Pobytne.Server.Controllers
             }
             try
             {
-                int? rowsAffected = await _userService.Insert(insertPermition);
+                int? rowsAffected = await _permitionService.Insert(insertPermition);
                 if (rowsAffected > 0)
                     return Ok("Insert successful");
                 else
@@ -53,7 +56,7 @@ namespace Pobytne.Server.Controllers
             }
             try
             {
-                int rowsAffected = await _userService.Update(updatePermition);
+                int rowsAffected = await _permitionService.Update(updatePermition);
                 if (rowsAffected > 0)
                     return Ok("Update successful");
                 else

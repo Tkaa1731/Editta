@@ -1,5 +1,5 @@
 ﻿using Dapper.FluentMap.Mapping;
-using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Procedural.DTO;
 
 namespace Pobytne.Data.Mappers
 {
@@ -18,9 +18,8 @@ namespace Pobytne.Data.Mappers
             Map(c => c.Street).ToColumn("Ulice");
             Map(c => c.PostNumber).ToColumn("PSC");
 
-            Map(c => c.ValidFrom).ToColumn("PrvniNavsteva");
-            Map(c => c.ValidTo).ToColumn("ClenSdruzeniDo");
             Map(c => c.Valid).ToColumn("JePlatny");
+
             Map(c => c.CreationUserId).ToColumn("Kdo");
             Map(c => c.CreationDate).ToColumn("Kdy");
         }

@@ -6,24 +6,32 @@
     <EditForm EditContext="_editContext" OnValidSubmit="OnValidSubmitHandler">
     <DataAnnotationsValidator/>
         <div class="mx-3">
-            <HxSelect TItem="UserRecord"
+            <HxSelect TItem="RKeyValue"
                                   TValue="int?"
                                   Label="Uživatel"
                                   Data="userList"
-                        @bind-Value="model.userId"
-                                  TextSelector="@(u => u.userName)"
-                                  ValueSelector="@(u => u.id)"
+                        @bind-Value="permition.UserId"
+                                  TextSelector="@(u => u.Name)"
+                                  ValueSelector="@(u => u.NId)"
                                   Nullable="true"
                                   NullText="-Vyber uživatele-"
                                   NullDataText="Načítám data..." 
                                   Enabled="formType == EForm.Insert" 
                                   />
             <div class="my-3">        
-                <PinForm @bind-Value="model.permitionString">
+                <PinForm @bind-Value="permition.PermitionString">
                     <ValidationMessage>
-                        <HxValidationMessage For="() => model.permitionString" Mode="ValidationMessageMode.Regular"/>
+                        <HxValidationMessage For="() => permition.PermitionString" Mode="ValidationMessageMode.Regular"/>
                     </ValidationMessage>
                 </PinForm>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="permition.ValidFrom" Label="Platí od" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                </div>
+                <div class="col">
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="permition.ValidTo" Label="Platí do" MinDate="permition.ValidFrom.AddDays(1)" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                </div>
             </div>
         </div>
     </EditForm>
@@ -34,19 +42,18 @@
 
 @code {
 
-    [EditorRequired]
-    [Parameter]
-    public EForm formType { get; set; }
-    [EditorRequired]
-    [Parameter]
-    public EventCallback<EForm> OnValidSubmit { get; set; }
-    [EditorRequired]
-    [Parameter]
-    public Permition? permition{ get; set; }
+        [EditorRequired]
+        [Parameter]
+        public EForm formType { get; set; }
+        [EditorRequired]
+        [Parameter]
+        public EventCallback<EForm> OnValidSubmit { get; set; }
+        [EditorRequired]
+        [Parameter]
+        public Permition? permition{ get; set; }
 
-    private UserModel model = new();
     private EditContext? _editContext;
-    private List<UserRecord> userList = new(); 
+    private List<RKeyValue> userList = new(); 
     private string ButtonText
     {
         get
@@ -55,36 +62,17 @@
             return "Aktualizovat";
         }
     }
-    private record UserRecord(string userName,int id);
-    private class UserModel
-    {
-        [Required(ErrorMessage = "Zvolte uživatele")]
-        public int? userId { get; set; } = default!;
-        [MinLength(50,ErrorMessage ="Vyplňte všechna oprávnění")]
-        public string permitionString { get; set; } = string.Empty;
-    }
+    private record UserRecord(string userName,int? id);
 
-    private async Task OnValidSubmitHandler()
-    {
-        if(permition is not null && model.userId.HasValue)
-        {
-            permition.UserId = model.userId.Value;
-            permition.PermitionString = model.permitionString;
-            permition.ValidFrom = DateTime.Today;
-            permition.ValidTo = DateTime.Today.AddYears(5);
-        }
+    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
 
-        await OnValidSubmit.InvokeAsync(formType);
-
-
-    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (permition is not null && firstRender)
         {
-           _editContext = new(model);
+            _editContext = new(permition);
             if (permition.UserId > 0)
-                await LoadUsers(permition.UserId);
+                await LoadUsers(permition.UserId.Value);
             else
                 await LoadUsers();
         }
@@ -97,36 +85,23 @@
             userList.Clear();
 
             if (id > 0)
-            {
-                var response = await service.GetByIdAsync<User>(id, -1);
+                userList.Add(new() { Name = permition.UserName, NId = permition.UserId});
 
-		        if (response is null)
-			        Console.WriteLine($"NO RESPONSE");
-		        else if (response is ErrorResponse response1)
-			        Console.WriteLine($"{response1.ErrorMessage}");
-		        else if (response is User u)
-		        {
-                    userList.Add(new UserRecord(u.UserName, u.Id));
-
-                    model.permitionString = permition.PermitionString;
-                    model.userId = id;
-		        }
-            }
             else
             {   
                 int module = permition.ModuleId;
                 var response =  await service.GetAllAsync<User>($"GetRest?moduleId={module}", -1);
 
-		        if (response is null)
-			        Console.WriteLine($"NO RESPONSE");
-		        else if (response is ErrorResponse response1)
-			        Console.WriteLine($"{response1.ErrorMessage}");
-		        else if (response is List<User> list)
-		        {
+                if (response is null)
+                    Console.WriteLine($"NO RESPONSE");
+                else if (response is ErrorResponse response1)
+                    Console.WriteLine($"{response1.ErrorMessage}");
+                else if (response is List<User> list)
+                {
                     foreach (var u in list)
                     {
-                        userList.Add(new UserRecord(u.UserName,u.Id));
-                    }     
+                        userList.Add(new(){ Name = u.UserName, Id = u.Id});
+                }     
 		        }
             }
             StateHasChanged();

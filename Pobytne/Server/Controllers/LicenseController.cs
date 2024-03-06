@@ -1,15 +1,15 @@
 ﻿using AuthRequirementsData.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Procedural.DTO;
 using Pobytne.Shared.Struct;
 
 namespace Pobytne.Server.Controllers
 {
 
+    [Route("License")]
 	[ApiController]
     [Authorize]
-	[Route("License")]
 	public class LicenseController : ControllerBase
 	{
 		private LicenseService _licenseService;
@@ -47,12 +47,6 @@ namespace Pobytne.Server.Controllers
                 return StatusCode(500, $"Internal Server Error :{ex.Message}");
             }
         }
-        // DELETE api/<ItemsController>/5
-        [PermissionAuthorize(permition, EAccess.FullAccess)]
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
         // POST api/<ItemsController>
         [HttpPost]
         [PermissionAuthorize(permition, EAccess.FullAccess)]
@@ -75,6 +69,12 @@ namespace Pobytne.Server.Controllers
             {
                 return StatusCode(500, $"Internal Server Error :{ex.Message}");
             }
+        }
+        // DELETE api/<ItemsController>/5
+        [PermissionAuthorize(permition, EAccess.FullAccess)]
+        [HttpDelete("{id}")]
+        public void Delete(int id)
+        {
         }
     }
 }

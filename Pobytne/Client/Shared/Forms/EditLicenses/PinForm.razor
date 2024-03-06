@@ -4,7 +4,7 @@
 
     <HxAutosuggest Label="Přístupy"
     	           Placeholder="Vyhledat podle názvu.."
-    	           TItem="PermitionRecord"
+    	           TItem="RKeyValue"
     	           TValue="int?"
                    MinimumLength="0"
     	           Value="@selected"
@@ -12,8 +12,8 @@
                    ValueExpression="()=>selected"
     	           DataProvider="ProvideSuggestions"
                    ItemFromValueResolver="ItemValueResolver"
-    	           ValueSelector="employee => employee.Index"
-    	           TextSelector="employee => employee.Name">
+    	           ValueSelector="p => p.NId"
+    	           TextSelector="p => p.Name">
         <EmptyTemplate>
             <span class="p-2 text-muted">Neexistující název přístupu</span>
         </EmptyTemplate>
@@ -33,7 +33,7 @@
                        value="@pinCodes[index]"
                        required
                        onfocus="this.select();"
-                       @onfocusin = "()=>selected = permition[index].Index"
+                       @onfocusin = "()=>selected = permition[index].Id"
                        @oninput="e => OnInput(index,e)"
                        @onkeydown="e => OnKeyDown(index, e)" />
 
@@ -85,19 +85,13 @@
     [Parameter]
     public RenderFragment? ValidationMessage { get; set; }
 
-
     private static readonly int PermitionCount = Enum.GetValues(typeof(EPermition)).Length;
     private HxTooltip? copyToolTip;
     private bool keyUp = false;
     private string text = string.Empty;
     private int? selected;
     private string[] pinCodes = new string[PermitionCount];
-    private List<PermitionRecord> permition = [];
-
-    private record PermitionRecord{
-        public required string Name;
-        public required int Index;
-    }
+    private List<RKeyValue> permition = [];
 
     protected override void OnInitialized()
     {
@@ -109,7 +103,7 @@
                 var displayAttribute = (DisplayAttribute)Attribute.GetCustomAttribute(field!, typeof(DisplayAttribute))!;
                 var name = displayAttribute?.Name ?? rec.ToString();
 
-                permition.Add(new PermitionRecord(){Name = name, Index = i});
+                permition.Add(new RKeyValue(){Name = name, Id = i});
 
                 if ((int)rec < CurrentValue?.Length)
                     pinCodes[i] = CurrentValue[(int)rec].ToString();
@@ -197,18 +191,18 @@
         validationErrorMessage = string.Empty;
         return true;
     }
-    private Task<AutosuggestDataProviderResult<PermitionRecord>> ProvideSuggestions(AutosuggestDataProviderRequest request) {
+    private Task<AutosuggestDataProviderResult<RKeyValue>> ProvideSuggestions(AutosuggestDataProviderRequest request) {
         if (request.UserInput?.Length > 0)
 		{
-           return Task.FromResult( new AutosuggestDataProviderResult<PermitionRecord> { Data = permition.Where(p => p.Name.ToLower().StartsWith(request.UserInput.ToLower())) }); 
+           return Task.FromResult( new AutosuggestDataProviderResult<RKeyValue> { Data = permition.Where(p => p.Name.ToLower().StartsWith(request.UserInput.ToLower())) }); 
 		}
-        return Task.FromResult( new AutosuggestDataProviderResult<PermitionRecord> { Data = permition }); 
+        return Task.FromResult( new AutosuggestDataProviderResult<RKeyValue> { Data = permition }); 
     }
-    private Task<PermitionRecord?> ItemValueResolver(int? value)
+    private Task<RKeyValue?> ItemValueResolver(int? value)
     {
         if (value.HasValue)
         {
-            return Task.FromResult(permition.Where(i => i.Index == value).FirstOrDefault());
+            return Task.FromResult(permition.Where(i => i.Id == value).FirstOrDefault());
         }
         return null;
 

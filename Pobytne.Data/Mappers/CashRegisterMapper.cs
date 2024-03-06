@@ -23,10 +23,9 @@ namespace Pobytne.Data.Mappers
 
 			Map(c => c.RecordId).ToColumn("IDZaznamu");
 			Map(c => c.RecordName).ToColumn("Nazev");
-
-			Map(c => c.CreationUserId).ToColumn("Kdo");
-			Map(c => c.CreationDate).ToColumn("Kdy");
-		}
+            Map(c => c.CreationUserId).ToColumn("Kdo");
+            Map(c => c.CreationDate).ToColumn("Kdy");
+        }
 	}
 
 }

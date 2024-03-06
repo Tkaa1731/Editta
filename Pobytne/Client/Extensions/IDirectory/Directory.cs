@@ -1,25 +1,22 @@
 ﻿using Havit.Blazor.Components.Web;
 using Havit.Blazor.Components.Web.Bootstrap;
 using Pobytne.Client.Services;
-using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Extensions;
+using Pobytne.Shared.Procedural.DTO;
 using Pobytne.Shared.Struct;
 using System.Collections.Generic;
 
 namespace Pobytne.Client.Extensions.IDirectory
 {
-	internal class Directory : IDirectory
+    internal class Directory(PobytneService service, string dirName) : IDirectory
 	{
-		private readonly PobytneService _service;
-		public string Name { get; set; }
-		public int Id => 0;
+		private readonly PobytneService _service = service;
+        public string Name { get; set; } = dirName;
+        public int Id => 0;
 		public IconBase Icon => BootstrapIcon.Archive;
 		private List<LicenseDir> Licenses { get; set; } = new List<LicenseDir>();
 
-		public Directory(PobytneService service, string dirName) { 
-			_service = service;
-			Name = dirName;
-		}
-		public List<IDirectory> SubDirectories {
+        public List<IDirectory> SubDirectories {
 			get { 
 				return Licenses.Select(l => l as IDirectory).ToList();
 			} 

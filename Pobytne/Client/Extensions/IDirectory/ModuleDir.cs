@@ -1,41 +1,38 @@
 ﻿using Havit.Blazor.Components.Web.Bootstrap;
 using Havit.Blazor.Components.Web;
-using Pobytne.Shared.Procedural;
 using Pobytne.Shared.Struct;
 using Pobytne.Client.Services;
+using Pobytne.Shared.Procedural.DTO;
+using Pobytne.Shared.Extensions;
 
 namespace Pobytne.Client.Extensions.IDirectory
 {
-    internal class ModuleDir : IDirectory
+    internal class ModuleDir(PobytneService service, Module module) : IDirectory
     {
-        private readonly PobytneService _service;
-        public ModuleDir(PobytneService service, Module module)
-        {
-            _service = service;
-            Module = module;
-        }
-        public Module Module { get; set; }
+        private readonly PobytneService _service = service;
+
+        public Module Module { get; set; } = module;
         public string Name =>  Module.ModuleName;
         public int Id => Module.Id;
         public IconBase Icon => BootstrapIcon.FolderPlus;
-        public List<IListItem> ItemsList { get; set; } = new();
-        public List<IDirectory> SubDirectories => new();
+        public List<IListItem> ItemsList { get; set; } = [];
+        public List<IDirectory> SubDirectories => [];
         public async Task AddNew() => await LoadData();
         private async Task LoadData()
         {
-            var response = await _service.GetAllAsync<User>($"UsersList?userOfModule={Module.Id}", -1);
-            List<User> users = new();
+            var response = await _service.GetAllAsync<Permition>($"PermitionList?idModule={Module.Id}", -1);
+            List<Permition> permitions = [];
 
             if (response is null)
                 Console.WriteLine($"NO RESPONSE");
             else if (response is ErrorResponse response1)
                 Console.WriteLine($"{response1.ErrorMessage}");
-            else if (response is List<User> list)
-                users = list;
+            else if (response is List<Permition> list)
+                permitions = list;
 
             ItemsList.Clear();
-            if (users is not null)
-                ItemsList = users.Select(u => u as IListItem).ToList();
+            if (permitions is not null)
+                ItemsList = permitions.Select(p => p as IListItem).ToList();
         }
         public async Task OnSelect()
         {
@@ -45,14 +42,7 @@ namespace Pobytne.Client.Extensions.IDirectory
             }
         }
 
-        public IListItem GetNew() => new User() {
-            AccessPermition = new List<Permition>{
-                new Permition() { 
-                    ModuleId = Module.Id ,
-                    ModuleName = Module.Name ,
-                } },
-            LicenseNumber = Module.LicenseNumber
-        };
+        public IListItem GetNew() => new Permition(){ ModuleId = Module.Id, ModuleName = Module.Name};
 
         public Task OnExpanded()
         {

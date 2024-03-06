@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pobytne.Server.Service;
-using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Procedural.DTO;
 using Pobytne.Shared.Struct;
 
 namespace Pobytne.Server.Controllers

@@ -9,20 +9,20 @@
         </SearchTemplate>
         <CommandsTemplate>
             @if(Editable){
-                <HxButton Text="Nová položka" CssClass="btn-custom" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="NewItemClicked" Enabled="ListItems is not null" />
+                <HxButton Text="Nová položka" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="NewItemClicked" Enabled="ListItems is not null" />
             }
         </CommandsTemplate>
     @* TODO:Infinite scroll LAZY-LOADING *@
     <DataTemplate>
         <HxGrid @ref="gridComponent" 
+            TItem="IListItem" 
+            Responsive="true" 
+            DataProvider="LoadDataItems" 
+            SelectedDataItemChanged="HandleSelectedDataItemChanged"
+            SelectedDataItem="selectedItem" 
             ContentNavigationMode="GridContentNavigationMode.InfiniteScroll" 
             TableContainerCssClass="scrollable-table-container"
-            Responsive="true" 
-            TItem="IListItem" 
-            DataProvider="LoadDataItems" 
-            SelectedDataItem="selectedItem" 
-            SelectedDataItemChanged="HandleSelectedDataItemChanged"
-        >
+            HeaderRowCssClass="sticky-top">
             <Columns>
                 <HxGridColumn HeaderText="Id" ItemTextSelector="@(item => item.Id.ToString())" SortKeySelector="@(item => item.Id)" IsDefaultSortColumn="true" />
                 <HxGridColumn HeaderText="Název" ItemTextSelector="@(item => item.Name)" SortKeySelector="@(item => item.Name)" />
@@ -73,6 +73,16 @@
 
     private Task<GridDataProviderResult<IListItem>> LoadDataItems(GridDataProviderRequest<IListItem> request)
     {
+  //       string debugOutput = $"Requesting data: StartIndex={request.StartIndex}, Count={request.Count}";
+		// StateHasChanged();
+
+		// await Task.Delay(500);  // simulate server delay in demo (do not put this in your code)
+
+		// return new GridDataProviderResult<IListItem>()
+		// 	{
+		// 		Data = await DemoDataService.GetEmployeesDataFragmentAsync(request.StartIndex, request.Count, request.CancellationToken),
+		// 		TotalCount = await DemoDataService.GetEmployeesCountAsync(request.CancellationToken)
+		// 	};
         IEnumerable<IListItem>? result = ListItems?.Where(c => c.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase)).ToList();
 
         return Task.FromResult(request.ApplyTo(result));

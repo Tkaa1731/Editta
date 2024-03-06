@@ -2,18 +2,13 @@
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Pobytne.Shared.Authentication;
+using Pobytne.Shared.Extensions;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace Pobytne.Client.Services
 {
-    public class ErrorResponse
-    {
-        public int StatusCode { get; set; }
-        public string ErrorMessage { get; set; } = string.Empty;
-    }
-
     public class PobytneService
     {
 
@@ -52,19 +47,13 @@ namespace Pobytne.Client.Services
             var response = await _httpClient.PostAsJsonAsync($"/Auth/Login", obj);
 
             var responseStatusCode = response.StatusCode;
-
+            var responseBody = await response.Content.ReadAsStringAsync();
+            object? result = new();
             if (responseStatusCode == HttpStatusCode.OK)
-            {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<UserAccount>(responseBody);
-            }
-            //else
-            var errorResponse = new ErrorResponse
-            {
-                StatusCode = (int)responseStatusCode,
-                ErrorMessage = "HTTP request failed with status code " + responseStatusCode
-            };
-            return errorResponse;
+                result = JsonConvert.DeserializeObject<UserAccount>(responseBody);
+            else if(responseStatusCode == HttpStatusCode.Unauthorized)
+                result = JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
+            return result;
         }
         //Allow UnAuthorized
         public async Task<object?> RevokeAsync(RefreshRequest obj)
@@ -72,18 +61,15 @@ namespace Pobytne.Client.Services
             var response = await _httpClient.DeleteAsync($"/Auth/Revoke?id={obj.UserId}");
 
             var responseStatusCode = response.StatusCode;
-
+            var responseBody = await response.Content.ReadAsStringAsync();
+            object? result = new();
             if (responseStatusCode == HttpStatusCode.OK)
             {
                 return true;
             }
-            //else
-            var errorResponse = new ErrorResponse
-            {
-                StatusCode = (int)responseStatusCode,
-                ErrorMessage = "HTTP request failed with status code " + responseStatusCode
-            };
-            return errorResponse;
+            else if (responseStatusCode == HttpStatusCode.Unauthorized)
+                result = JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
+            return result;
         }
         //Allow UnAuthorized
         public async Task<object?> RefreshAsync(RefreshRequest obj)
@@ -91,19 +77,13 @@ namespace Pobytne.Client.Services
             var response = await _httpClient.PostAsJsonAsync($"/Auth/Refresh", obj);
 
             var responseStatusCode = response.StatusCode;
-
+            var responseBody = await response.Content.ReadAsStringAsync();
+            object? result = new();
             if (responseStatusCode == HttpStatusCode.OK)
-            {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<UserAccount>(responseBody);
-            }
-            //else
-            var errorResponse = new ErrorResponse
-            {
-                StatusCode = (int)responseStatusCode,
-                ErrorMessage = "HTTP request failed with status code " + responseStatusCode
-            };
-            return errorResponse;
+                result = JsonConvert.DeserializeObject<UserAccount>(responseBody);
+            else if (responseStatusCode == HttpStatusCode.Unauthorized)
+                result = JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
+            return result;
         }
 
         public async Task<object?> GetAllAsync<T>(string requestUri, int ModuleId)
@@ -175,9 +155,11 @@ namespace Pobytne.Client.Services
 
             var responseStatusCode = response.StatusCode;
             var message = response.Headers.WwwAuthenticate.ToString();
+            var responseBody = await response.Content.ReadAsStringAsync();
 
-			if (responseStatusCode == HttpStatusCode.OK)
+            if (responseStatusCode == HttpStatusCode.OK)
 				return Task.CompletedTask;
+
 			else if (responseStatusCode == HttpStatusCode.Unauthorized && message.Contains("invalid_token") && message.Contains("The access token expired"))
 			{
 				var auth = new AuthenticationService(_storageService, this, sp);
@@ -188,25 +170,19 @@ namespace Pobytne.Client.Services
 				}
 			}
 
-			var errorResponse = new ErrorResponse
-			{
-				StatusCode = (int)responseStatusCode,
-				ErrorMessage = "HTTP request failed with status code " + responseStatusCode
-			};
-			return errorResponse;
-		}
-		private async Task<object?> PostFilterAsyncAuthorizedHandler<T,P>(string request, T obj)
+            return JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
+        }
+        private async Task<object?> PostFilterAsyncAuthorizedHandler<T,P>(string request, T obj)
 		{
 			var response = await _httpClient.PostAsJsonAsync(request, obj);
 
 			var responseStatusCode = response.StatusCode;
 			var message = response.Headers.WwwAuthenticate.ToString();
+			var responseBody = await response.Content.ReadAsStringAsync();
 
 			if (responseStatusCode == HttpStatusCode.OK)
-            {
-				var responseBody = await response.Content.ReadAsStringAsync();
 			    return JsonConvert.DeserializeObject<IEnumerable<P>>(responseBody);
-            }
+
 			else if (responseStatusCode == HttpStatusCode.Unauthorized && message.Contains("invalid_token") && message.Contains("The access token expired"))
 			{
 				var auth = new AuthenticationService(_storageService, this, sp);
@@ -216,13 +192,7 @@ namespace Pobytne.Client.Services
 					return await PostFilterAsyncAuthorizedHandler<T,P>(request, obj);// Pokud se podari refresh posli dotaz znovu
 				}
 			}
-
-            var errorResponse = new ErrorResponse
-            {
-                StatusCode = (int)responseStatusCode,
-                ErrorMessage = "HTTP request failed with status code " + responseStatusCode
-            };
-            return errorResponse;
+            return JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
         }
         private async Task<object?> SendAsyncAuthorizedHandler<T>(HttpRequestMessage requestMessage)
         {
@@ -230,12 +200,11 @@ namespace Pobytne.Client.Services
 
             var responseStatusCode = response.StatusCode;
             var message = response.Headers.WwwAuthenticate.ToString();
+			var responseBody = await response.Content.ReadAsStringAsync();
 
 			if (responseStatusCode == HttpStatusCode.OK)
-			{
-				var responseBody = await response.Content.ReadAsStringAsync();
 				return JsonConvert.DeserializeObject<T>(responseBody);
-			}
+
 			else if (responseStatusCode == HttpStatusCode.Unauthorized && message.Contains("invalid_token") && message.Contains("The token expired"))
 			{
 				var auth = new AuthenticationService(_storageService, this, sp);
@@ -247,12 +216,7 @@ namespace Pobytne.Client.Services
                 }
             }
 
-            var errorResponse = new ErrorResponse
-            {
-                StatusCode = (int)responseStatusCode,
-                ErrorMessage = "HTTP request failed with status code " + responseStatusCode
-            };
-            return errorResponse;
+            return JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
         }
 
     }

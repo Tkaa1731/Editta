@@ -1,7 +1,7 @@
-﻿using Pobytne.Shared.Procedural;
-using System.Data.SqlClient;
+﻿using System.Data.SqlClient;
 using System.Data;
 using Dapper;
+using Pobytne.Shared.Procedural.DTO;
 
 namespace Pobytne.Data.Tables
 {
@@ -9,19 +9,20 @@ namespace Pobytne.Data.Tables
     {
         public async Task<IEnumerable<Client>> GetAll(object conditions)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString())) // TODO: odstranit omezeni TOP 15
+            using (IDbConnection cnn = Database.CreateConnection())
             {
-                string sql = @"select TOP 15 cl.*, cr.JmenoUser AS CreationClientName
+                string sql = @"select TOP 30 cl.*, cr.JmenoUser AS CreationClientName
                                from S_Uzivatele cl
                                JOIN S_LoginUser cr ON cl.Kdo = cr.IDLogin
-                               where cl.IDModulu = @ModuleNumber;";
+                               WHERE cl.IDModulu = @ModuleNumber
+                               ORDER BY cl.IDUzivatele DESC;";
 
                 return await cnn.QueryAsync<Client>(sql, conditions);
             }
         }
         public async Task<int> GetCount(object conditions)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = Database.CreateConnection())
             {
                 return await cnn.RecordCountAsync<Client>(conditions);
             }
@@ -29,7 +30,7 @@ namespace Pobytne.Data.Tables
 		public async Task<int> InsUpTran(DynamicParameters param)
 		{
 			string cashRegisterSQL = "p_sp_Uzivatele_InsUp";
-			using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+			using IDbConnection cnn = Database.CreateConnection();
 			int success = await cnn.ExecuteAsync(cashRegisterSQL, param, commandType: CommandType.StoredProcedure);
 
 			if (success == 1)
@@ -56,19 +57,19 @@ namespace Pobytne.Data.Tables
 			result.AddDynamicParams(template);
 			return result;
 		}
-		public async Task<int?> Insert(Client user)
+		public async Task<int?> Insert(Client client)
         {
-            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
-            return await cnn.InsertAsync(user);
+            using IDbConnection cnn = Database.CreateConnection();
+            return await cnn.InsertAsync(client);
         }
-        public async Task<int> Update(Client user)
+        public async Task<int> Update(Client client)
         {
-            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
-            return await cnn.UpdateAsync(user);
+            using IDbConnection cnn = Database.CreateConnection();
+            return await cnn.UpdateAsync(client);
         }
         public async Task<int> Delete(int id)
         {
-            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            using IDbConnection cnn = Database.CreateConnection();
             return await cnn.DeleteAsync(id);
         }
     }

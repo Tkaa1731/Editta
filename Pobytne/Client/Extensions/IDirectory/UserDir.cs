@@ -1,32 +1,29 @@
 ﻿using Havit.Blazor.Components.Web.Bootstrap;
 using Havit.Blazor.Components.Web;
-using Pobytne.Shared.Procedural;
 using Pobytne.Shared.Struct;
 using System.Net.Http.Json;
 using Pobytne.Client.Services;
 using System.ComponentModel;
+using Pobytne.Shared.Procedural.DTO;
+using Pobytne.Shared.Extensions;
 
 namespace Pobytne.Client.Extensions.IDirectory
 {
-    internal class UserDir : IDirectory// add/update user
+    internal class UserDir(PobytneService service, int licenseNumber) : IDirectory// add/update user
     {
-        private readonly int _licenseNumber;
-        private readonly PobytneService _service;
-        public UserDir(PobytneService service, int licenseNumber)
-        {
-            _service = service;
-            _licenseNumber = licenseNumber;
-        }
+        private readonly int _licenseNumber = licenseNumber;
+        private readonly PobytneService _service = service;
+
         public string Name => "Users";
         public int Id => 0;
         public IconBase Icon => BootstrapIcon.People;
-        public List<IListItem> ItemsList { get; set; } = new List<IListItem>() { };
-        public List<IDirectory> SubDirectories => new List<IDirectory>();
+        public List<IListItem> ItemsList { get; set; } = [];
+        public List<IDirectory> SubDirectories => [];
         public async Task AddNew() => await LoadData();
         private async Task LoadData()
         {
             var response = await _service.GetAllAsync<User>($"UsersList?licenseNumber={_licenseNumber}", -1);
-            List<User> users = new();
+            List<User> users = [];
 
             if (response is null)
                 Console.WriteLine($"NO RESPONSE");

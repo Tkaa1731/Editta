@@ -27,7 +27,7 @@ namespace Pobytne.Data.Tables.InteractionTables
         }
         public async Task<IEnumerable<Evidence>> SelectByCondition(DynamicParameters parameters, string sqlCondition)
         {
-			using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString())) // TODO: odstranit omezeni TOP 15
+			using (IDbConnection cnn = Database.CreateConnection()) // TODO: odstranit omezeni TOP 15
 			{
 				string sql = @" SELECT TOP 20 
                                     e.*, i.NazevInterakce, i.IDUzivatele, i.Datum, i.IDModulu, u.JmenoUzivatele, 

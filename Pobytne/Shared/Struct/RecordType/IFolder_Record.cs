@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Pobytne.Shared.Struct.RecordType
+﻿namespace Pobytne.Shared.Struct.RecordType
 {
-    public interface IFolder_Record : ICreation
+    public interface IFolder_Record
     {
         string Name { get; set; }
         int Order { get; set; }
         string Note { get; set; }
+        DateTime ValidFrom { get; set; }
+        DateTime ValidTo { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Pobytne.Client.Services;
+using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural;
 using System.ComponentModel;
 using System.Reflection;
@@ -34,8 +35,8 @@ namespace Pobytne.Client.Extensions
 
 			if (response is null)
 				Console.WriteLine($"NO RESPONSE");
-			else if (response is ErrorResponse response1)
-				Console.WriteLine($"{response1.ErrorMessage}");
+			else if (response is ErrorResponse error)
+				Console.WriteLine($"{error.ErrorMessage}");
 			else if (response is List<Record> list)
 			{
 				SubRecords.Clear();

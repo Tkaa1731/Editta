@@ -9,7 +9,7 @@ namespace Pobytne.Data.Tables
     {
 		public async Task<IEnumerable<Record>> GetSubRecords(object conditions)
 		{
-			using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+			using (IDbConnection cnn = Database.CreateConnection())
 			{
 				string sql = @"SELECT z.*, sz.*, u.JmenoUser AS CreationUserName, zv.Nazev AS RecordPropertiesName
                                 FROM S_Zaznamy z
@@ -23,7 +23,7 @@ namespace Pobytne.Data.Tables
 		}
 		public async Task<IEnumerable<Record>> GetRoot(object conditions)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = Database.CreateConnection())
             {
                 string sql = @"SELECT z.*, sz.*, u.JmenoUser AS CreationUserName, zv.Nazev AS RecordPropertiesName
                                 FROM S_Zaznamy z
@@ -37,14 +37,14 @@ namespace Pobytne.Data.Tables
         }
         public async Task<int> GetCount(object conditions)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = Database.CreateConnection())
             {
                 return await cnn.RecordCountAsync<Record>(conditions);
             }
         }
         public async Task<int> GetMaxDepth(object conditions)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = Database.CreateConnection())
             {
                 string sql = @"SELECT MAX(Uroven)
                                 FROM S_StrukturaZaznamu
@@ -56,7 +56,7 @@ namespace Pobytne.Data.Tables
 		public async Task<int> InsUpTran(DynamicParameters param)
 		{
 			string cashRegisterSQL = "p_sp_Zaznamy_InsUp";
-			using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+			using IDbConnection cnn = Database.CreateConnection();
 			int success = await cnn.ExecuteAsync(cashRegisterSQL, param, commandType: CommandType.StoredProcedure);
 
 			if (success == 1)
@@ -66,17 +66,19 @@ namespace Pobytne.Data.Tables
 		}
 		public async Task<int?> Insert(Record record)
         {
-            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            // TODO:StrukturaZaznamu
+            using IDbConnection cnn = Database.CreateConnection();
             return await cnn.InsertAsync(record);
         }
         public async Task<int> Update(Record record)
         {
-            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            //TODO:StrukturaZaznamu
+            using IDbConnection cnn = Database.CreateConnection();
             return await cnn.UpdateAsync(record);
         }
         public async Task<int> Delete(int id)
         {
-            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            using IDbConnection cnn = Database.CreateConnection();
             return await cnn.DeleteAsync(id);
         }
     }

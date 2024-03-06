@@ -1,31 +1,37 @@
-﻿using Pobytne.Shared.Procedural;
-using System.Data.SqlClient;
-using System.Data;
+﻿using System.Data;
 using Dapper;
-using System.Transactions;
 using Dapper.Transaction;
-using System;
+using Pobytne.Shared.Procedural.DTO;
 
 namespace Pobytne.Data.Tables
 {
     public class UserTable //: IDataTable<User>
     {
-        public async Task<User?> GetByLogin(string loginUser)
+        public async Task<User> GetByLogin(string loginUser)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = Database.CreateConnection())
             {
-                string sql = @"select u.*, c.JmenoUser AS CreationUserName
-                               from S_LoginUser u
-                               join S_LoginUser c ON u.Kdo = c.IDLogin
-                               where u.LoginUser = @LoginUser;";
+                string sql = @"SELECT o.* ,m.Nazev AS ModuleName, u.* 
+                               FROM S_LoginUser u
+                               LEFT JOIN S_Opravneni o ON u.IDLogin = o.IDLogin
+                               LEFT JOIN S_Moduly m ON o.IDModulu = m.IDModulu
+                               WHERE u.LoginUser = @LoginUser;";
                 var conditions = new { LoginUser = loginUser };
-                var users = await cnn.QueryAsync<User>(sql, conditions);
-                return users.FirstOrDefault();
+
+                User user = new() { Id = -1};
+                var permitions = await cnn.QueryAsync<Permition, User, Permition>(sql, (p, u) => {
+                    user = u;
+                    return p;
+                }, conditions,
+                splitOn: "IDLogin");
+                
+                user.AccessPermition = permitions.ToList();
+                return user;
             }
         }
         public async Task<User?> GetById(int idLogin)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = Database.CreateConnection())
             {
                 string sql = @"select u.*, c.JmenoUser AS CreationUserName
                                from S_LoginUser u
@@ -39,7 +45,7 @@ namespace Pobytne.Data.Tables
         }
         public async Task<IEnumerable<User>> GetAll(object conditions)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = Database.CreateConnection())
             {
                 string sql = @"select u.*, c.JmenoUser AS CreationUserName
                                from S_LoginUser u
@@ -51,32 +57,14 @@ namespace Pobytne.Data.Tables
         }
         public async Task<int> GetCount(object conditions)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = Database.CreateConnection())
             {
                 return await cnn.RecordCountAsync<User>(conditions);
             }
         }
-        public async Task<IEnumerable<User>> GetWithPermitions(object conditions)
-        {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
-            {
-                string sql = @"SELECT u.*, o.*, m.Nazev AS ModuleName
-                                FROM S_LoginUser u
-                                LEFT JOIN S_Opravneni o ON u.IDLogin = o. IDLogin
-                                LEFT JOIN S_Moduly m ON o.IDModulu = m.IDModulu 
-                                WHERE o.IDModulu = @IDModulu;";
-
-                var users = await cnn.QueryAsync<User,Permition,User>(sql, (u, p) => {
-                    u.AccessPermition = new List<Permition>() { p };
-                    return u;
-                },conditions,
-                splitOn: "IDOpravneni");
-                return users;
-            }
-        }
         public async Task<IEnumerable<User>> GetByLicenseExsModule(int idModulu)
         {
-            using (IDbConnection cnn = new SqlConnection(Tools.GetConnectionString()))
+            using (IDbConnection cnn = Database.CreateConnection())
             {
                 string sql = @"SELECT *
                             FROM S_LoginUser u
@@ -92,7 +80,7 @@ namespace Pobytne.Data.Tables
 		public async Task<int> InsUpTran(DynamicParameters param)
 		{
 			string cashRegisterSQL = "p_sp_LoginUser_InsUp";
-			using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+			using IDbConnection cnn = Database.CreateConnection();
             int success = await cnn.ExecuteAsync(cashRegisterSQL, param, commandType: CommandType.StoredProcedure);
 
 			if (success == 1)
@@ -126,17 +114,17 @@ namespace Pobytne.Data.Tables
 		}
 		public async Task<int?> Insert(User user)
         {
-            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            using IDbConnection cnn = Database.CreateConnection();
             return await cnn.InsertAsync(user);
         }
         public async Task<int> Update(User user)
         {
-            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            using IDbConnection cnn = Database.CreateConnection();
             return await cnn.UpdateAsync(user);
         }
         public async Task<int> Delete(int id)
         {
-            using IDbConnection cnn = new SqlConnection(Tools.GetConnectionString());
+            using IDbConnection cnn = Database.CreateConnection();
             return await cnn.DeleteAsync(id);
         }
     }
