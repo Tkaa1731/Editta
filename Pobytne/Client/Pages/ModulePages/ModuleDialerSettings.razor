@@ -1,0 +1,148 @@
+﻿@page "/{idModule}/DialerSettings/{dialerName}"
+@inject PobytneService _service
+
+<ModuleNav idModule="@idModule" PageTitle="Číselník"></ModuleNav>
+
+<div class="d-flex align-items-center w-100 h-100">
+
+	<HxTabPanel NavVariant="NavVariant.Pills" ActiveTabId="@dialerName" CssClass="flex-column card floating-card w-25 me-3 p-4">
+		<HxTab Title="Číselník typu plateb" TitleCssClass="mb-3" Id="PaymentDialer">
+			<Content>
+				<HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card">
+					<TitleTemplate>
+						Počet záznamů<HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@paymentList.Count</HxBadge>
+					</TitleTemplate>
+					<CommandsTemplate>
+						<HxButton Text="Nová položka" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="()=>{paymentForm = new(){ModuleId = moduleWorkspace.Id}; paymentFormType = EForm.Insert;}" />
+					</CommandsTemplate>
+					<DataTemplate>
+						<HxGrid TItem="Payment" DataProvider="GetPaymentData" Responsive="true" SelectedDataItemChanged="(item)=>{paymentForm = item; paymentFormType = EForm.Update;}" TableContainerCssClass="scrollable-table-container">
+							<Columns>
+								<HxGridColumn HeaderText="Id" ItemTextSelector="p => p.Id.ToString()" />
+								<HxGridColumn HeaderText="Name" ItemTextSelector="p => p.Name" />
+								<HxGridColumn HeaderText="Type" ItemTextSelector="p => p.Type.ToString()" />
+								<HxGridColumn HeaderText="Invoice prefix" ItemTextSelector="p => p.InvoicePrefix" />
+								<HxGridColumn HeaderText="Invoice number" ItemTextSelector="p => p.InvoiceNumber.ToString()" />
+							</Columns>
+						</HxGrid>
+					</DataTemplate>
+				</HxListLayout>
+
+				<div class="card floating-card w-100 mt-3 p-3">
+					<PaymentForm formType="paymentFormType" payment="paymentForm"  OnValidSubmit="StateHasChanged"/>
+				</div>
+			</Content>
+		</HxTab>
+		<HxTab Title="Číselník vlastnosti záznamů" Id="ConstantDialer">
+			<Content>
+				@* TODO:Dodelat konstanty *@
+ 				<HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card">
+					<TitleTemplate>
+						Počet záznamů<HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@attributeList?.Count</HxBadge>
+					</TitleTemplate>
+					<CommandsTemplate>
+						<HxButton Text="Nová položka" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="()=>{attributeForm = new(){ModuleId = moduleWorkspace.Id}; attributeFormType = EForm.Insert;}" />
+					</CommandsTemplate>
+					<DataTemplate>
+						<HxGrid TItem="RecordAttribute" DataProvider="GetAttributeData" Responsive="true" SelectedDataItemChanged="(item)=>{attributeForm = item; attributeFormType = EForm.Update;}" TableContainerCssClass="scrollable-table-container">
+							<Columns>
+								<HxGridColumn HeaderText="Id" ItemTextSelector="p => p.Id.ToString()" />
+								<HxGridColumn HeaderText="Name" ItemTextSelector="p => p.Name" />
+								<HxGridColumn HeaderText="Type" ItemTextSelector="p => p.Type.ToString()" />
+								<HxGridColumn HeaderText="UcetA" ItemTextSelector="p => p.AccountA" />
+								<HxGridColumn HeaderText="UcetS" ItemTextSelector="p => p.AccountS" />
+							</Columns>
+						</HxGrid>
+					</DataTemplate>
+				</HxListLayout>
+
+				<div class="card floating-card w-100 mt-3 p-3">
+					<RecordAttributeForm formType="attributeFormType"  recAttribute="attributeForm" OnValidSubmit="StateHasChanged" />
+				</div>
+			</Content>
+		</HxTab>
+	</HxTabPanel>
+</div>
+<style>
+	.tab-content{
+		width: 75% !important;
+		height: 100% !important;
+	}
+
+	.scrollable-table-container {
+		max-height: 50svh;
+		overflow: auto;
+	}
+</style>
+@code {
+	[EditorRequired]
+	[Parameter]
+	public string idModule { get; set; } = "-1";
+	[EditorRequired]
+	[Parameter]
+	public string dialerName { get; set; } = "PaymentDialer";
+	[CascadingParameter]
+	private ModuleWorkplace moduleWorkspace { get; set; } = default!;
+	private int listCount;
+
+	private List<Payment> paymentList = [];
+	private Payment paymentForm = new();
+	private EForm paymentFormType = EForm.Insert;
+
+	private List<RecordAttribute> attributeList = [];
+	private RecordAttribute attributeForm = new();
+	private EForm attributeFormType = EForm.Insert;
+
+	protected override void OnInitialized()
+	{
+		moduleWorkspace.ModuleId = idModule;
+		base.OnInitialized();
+	}
+
+	private async Task<GridDataProviderResult<Payment>> GetPaymentData(GridDataProviderRequest<Payment> request)
+	{
+		var response = await _service.GetAllAsync<Payment>($"?moduleNumber={moduleWorkspace.Id}", moduleWorkspace.Id);
+
+		if (response is null)
+			Console.WriteLine($"NO RESPONSE");
+		else if (response is ErrorResponse response1)
+			Console.WriteLine($"{response1.ErrorMessage}");
+		else if (response is List<Payment> list)
+		{
+			paymentList = list;
+			listCount = list.Count;
+			return new GridDataProviderResult<Payment>()
+				{
+					Data = list,
+					TotalCount = list.Count
+				};
+		}
+		return new GridDataProviderResult<Payment>()
+			{
+				Data = [],
+				TotalCount = 0
+			};
+		// you usually pass the data-request to your API/DataLayer
+	}
+	private async Task<GridDataProviderResult<RecordAttribute>> GetAttributeData(GridDataProviderRequest<RecordAttribute> request)
+	{
+		var response = await _service.GetAllAsync<RecordAttribute>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
+
+		if (response is null)
+			Console.WriteLine($"NO RESPONSE");
+		else if (response is ErrorResponse response1)
+			Console.WriteLine($"{response1.ErrorMessage}");
+		else if (response is List<RecordAttribute> list)
+		{
+			attributeList = list;
+			listCount = list.Count;
+			return request.ApplyTo(list);
+		}
+		return new GridDataProviderResult<RecordAttribute>()
+			{
+				Data = [],
+				TotalCount = 0
+			};
+		// you usually pass the data-request to your API/DataLayer
+	}
+}

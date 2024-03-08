@@ -1,0 +1,91 @@
+﻿@using System.ComponentModel.DataAnnotations;
+
+@if(recAttribute is not null)
+{
+    <EditForm Model="recAttribute" OnValidSubmit=OnValidSubmitHandler>
+	    <DataAnnotationsValidator />
+		<div class="mx-3 mt-3">
+			<div class="row">
+				<div class="col">
+					<HxInputText @bind-Value="recAttribute.Name" Label="Název vlastnosti" Type="InputType.Text" ValidationMessageMode="ValidationMessageMode.Regular"/>
+				</div>
+				<div class="col">
+                    <HxSelect TItem="RKeyValue"
+                              TValue="int"
+                              Label="Typ záznamu"
+                              Data="recordTypeList"
+                              @bind-Value="selectedType"
+                              TextSelector="@(r => r.Name)"
+                              ValueSelector="@(r => r.Id)"/>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col">
+					<HxInputText @bind-Value="recAttribute.AccountA" Label="ÚčetA" ValidationMessageMode="ValidationMessageMode.Regular"/>
+				</div>
+				<div class="col">
+					<HxInputText @bind-Value="recAttribute.AccountS" Label="ÚčetS" ValidationMessageMode="ValidationMessageMode.Regular"/>
+				</div>
+                <div class="col">
+                    <HxInputText @bind-Value="recAttribute.OrderNumber" Label="Číslo zakázky" ValidationMessageMode="ValidationMessageMode.Regular" />
+				</div>
+				<div class="col">
+					<HxInputText @bind-Value="recAttribute.CentreNumber" Label="Číslo střediska" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                </div>				
+                <div class="col">
+                    <HxInputText @bind-Value="recAttribute.ProjectNumber" Label="Číslo projektu" ValidationMessageMode="ValidationMessageMode.Regular" />
+                </div>
+			</div>
+			<div class="row">
+            </div>
+            @if (formType == EForm.Update)
+            {
+             <div class="mt-2 text-end" style="font-size:smaller;"><b>Poslední úprava:</b> @recAttribute.CreationUserName  @recAttribute.CreationDate.ToShortDateString()</div>   
+            }
+        </div>
+
+        <div class="d-grid gap-2">
+            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        </div>
+
+    </EditForm>
+}
+
+@code {
+    [EditorRequired]
+    [Parameter]
+    public RecordAttribute recAttribute { get; set; } = new();
+    [EditorRequired]
+    [Parameter]
+    public EForm formType { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public EventCallback<EForm> OnValidSubmit{ get; set; }
+    private string ButtonText
+    {
+        get
+        {
+            if (formType == EForm.Insert) return "Vložit";
+            return "Aktualizovat";
+        }
+    }
+    private List<RKeyValue> recordTypeList = [];
+    private int selectedType
+    {
+        get => (int)recAttribute.Type;
+        set { recAttribute.Type = (ERecordType)value; }
+    }
+    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
+        protected override void OnInitialized()
+    {
+        foreach (ERecordType pt in Enum.GetValues(typeof(ERecordType)))
+        {
+            var field = pt.GetType().GetField(pt.ToString());
+            var displayAttribute = (DisplayAttribute)Attribute.GetCustomAttribute(field!, typeof(DisplayAttribute))!;
+            var name = displayAttribute?.Name ?? pt.ToString();
+
+            recordTypeList.Add(new RKeyValue() { Name = name, Id = (int)pt });
+        }
+        base.OnInitialized();
+    }
+}

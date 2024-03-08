@@ -31,10 +31,10 @@
 			</div>
 			<div class="row">
                 <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="user.ValidFrom" MinDate="DateTime.Now.AddDays(1)" Label="Platní od" />
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="user.ValidFrom" Label="Platní od" />
                 </div>
                 <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="user.ValidTo"  Label="Platí do"/>
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="user.ValidTo"  MinDate="user.ValidFrom.AddDays(1)" Label="Platí do"/>
                 </div>
             </div>
 

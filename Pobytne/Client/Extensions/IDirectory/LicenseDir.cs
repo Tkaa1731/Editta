@@ -40,7 +40,7 @@ namespace Pobytne.Client.Extensions.IDirectory
         public string Name => $"{License.NameOfOrganization} | {License.LicenseNumber}";
         public IconBase Icon { get { return BootstrapIcon.Folder; } }
 
-        public async Task AddNew() => await LoadData();
+        public async Task Refresh() => await LoadData();
         private async Task LoadData()
         {
             var response = await _service.GetAllAsync<Module>($"?licenseNumber={License.LicenseNumber}",-1);

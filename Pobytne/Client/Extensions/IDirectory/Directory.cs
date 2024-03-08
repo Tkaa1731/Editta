@@ -29,7 +29,7 @@ namespace Pobytne.Client.Extensions.IDirectory
 			}
 		}
 
-		public async Task AddNew() => await LoadData();
+		public async Task Refresh() => await LoadData();
 		private async Task LoadData()
 		{
 			var response = await _service.GetAllAsync<License>("",-1);

@@ -19,7 +19,20 @@
                     <HxInputNumber @bind-Value="Ware.Price" Label="Částka" TValue="float" Decimals="2" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
                 <div class="col-6">
-                    <HxInputText @bind-Value="@Ware.RecordPropertiesName" Label="Účetní specifikace" Type="InputType.Text" />
+                    <HxAutosuggest Label="Účetní specifikace"
+    	               Placeholder="Vyhledat podle názvu.."
+    	               TItem="RKeyValue"
+    	               TValue="int?"
+                       MinimumLength="0"
+    	               @bind-Value="@Ware.RecordPropertiesId"
+    	               DataProvider="ProvideSuggestions"
+                       ItemFromValueResolver="ItemValueResolver"
+    	               ValueSelector="p => p.NId"
+    	               TextSelector="p => p.Name">
+                        <EmptyTemplate>
+                            <span class="p-2 text-muted">Neexistující název</span>
+                        </EmptyTemplate>
+                    </HxAutosuggest>
                 </div>
             </div>
             <div class="row pt-3">
@@ -36,7 +49,7 @@
             <hr style="height: 2px;color: #999;">
             <div class="row align-items-center">
                 <div class="col">
-                    <HxSwitch Text="Používat permanentky" @bind-Value="@Ware.IsSeasonTicket"/>
+                    <HxSwitch Text="Používat permanentky" Value="@Ware.IsSeasonTicket" ValueChanged="(value)=>{Ware.IsSeasonTicket = value; if(!value){Ware.GroupPrice = 0; Ware.GroupQuantity = 0; }}" ValueExpression="()=>Ware.IsSeasonTicket"/>
                 </div>
                 <div class="col">
                     <HxInputNumber @bind-Value="Ware.GroupQuantity" Label="Počet jednotek"TValue="int" Enabled="Ware.IsSeasonTicket"/>
@@ -52,10 +65,10 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Ware.ValidFrom" MinDate="DateTime.Now.AddDays(1)" Label="Platní od" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Ware.ValidFrom" Label="Platní od" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
                 <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Ware.ValidTo"  Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Ware.ValidTo" MinDate="Ware.ValidFrom.AddDays(1)"  Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
             </div>
         </div>
@@ -75,6 +88,9 @@
     [EditorRequired]
     [Parameter]
     public EventCallback<EForm> OnValidSubmit { get; set; }
+    [Parameter]
+    [EditorRequired]
+    public List<RKeyValue> recAttributeList { get; set; } = [];
     private string ButtonText
     {
         get
@@ -84,4 +100,19 @@
         }
     }
     private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
+        private Task<AutosuggestDataProviderResult<RKeyValue>> ProvideSuggestions(AutosuggestDataProviderRequest request) {
+        if (request.UserInput?.Length > 0)
+		{
+           return Task.FromResult( new AutosuggestDataProviderResult<RKeyValue> { Data = recAttributeList.Where(p => p.Name.ToLower().StartsWith(request.UserInput.ToLower())) }); 
+		}
+        return Task.FromResult( new AutosuggestDataProviderResult<RKeyValue> { Data = recAttributeList }); 
+    }
+    private Task<RKeyValue?> ItemValueResolver(int? value)
+    {
+        if (value.HasValue)
+        {
+            return Task.FromResult(recAttributeList.Where(i => i.Id == value).FirstOrDefault());
+        }
+        return null;
+    }
 }

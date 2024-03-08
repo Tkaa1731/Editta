@@ -1,10 +1,8 @@
 ﻿@inject IJSRuntime js
 @inject PobytneService service
+@inject IHxMessengerService Messenger
 
 <HxModal @ref="myModal" Backdrop="ModalBackdrop.Static" Size="ModalSize.Large" OnClosed="HandleHideClick">
-    <HeaderTemplate>
-        <h2 class=@headerStyle>@headerText</h2>
-    </HeaderTemplate>
     <BodyTemplate>
         @if (formType == EForm.Update && formItem is not null)
         {
@@ -48,9 +46,6 @@
 
     public HxModal myModal = new();
 
-    private string headerText = "";
-    private string headerStyle = "";
-
     public async Task UpdateForm()
     {
         var t = formItem;
@@ -63,11 +58,9 @@
         formType = EForm.Insert;
         await myModal.ShowAsync();
     }
-    private async Task HandleHideClick()
+    private void HandleHideClick()
     {
-        headerText = "";
-        headerStyle = "";
-        await myModal.HideAsync();
+        Messenger.Clear();
     }
 
     private async Task  CompleteReq<T>(EForm e,T obj)
@@ -78,27 +71,30 @@
         else if(e == EForm.Insert)
             response = await service.InsertAsync(obj, moduleWorkspace.Id);
 
+
         if (response is null || response is ErrorResponse)
         {
-            headerText = "FAIL";
-            //ERROR occured
+            var errorText = "Vyskytla se neočekávaná chyba";
+            if (response is ErrorResponse error)
+                errorText = error.ErrorMessage;
+            Messenger.AddError(title: "Chyba při ukladani", message: errorText );
         }
         else
         {
-            headerText = "SUCCESS";
-            headerStyle = "text-success";
-            await OnSuccessRequest.InvokeAsync();       
+            Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně uložen.");
+
+            await OnSuccessRequest.InvokeAsync();  
+
+            await Task.Delay(1000);
+            await myModal.HideAsync();
+            
             //TODO: Set parameter only if request is success
         }
-        StateHasChanged();// rerender componennt
-        return;
-
     }
     private async Task Request(EForm request)
     {
         if(formItem is not null)
-        {   
-            headerStyle = "text-danger";
+        {
             // ACreation
             formItem.CreationDate = DateTime.Now;
             formItem.CreationUserId = moduleWorkspace.UserId;
@@ -128,9 +124,9 @@
                     break;
             }
 
-            await Task.Delay(1000);
+            // await Task.Delay(1000);
 
-            await HandleHideClick();
+            // await myModal.HideAsync();
         }
     }
 }

@@ -12,15 +12,22 @@ namespace Pobytne.Shared.Procedural
         [Editable(false)]
         public int Id { get; set; }
         public int ModuleId { get; set; }
+        //------- S_StrukturaZaznamu
+        [Editable(false)]
         public int RootId {  get; set; }
+        [Editable(false)]
         public int ParentId {  get; set; }
+        [Editable(false)]
+        public int StructDepth { get; set; }
+        //--------------------------
         [Required(ErrorMessage = "Vyplňte pořadí v seznamu")]
         public int Order {  get; set; }
         [Required(ErrorMessage = "Vyplňte název položky")]
         public string Name { get; set; } = string.Empty;
         public ERecordType RecordType { get; set; }
         // S_ZaznamyVlastnosti
-        public int RecordPropertiesId {  get; set; }
+        public int? RecordPropertiesId {  get; set; }
+        [Editable(false)]
         public string RecordPropertiesName { get; set; } = string.Empty;
         [Required(ErrorMessage = "Vyplňte množství")]
         public int Quantity { get; set; }
@@ -38,13 +45,14 @@ namespace Pobytne.Shared.Procedural
         public int GroupQuantity { get; set; }
         public float GroupPrice { get; set; }
         public string Note {  get; set; } = string.Empty;
-        public int StructDepth { get; set; }
         [Required(ErrorMessage = "Vyplňte datum")]
         public DateTime ValidFrom { get; set; } = DateTime.Now;
         [Required(ErrorMessage = "Vyplňte datum")]
         public DateTime ValidTo { get; set; } = DateTime.Now.AddYears(1);
-        // IListItem
+        // ---------------IListItem
+        [Editable(false)]
         public string Description => Note;
+        [Editable(false)]
         public bool Active => ValidTo >= DateTime.Now;
 
     }

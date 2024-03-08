@@ -57,10 +57,8 @@ namespace Pobytne.Data.Tables
         }
         public async Task<int> GetCount(object conditions)
         {
-            using (IDbConnection cnn = Database.CreateConnection())
-            {
-                return await cnn.RecordCountAsync<User>(conditions);
-            }
+            using IDbConnection cnn = Database.CreateConnection();
+            return await cnn.RecordCountAsync<User>(conditions);
         }
         public async Task<IEnumerable<User>> GetByLicenseExsModule(int idModulu)
         {

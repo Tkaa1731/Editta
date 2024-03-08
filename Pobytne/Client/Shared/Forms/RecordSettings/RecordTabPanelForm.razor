@@ -1,18 +1,19 @@
-﻿
+﻿@inject PobytneService _service
+
 <HxTabPanel ActiveTabId="@recordType">
-    <HxTab Id="Folder" Title="Slozka" Enabled=@(recordType == "Folder" || record?.Id <= 0) TitleCssClass="text-secondary">
+    <HxTab Id="Folder" Title="Složka" Enabled=@(recordType == "Folder" || record?.Id <= 0) >
         <Content>
             <FolderForm formType="formType" Folder="record as IFolder_Record" OnValidSubmit="OnValidSubmit" />
         </Content>
     </HxTab>
-    <HxTab Id="Ware" Title="Evidence zbozi" Enabled=@(recordType == "Ware" || record?.Id <= 0) TitleCssClass="text-secondary">
+    <HxTab Id="Ware" Title="Zboží" Enabled=@(recordType == "Ware" || record?.Id <= 0) >
         <Content>
-            <WareForm formType="formType" Ware="record as IWare_Record" OnValidSubmit="OnValidSubmit" />
+            <WareForm formType="formType" Ware="record as IWare_Record" recAttributeList="attributeWare" OnValidSubmit="OnValidSubmit" />
         </Content>
     </HxTab>
-    <HxTab Id="Activity" Title="Evidence aktivit" Enabled=@(recordType == "Activity" || record?.Id <= 0) TitleCssClass="text-secondary">
+    <HxTab Id="Activity" Title="Aktivita" Enabled=@(recordType == "Activity" || record?.Id <= 0) >
         <Content>
-            <ActivityForm formType="formType" Activity="record as IActivity_Record" OnValidSubmit="OnValidSubmit" />
+            <ActivityForm formType="formType" Activity="record as IActivity_Record" recAttributeList=attributeActivity OnValidSubmit="OnValidSubmit" />
         </Content>
     </HxTab>
     @*<HxTab Id="EmployeeTasks" Title="Cinnosti" Enabled=@(recordType == "EmployeeTasks" || record?.Id <= 0)>
@@ -23,6 +24,8 @@
 </HxTabPanel>
 
 @code {
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
     [Parameter]
     [EditorRequired]
     public  Record? record{ get; set; }
@@ -33,6 +36,8 @@
     [Parameter]
     public EventCallback<EForm> OnValidSubmit { get; set; }
 
+    private List<RKeyValue> attributeWare { get; set; } = [];
+    private List<RKeyValue> attributeActivity { get; set; } = [];
     private string recordType
     {
         get
@@ -42,5 +47,20 @@
             else
                 return "Folder";
         }
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await _service.GetAllAsync<RecordAttribute>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
+
+        if (response is null)
+            Console.WriteLine($"NO RESPONSE");
+        else if (response is ErrorResponse response1)
+            Console.WriteLine($"{response1.ErrorMessage}");
+        else if (response is List<RecordAttribute> list)
+        {
+            attributeActivity = list.Where(a => a.Type == ERecordType.Activity).Select(a => new RKeyValue(){Name = a.Name,Id = a.Id}).ToList();
+            attributeWare = list.Where(a => a.Type == ERecordType.Ware).Select(a => new RKeyValue() { Name = a.Name, Id = a.Id }).ToList();
+        }
+        await base.OnInitializedAsync();
     }
 }

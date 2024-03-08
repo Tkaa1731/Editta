@@ -24,7 +24,7 @@
             TableContainerCssClass="scrollable-table-container"
             HeaderRowCssClass="sticky-top">
             <Columns>
-                <HxGridColumn HeaderText="Id" ItemTextSelector="@(item => item.Id.ToString())" SortKeySelector="@(item => item.Id)" IsDefaultSortColumn="true" />
+                <HxGridColumn HeaderText="Id" ItemTextSelector="@(item => item.Id.ToString())" SortKeySelector="@(item => item.Id)" IsDefaultSortColumn="false" />
                 <HxGridColumn HeaderText="Název" ItemTextSelector="@(item => item.Name)" SortKeySelector="@(item => item.Name)" />
                 <HxGridColumn HeaderText="Popis" ItemTextSelector="@(item => item.Description)" SortKeySelector="@(item => item.Description)" />
                 <HxGridColumn HeaderText="Poslední úprava" ItemTextSelector="@(item => item.CreationDate.ToString())" SortKeySelector="@(item => item.CreationDate)" />
