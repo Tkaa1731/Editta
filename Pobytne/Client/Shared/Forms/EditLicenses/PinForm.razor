@@ -96,21 +96,20 @@
     protected override void OnInitialized()
     {
         int i = 0;
-        if(true)
-            foreach (EPermition rec in Enum.GetValues(typeof(EPermition)))
-            {
-                var field = rec.GetType().GetField(rec.ToString());
-                var displayAttribute = (DisplayAttribute)Attribute.GetCustomAttribute(field!, typeof(DisplayAttribute))!;
-                var name = displayAttribute?.Name ?? rec.ToString();
-
-                permition.Add(new RKeyValue(){Name = name, Id = i});
-
-                if ((int)rec < CurrentValue?.Length)
-                    pinCodes[i] = CurrentValue[(int)rec].ToString();
-                else
-                    pinCodes[i] = "0";
-                i ++;
-            }
+        foreach (EPermition rec in Enum.GetValues(typeof(EPermition)))
+        {
+            var field = rec.GetType().GetField(rec.ToString());
+            var displayAttribute = (DisplayAttribute)Attribute.GetCustomAttribute(field!, typeof(DisplayAttribute))!;
+            var name = displayAttribute?.Name ?? rec.ToString();
+        
+            permition.Add(new RKeyValue(){Name = name, Id = i});
+        
+            if ((int)rec < CurrentValue?.Length)
+                pinCodes[i] = CurrentValue[(int)rec].ToString();
+            else
+                pinCodes[i] = "0";
+            i ++;
+        }
         base.OnInitialized();
     }
 

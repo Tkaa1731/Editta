@@ -124,7 +124,7 @@ a.no-link {
         background-color: #a8bbbf;
     }
 
-.bg-dark {
+.dark {
     background-color: #061726!important;
 }
 .card.floating-card, .floating-card >.card {
@@ -140,12 +140,12 @@ a.no-link {
 .btn.btn-success {
     color: #fff;
     background-color: #50a732 !important;
-    border-color: #52AD34;
+    border-color: #52AD34 !important;
 }
 .btn.btn-primary {
     color: #fff;
     background-color: #3C74F6 !important;
-    border-color: #2966F5;
+    border-color: #2966F5 !important;
 }
 .bg-orange {
     background-color: #f5c75d !important;

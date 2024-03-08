@@ -12,8 +12,8 @@ namespace Pobytne.Shared.Procedural.DTO
         public string Name { get; set; } = string.Empty; //NazevDokladu
         public int ModuleId { get; set; } //IDModulu
         public EPaymentType Type { get; set; } //TypPlatby
-        public string FacturePrefix { get; set; } = string.Empty; //PrefixDokladu
-        public int FactureNumber { get; set; } //CisloDokladu
+        public string InvoicePrefix { get; set; } = string.Empty; //PrefixDokladu
+        public int InvoiceNumber { get; set; } //CisloDokladu
         public int DefaultPayment { get; set; } //VychoziPlatba
         [Required(ErrorMessage = "Vyplňte datum")]
         public DateTime ValidFrom { get; set; } = DateTime.Now;

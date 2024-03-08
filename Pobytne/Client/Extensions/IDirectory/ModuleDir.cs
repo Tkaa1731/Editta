@@ -17,7 +17,7 @@ namespace Pobytne.Client.Extensions.IDirectory
         public IconBase Icon => BootstrapIcon.FolderPlus;
         public List<IListItem> ItemsList { get; set; } = [];
         public List<IDirectory> SubDirectories => [];
-        public async Task AddNew() => await LoadData();
+        public async Task Refresh() => await LoadData();
         private async Task LoadData()
         {
             var response = await _service.GetAllAsync<Permition>($"PermitionList?idModule={Module.Id}", -1);

@@ -10,6 +10,11 @@ namespace Pobytne.Data.Tables.InteractionTables
 {
 	public class EvidenceTable //P_Evidence
     {
+        public async Task<int> GetCount(object conditions)
+        {
+            using IDbConnection cnn = Database.CreateConnection();
+            return await cnn.RecordCountAsync<Evidence>(conditions);
+        }
         public async Task<int> InsUpTran(DynamicParameters param, IDbTransaction tran, IDbConnection cnn)
         {
             string evidenceSQL = "p_sp_Evidence_InsUp";

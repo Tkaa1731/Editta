@@ -11,8 +11,8 @@ namespace Pobytne.Data.Mappers
             Map(p => p.ModuleId).ToColumn("IDModulu");
             Map(p => p.Type).ToColumn("TypPlatby");
             Map(p => p.Name).ToColumn("NazevDokladu");
-            Map(p => p.FacturePrefix).ToColumn("PrefixDokladu");
-            Map(p => p.FactureNumber).ToColumn("CisloDokladu");
+            Map(p => p.InvoicePrefix).ToColumn("PrefixDokladu");
+            Map(p => p.InvoiceNumber).ToColumn("CisloDokladu");
             Map(p => p.DefaultPayment).ToColumn("VychoziPlatba");
                 
             Map(p => p.ValidFrom).ToColumn("PlatiOd");

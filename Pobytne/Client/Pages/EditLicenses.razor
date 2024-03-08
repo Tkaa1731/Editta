@@ -55,7 +55,7 @@
                 case LicenseDir l:
                     return "Počet modulů";
                 case UserDir u:
-                        return "Počet uživatelů";
+                    return "Počet uživatelů";
                 case ModuleDir m:
                     return "Počet oprávnění";
                 default:
@@ -100,7 +100,7 @@
     {
         if (selectedDirectory is not null)
         {
-            await selectedDirectory.AddNew();
+            await selectedDirectory.Refresh();
             await OnSelect(selectedDirectory);            
         }
         StateHasChanged();

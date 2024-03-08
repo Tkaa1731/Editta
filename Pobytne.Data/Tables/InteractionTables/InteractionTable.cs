@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Dapper.Transaction;
 using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Procedural.DTO;
 using System.Data;
 using System.Data.SqlClient;
 

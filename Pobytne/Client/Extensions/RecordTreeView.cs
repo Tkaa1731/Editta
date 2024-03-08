@@ -1,12 +1,10 @@
 ﻿using Pobytne.Client.Services;
 using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural;
-using System.ComponentModel;
-using System.Reflection;
 
 namespace Pobytne.Client.Extensions
 {
-	public class RecordTreeView
+    public class RecordTreeView
 	{
 		private readonly PobytneService _service;
 		public required Record Record {  get; set; }

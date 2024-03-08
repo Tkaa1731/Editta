@@ -24,7 +24,7 @@
                                     <HxInputText @bind-Value="logRequest.Password" Label="Heslo" Type="InputType.Password" />
                                 </div>
                             </div>
-                            <div class="d-grid gap-2">
+                            <div class="d-grid gap-2 mt-3">
                                 <HxSubmit Color="ThemeColor.Primary">Přihlásit se</HxSubmit>
                             </div>
                         </EditForm>
@@ -50,7 +50,7 @@
             moduleWorkspace.UserId = user.User.Id;
             moduleWorkspace.LicenseNumber = user.User.LicenseNumber;
             moduleWorkspace.ModulesDic = user.User.AccessPermition.ToDictionary(p => p.ModuleId, p => p.ModuleName);
-            navManager.NavigateTo("/", true);
+            // navManager.NavigateTo("/", true);
         }
         else
         {

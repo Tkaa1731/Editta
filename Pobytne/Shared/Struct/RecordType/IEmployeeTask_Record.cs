@@ -10,7 +10,7 @@ namespace Pobytne.Shared.Struct
     {
         string Name { get; }
         int Order { get; }
-        int RecordPropertiesId { get; }
+        int? RecordPropertiesId { get; }
         string RecordPropertiesName { get; }
         string Note { get; }
         DateTime ValidFrom { get; set; }

@@ -89,7 +89,7 @@
                         ModuleId = int.Parse(idModule),
                         RootId = 0,
                         ParentId = 0,
-                        StructDepth = 0,
+                        StructDepth = -1,//!prvni rada bude 0
                     }
             )
             {
@@ -110,7 +110,7 @@
     {
         if (selectedDirectory is not null)
         {
-            await selectedDirectory.AddNew();
+            await selectedDirectory.Refresh();
             await OnSelect(selectedDirectory);
         }
         StateHasChanged();

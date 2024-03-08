@@ -10,14 +10,12 @@ namespace Pobytne.Server.Controllers
     [Route("Payment")]
     [ApiController]
     [Authorize]
-    public class PaymentController : ControllerBase
+    public class PaymentController(PaymentService paymentService) : ControllerBase
     {
-        private PaymentService _paymentService;
+        private PaymentService _paymentService = paymentService;
 		public const EPermition permition = EPermition.PaymentType;
 
-		public PaymentController(PaymentService paymentService) => _paymentService = paymentService;
-
-        [HttpGet]
+		[HttpGet]
         [PermissionAuthorize(permition, EAccess.ReadOnly)]
         public async Task<IEnumerable<Payment>> Get([FromQuery] int moduleNumber)
         {

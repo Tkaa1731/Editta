@@ -30,7 +30,10 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidTo" MinDate="DateTime.Now.AddDays(1)" Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidFrom" Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                </div>                
+                <div class="col">
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidTo" MinDate="license.ValidFrom.AddDays(1)" Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
                 <div class="col">
                     <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.DateOfPayment"  Label="Datum platby" Enabled="license.IsPayed" />

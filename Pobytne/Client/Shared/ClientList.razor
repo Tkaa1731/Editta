@@ -1,7 +1,7 @@
 ﻿@inject PobytneService _service
 
-	<ListCustom ListTitle="Počet klientů" ListItems="AllClients" selectedItemChanged="HandleSelectedDataItemChanged" EventNewItem="OnNewItem" selectedItem="Value" Editable="Editable" />
-	<FormModal formItem="Value" @ref=formModal OnSuccessRequest="StateHasChanged"></FormModal>
+<ListCustom ListTitle="Počet klientů" ListItems="AllClients" selectedItemChanged="OnItemSelect" EventNewItem="OnNewItem" selectedItem="Value" Editable="Editable" />
+<FormModal formItem="Value" @ref=formModal OnSuccessRequest="OnSuccessRequestHandler"></FormModal>
 
 @code {
 	[CascadingParameter]
@@ -29,7 +29,7 @@
 		if (clients.Count > 0)
 			AllClients = clients.Where(c => c.Id != 0).Select(c => c as IListItem).ToList();
 	}
-	private async Task HandleSelectedDataItemChanged(IListItem selection)
+	private async Task OnItemSelect(IListItem selection)
 	{
 		Value = selection;
 		await ValueChanged.InvokeAsync(Value);
@@ -44,5 +44,10 @@
 				Valid = true,
 			};
 		await formModal.InsertForm();
+	}
+	private async Task OnSuccessRequestHandler()
+	{
+		//UPATE LIST
+		StateHasChanged();
 	}
 }

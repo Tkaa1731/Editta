@@ -5,7 +5,7 @@
         string Name { get; set; }
         int Order { get; set; }
         int Stock { get; set; }
-        int RecordPropertiesId { get; set; }
+        int? RecordPropertiesId { get; set; }
         string RecordPropertiesName { get; set; }
         int Quantity { get; set; }
         float Price { get; set; }

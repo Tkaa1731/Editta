@@ -20,28 +20,6 @@ namespace Pobytne.Server.Controllers
         {
             _userService = userService;
         }
-        [HttpPost]
-        [PermissionAuthorize(permition, EAccess.FullAccess)]
-        [Route("Update")]
-        public async Task<IActionResult> Update([FromBody]User updateUser) 
-        {
-            if (updateUser is null)
-            {
-                return BadRequest("Invalid data");
-            }
-            try
-            {
-                int rowsAffected = await _userService.Update(updateUser);
-                if (rowsAffected > 0)
-                    return Ok("Update successful");
-                else
-                    return BadRequest("Update failed");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal Server Error :{ex.Message}");
-            }
-        }
 
         [HttpGet]
         [PermissionAuthorize(permition, EAccess.ReadOnly)]
@@ -77,12 +55,27 @@ namespace Pobytne.Server.Controllers
                 return StatusCode(500, $"Internal Server Error :{ex.Message}");
             }
         }
-        // DELETE api/<ItemsController>/5
+        [HttpPost]
         [PermissionAuthorize(permition, EAccess.FullAccess)]
-        [HttpDelete("{id}")]
-        public async Task<bool> Delete(int id)
+        [Route("Update")]
+        public async Task<IActionResult> Update([FromBody]User updateUser) 
         {
-            return await _userService.Delete(id) > 0; 
+            if (updateUser is null)
+            {
+                return BadRequest("Invalid data");
+            }
+            try
+            {
+                int rowsAffected = await _userService.Update(updateUser);
+                if (rowsAffected > 0)
+                    return Ok("Update successful");
+                else
+                    return BadRequest("Update failed");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error :{ex.Message}");
+            }
         }
         // POST api/<ItemsController>
         [HttpPost]
@@ -106,6 +99,13 @@ namespace Pobytne.Server.Controllers
             {
                 return StatusCode(500, $"Internal Server Error :{ex.Message}");
             }
+        }
+        // DELETE api/<ItemsController>/5
+        [PermissionAuthorize(permition, EAccess.FullAccess)]
+        [HttpDelete("{id}")]
+        public async Task<bool> Delete(int id)
+        {
+            return await _userService.Delete(id) > 0; 
         }
     }
 }

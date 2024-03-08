@@ -1,6 +1,6 @@
 ﻿namespace Pobytne.Client.Extensions
 {
-	internal record RKeyValue // dataType for KeyValued components (Radio,Select,Autosuggest)
+	public record RKeyValue // dataType for KeyValued components (Radio,Select,Autosuggest)
 	{
 		public required string Name { get; set; }
 		public int? NId { get; set; }

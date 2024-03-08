@@ -10,9 +10,10 @@ namespace Pobytne.Client.Extensions.IDirectory
         IconBase Icon { get; }
         List<IDirectory> SubDirectories { get; }
         List<IListItem> ItemsList { get; }
-        Task OnSelect();
-        Task OnExpanded();
-        Task AddNew();
-        IListItem GetNew();
+        Task OnSelect(); // EventCallback onSelect
+        Task OnExpanded(); // EventCallback onExpanded
+        Task Refresh();
+        //Task LoadData(); //LoadData from DB
+        IListItem GetNew();// New IDirectory
     }
 }

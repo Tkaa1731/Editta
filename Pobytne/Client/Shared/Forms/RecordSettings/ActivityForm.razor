@@ -18,8 +18,21 @@
                 <div class="col">
                     <HxInputNumber @bind-Value="Activity.Child" Label="Počet dětí" TValue="int" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
-                <div class="col">
-                    <HxInputNumber @bind-Value="Activity.Price" Label="Částka" TValue="float" Decimals="2" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                <div class="col-6">
+                    <HxAutosuggest Label="Účetní specifikace"
+    	               Placeholder="Vyhledat podle názvu.."
+    	               TItem="RKeyValue"
+    	               TValue="int?"
+                       MinimumLength="0"
+    	               @bind-Value="@Activity.RecordPropertiesId"
+    	               DataProvider="ProvideSuggestions"
+                       ItemFromValueResolver="ItemValueResolver"
+    	               ValueSelector="p => p.NId"
+    	               TextSelector="p => p.Name">
+                        <EmptyTemplate>
+                            <span class="p-2 text-muted">Neexistující název</span>
+                        </EmptyTemplate>
+                    </HxAutosuggest>
                 </div>
             </div>
             <div class="row align-items-center">
@@ -30,13 +43,13 @@
                     <HxSwitch Text="Klient je povinný" @bind-Value="@Activity.IsClientRequired" />
                 </div>
                 <div class="col">
-                    <HxInputText @bind-Value="@Activity.RecordPropertiesName" Label="Účetní specifikace" Type="InputType.Text" />
+                    <HxInputNumber @bind-Value="Activity.Price" Label="Částka" TValue="float" Decimals="2" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
             </div>
             <hr style="height: 2px;color: #999;">
             <div class="row align-items-center">
                 <div class="col">
-                    <HxSwitch Text="Používat permanentky" @bind-Value="@Activity.IsSeasonTicket"/>
+                    <HxSwitch Text="Používat permanentky" Value="@Activity.IsSeasonTicket" ValueChanged="(value)=>{Activity.IsSeasonTicket = value; if(!value){Activity.GroupPrice = 0; Activity.GroupQuantity = 0; }}" ValueExpression="()=>Activity.IsSeasonTicket"/>
                 </div>
                 <div class="col">
                     <HxInputNumber @bind-Value="Activity.GroupQuantity" Label="Počet jednotek"TValue="int" Enabled="Activity.IsSeasonTicket"/>
@@ -52,10 +65,10 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Activity.ValidFrom" MinDate="DateTime.Now.AddDays(1)" Label="Platní od" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Activity.ValidFrom" Label="Platní od" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
                 <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Activity.ValidTo"  Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Activity.ValidTo" MinDate="Activity.ValidFrom.AddDays(1)"  Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
             </div>
         </div>
@@ -66,15 +79,18 @@
     </EditForm>
 }
 @code {
-	[Parameter]
-	[EditorRequired]
-	public IActivity_Record? Activity { get; set; }
+    [Parameter]
+    [EditorRequired]
+    public IActivity_Record? Activity { get; set; }
     [EditorRequired]
     [Parameter]
     public EForm formType { get; set; }
     [EditorRequired]
     [Parameter]
     public EventCallback<EForm> OnValidSubmit { get; set; }
+    [Parameter]
+    [EditorRequired]
+    public List<RKeyValue> recAttributeList { get; set; } = [];
     private string ButtonText
     {
         get
@@ -83,5 +99,21 @@
             return "Aktualizovat";
         }
     }
+
     private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
+    private Task<AutosuggestDataProviderResult<RKeyValue>> ProvideSuggestions(AutosuggestDataProviderRequest request) {
+        if (request.UserInput?.Length > 0)
+		{
+           return Task.FromResult( new AutosuggestDataProviderResult<RKeyValue> { Data = recAttributeList.Where(p => p.Name.ToLower().StartsWith(request.UserInput.ToLower())) }); 
+		}
+        return Task.FromResult( new AutosuggestDataProviderResult<RKeyValue> { Data = recAttributeList }); 
+    }
+    private Task<RKeyValue?> ItemValueResolver(int? value)
+    {
+        if (value.HasValue)
+        {
+            return Task.FromResult(recAttributeList.Where(i => i.Id == value).FirstOrDefault());
+        }
+        return null;
+    }
 }

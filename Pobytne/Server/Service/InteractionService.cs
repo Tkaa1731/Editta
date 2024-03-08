@@ -54,7 +54,7 @@ namespace Pobytne.Server.Service
                         param = _evidTable.GetParamsForTrans(r, delete);
                         param.AddDynamicParams(interactionParam);
                         param.Add("@IDEvidence", 0, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
-                        /// TODO: Dodelat odecitani ze skladu zasob
+                        // TODO: Dodelat odecitani ze skladu zasob
                         if (r.IsBalanceCheck)
                         {
                             //edit skladu

@@ -38,9 +38,10 @@ namespace Pobytne.Client.Extensions.IDirectory
 
         public List<IListItem> ItemsList => SubRecords.Select(r => r as IListItem).ToList();// IListItem Pro Zobrazeni v listu
 
-        public Task AddNew()
+        public async Task Refresh()
         {
-            throw new NotImplementedException();
+            await LoadData();
+            //await OnExpanded();
         }
 
         public IListItem GetNew() => new Record()
@@ -50,41 +51,40 @@ namespace Pobytne.Client.Extensions.IDirectory
             RootId = Record.RootId,
             ModuleId = Record.ModuleId,
             StructDepth = Record.StructDepth + 1,
-            Order = this.subRecords.Count,
-            //CreationDate = DateTime.Now, //Implementovano v databazi
-            //CreationUserId = 1,// TODO: author id
-            ValidFrom = DateTime.Now,
-            ValidTo = DateTime.Now.AddYears(1),
+            //CreationDate = DateTime.Now, // Implementovano pri submitu v FormModal komponente
+            //CreationUserId = 1,// Implementovano pri submitu v FormModal komponente
+            Order = this.subRecords.Count,//default hodnoty
+            ValidFrom = DateTime.Now,// default hodnoty
+            ValidTo = DateTime.Now.AddYears(1),//default hodnoty
         };
+        private async Task LoadData()
+        {
+            object? response;
+            if (Record.Id <= 0)// root
+                response = await _service.GetAllAsync<Record>($"RecordsRoot?moduleId={Record.ModuleId}", Record.ModuleId);
 
+            else
+                response = await _service.GetAllAsync<Record>($"RecordsBranch?parentId={Record.Id}", Record.ModuleId);
+
+            if (response is null)
+                Console.WriteLine($"NO RESPONSE");
+            else if (response is ErrorResponse error)
+                Console.WriteLine($"{error.ErrorMessage}");
+            else if (response is List<Record> list)
+            {
+                SubRecords = list;
+            }
+        }
         public async Task OnSelect()
         {
             if(SubRecords.Count <= 0)
-            {
-                object? response;
-                if(Record.Id <= 0)// root
-                    response = await _service.GetAllAsync<Record>($"RecordsRoot?moduleId={Record.ModuleId}",Record.ModuleId);
-
-                else
-                    response = await _service.GetAllAsync<Record>($"RecordsBranch?parentId={Record.Id}",Record.ModuleId);
-
-                if (response is null)
-                    Console.WriteLine($"NO RESPONSE");
-                else if (response is ErrorResponse error)
-                    Console.WriteLine($"{error.ErrorMessage}");
-                else if (response is List<Record> list)
-                {
-                    SubRecords = list;
-                }
-            }
+                await LoadData();
         }
 
         public async Task OnExpanded()
         {
-            foreach ( RecordDir rd in SubDirectories) 
-            {
+            foreach ( var rd in SubDirectories) 
                await rd.OnSelect();
-            }
         }
     }
 }

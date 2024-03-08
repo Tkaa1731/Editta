@@ -11,15 +11,16 @@ namespace Pobytne.Client.Extensions.IDirectory
 {
     internal class UserDir(PobytneService service, int licenseNumber) : IDirectory// add/update user
     {
-        private readonly int _licenseNumber = licenseNumber;
         private readonly PobytneService _service = service;
+        private readonly int _licenseNumber = licenseNumber;
+
 
         public string Name => "Users";
         public int Id => 0;
         public IconBase Icon => BootstrapIcon.People;
         public List<IListItem> ItemsList { get; set; } = [];
         public List<IDirectory> SubDirectories => [];
-        public async Task AddNew() => await LoadData();
+        public async Task Refresh() => await LoadData();
         private async Task LoadData()
         {
             var response = await _service.GetAllAsync<User>($"UsersList?licenseNumber={_licenseNumber}", -1);
