@@ -1,63 +1,97 @@
 ﻿@page "/{idModule}/DialerSettings/{dialerName}"
 @inject PobytneService _service
+@inject IHxMessengerService Messenger
 
 <ModuleNav idModule="@idModule" PageTitle="Číselník"></ModuleNav>
 
-<div class="d-flex align-items-center w-100 h-100">
+<div class="w-100 h-100">
 
-	<HxTabPanel NavVariant="NavVariant.Pills" ActiveTabId="@dialerName" CssClass="flex-column card floating-card w-25 me-3 p-4">
-		<HxTab Title="Číselník typu plateb" TitleCssClass="mb-3" Id="PaymentDialer">
+	<HxTabPanel NavVariant="NavVariant.Pills" InitialActiveTabId="@dialerName" CssClass="card floating-card w-25 ms-4 mt-4 p-4 position-fixed" RenderMode="TabPanelRenderMode.ActiveTabOnly">
+		<HxTab Title="Číselník typu plateb" TitleCssClass="mb-3" Id="PaymentDialer" ContentCssClass="h-100">
 			<Content>
-				<HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card">
-					<TitleTemplate>
-						Počet záznamů<HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@paymentList.Count</HxBadge>
-					</TitleTemplate>
-					<CommandsTemplate>
-						<HxButton Text="Nová položka" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="()=>{paymentForm = new(){ModuleId = moduleWorkspace.Id}; paymentFormType = EForm.Insert;}" />
-					</CommandsTemplate>
-					<DataTemplate>
-						<HxGrid TItem="Payment" DataProvider="GetPaymentData" Responsive="true" SelectedDataItemChanged="(item)=>{paymentForm = item; paymentFormType = EForm.Update;}" TableContainerCssClass="scrollable-table-container">
-							<Columns>
-								<HxGridColumn HeaderText="Id" ItemTextSelector="p => p.Id.ToString()" />
-								<HxGridColumn HeaderText="Name" ItemTextSelector="p => p.Name" />
-								<HxGridColumn HeaderText="Type" ItemTextSelector="p => p.Type.ToString()" />
-								<HxGridColumn HeaderText="Invoice prefix" ItemTextSelector="p => p.InvoicePrefix" />
-								<HxGridColumn HeaderText="Invoice number" ItemTextSelector="p => p.InvoiceNumber.ToString()" />
-							</Columns>
-						</HxGrid>
-					</DataTemplate>
-				</HxListLayout>
+				<div class="d-flex h-100">
 
-				<div class="card floating-card w-100 mt-3 p-3">
-					<PaymentForm formType="paymentFormType" payment="paymentForm"  OnValidSubmit="StateHasChanged"/>
+					<div class="col">
+						<div class="h-25 my-4" />
+						<div class="card floating-card p-3 h-auto me-4 ">
+							<PaymentForm formType="paymentFormType" payment="paymentForm" Enabled=@(paymentForm.ModuleId > 0)  OnValidSubmit="(args) => Request(args.Item1,args.Item2)"/>
+						</div>
+					</div>
+				
+					<HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card col-8">
+						<TitleTemplate>
+							Počet záznamů<HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@paymentList.Count</HxBadge>
+						</TitleTemplate>
+						<CommandsTemplate>
+							<HxButton Text="Nová položka" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="()=>{paymentForm = new(){ModuleId = moduleWorkspace.Id}; paymentFormType = EForm.Insert;}" />
+						</CommandsTemplate>
+						<DataTemplate>
+							<HxGrid TItem="Payment" 
+								DataProvider="async(request)=>{if(!paymentList.Any()){paymentList = await LoadData<Payment>(); StateHasChanged();} return request.ApplyTo(paymentList);}" 
+								Responsive="true" 
+								SelectedDataItemChanged="(item)=>{paymentForm = item; paymentFormType = EForm.Update;}" 
+								TableContainerCssClass="scrollable-table-container" 
+								ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
+								HeaderRowCssClass="sticky-top"
+								ItemRowHeight="20">
+								<Columns>
+									<HxGridColumn HeaderText="Id" ItemTextSelector="payment => payment.Id.ToString()" />
+									<HxGridColumn HeaderText="Název dokladu" ItemTextSelector="payment => payment.Name" />
+									<HxGridColumn HeaderText="Typ platby" ItemTextSelector="payment => payment.Type.ToString()" />
+									<HxGridColumn HeaderText="Prefix dokladu" ItemTextSelector="payment => payment.InvoicePrefix" />
+									<HxGridColumn HeaderText="Číslo dokladu" ItemTextSelector="payment => payment.InvoiceNumber.ToString()" />
+
+									<HxContextMenuGridColumn Context="payment">
+										<HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" OnClick="async ()=> await DeleteItemClicked(payment)" />
+									</HxContextMenuGridColumn>      
+								</Columns>
+							</HxGrid>
+						</DataTemplate>
+					</HxListLayout>
 				</div>
 			</Content>
 		</HxTab>
-		<HxTab Title="Číselník vlastnosti záznamů" Id="ConstantDialer">
+		<HxTab Title="Číselník vlastnosti záznamů" Id="ConstantDialer"  ContentCssClass="h-100">
 			<Content>
-				@* TODO:Dodelat konstanty *@
- 				<HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card">
-					<TitleTemplate>
-						Počet záznamů<HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@attributeList?.Count</HxBadge>
-					</TitleTemplate>
-					<CommandsTemplate>
-						<HxButton Text="Nová položka" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="()=>{attributeForm = new(){ModuleId = moduleWorkspace.Id}; attributeFormType = EForm.Insert;}" />
-					</CommandsTemplate>
-					<DataTemplate>
-						<HxGrid TItem="RecordAttribute" DataProvider="GetAttributeData" Responsive="true" SelectedDataItemChanged="(item)=>{attributeForm = item; attributeFormType = EForm.Update;}" TableContainerCssClass="scrollable-table-container">
-							<Columns>
-								<HxGridColumn HeaderText="Id" ItemTextSelector="p => p.Id.ToString()" />
-								<HxGridColumn HeaderText="Name" ItemTextSelector="p => p.Name" />
-								<HxGridColumn HeaderText="Type" ItemTextSelector="p => p.Type.ToString()" />
-								<HxGridColumn HeaderText="UcetA" ItemTextSelector="p => p.AccountA" />
-								<HxGridColumn HeaderText="UcetS" ItemTextSelector="p => p.AccountS" />
-							</Columns>
-						</HxGrid>
-					</DataTemplate>
-				</HxListLayout>
+				<div class="d-flex h-100">
+					<div class="col">
+							<div class="h-25 my-4" />
+							<div class="card floating-card p-3 h-auto me-4">
+								<RecordAttributeForm formType="attributeFormType"  recAttribute="attributeForm" Enabled=@(attributeForm.ModuleId > 0) OnValidSubmit="(args) => Request(args.Item1,args.Item2)" />
+							</div>
+					</div>
+ 					<HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card col-8">
+						<TitleTemplate>
+							Počet záznamů<HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@attributeList.Count</HxBadge>
+						</TitleTemplate>
+						<CommandsTemplate>
+							<HxButton Text="Nová položka" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="()=>{attributeForm = new(){ModuleId = moduleWorkspace.Id}; attributeFormType = EForm.Insert;}" />
+						</CommandsTemplate>
+						<DataTemplate>
+							<HxGrid
+								TItem="RecordAttribute" 
+								DataProvider="async(request)=>{if(!attributeList.Any()){attributeList = await LoadData<RecordAttribute>(); StateHasChanged();} return request.ApplyTo(attributeList);}" 
+								Responsive="true" 
+								SelectedDataItemChanged="(item)=>{attributeForm = item; attributeFormType = EForm.Update;}" 
+								TableContainerCssClass="scrollable-table-container" 
+								ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
+								HeaderRowCssClass="sticky-top"
+								ItemRowHeight="20">
+								<Columns>
+									<HxGridColumn HeaderText="Id" ItemTextSelector="attribute => attribute.Id.ToString()" />
+									<HxGridColumn HeaderText="Název vlastnosti" ItemTextSelector="attribute => attribute.Name" />
+									<HxGridColumn HeaderText="Typ záznamu" ItemTextSelector="attribute => attribute.Type.ToString()" />
+									<HxGridColumn HeaderText="ÚčetA" ItemTextSelector="attribute => attribute.AccountA" />
+									<HxGridColumn HeaderText="ÚčetS" ItemTextSelector="attribute => attribute.AccountS" />
 
-				<div class="card floating-card w-100 mt-3 p-3">
-					<RecordAttributeForm formType="attributeFormType"  recAttribute="attributeForm" OnValidSubmit="StateHasChanged" />
+									<HxContextMenuGridColumn Context="attribute">
+										<HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" OnClick="async ()=> await DeleteItemClicked(attribute)" />
+									</HxContextMenuGridColumn>   
+								</Columns>
+							</HxGrid>
+						</DataTemplate>
+					</HxListLayout>
+
 				</div>
 			</Content>
 		</HxTab>
@@ -65,12 +99,11 @@
 </div>
 <style>
 	.tab-content{
-		width: 75% !important;
 		height: 100% !important;
 	}
 
 	.scrollable-table-container {
-		max-height: 50svh;
+		max-height: 80svh;
 		overflow: auto;
 	}
 </style>
@@ -83,7 +116,7 @@
 	public string dialerName { get; set; } = "PaymentDialer";
 	[CascadingParameter]
 	private ModuleWorkplace moduleWorkspace { get; set; } = default!;
-	private int listCount;
+
 
 	private List<Payment> paymentList = [];
 	private Payment paymentForm = new();
@@ -98,51 +131,71 @@
 		moduleWorkspace.ModuleId = idModule;
 		base.OnInitialized();
 	}
-
-	private async Task<GridDataProviderResult<Payment>> GetPaymentData(GridDataProviderRequest<Payment> request)
+	private async Task<List<T>> LoadData<T>()
 	{
-		var response = await _service.GetAllAsync<Payment>($"?moduleNumber={moduleWorkspace.Id}", moduleWorkspace.Id);
+		var response = await _service.GetAllAsync<T>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
 
-		if (response is null)
-			Console.WriteLine($"NO RESPONSE");
-		else if (response is ErrorResponse response1)
-			Console.WriteLine($"{response1.ErrorMessage}");
-		else if (response is List<Payment> list)
+		if (response is null || response is ErrorResponse)
 		{
-			paymentList = list;
-			listCount = list.Count;
-			return new GridDataProviderResult<Payment>()
-				{
-					Data = list,
-					TotalCount = list.Count
-				};
+			var errorText = "Vyskytla se neočekávaná chyba";
+			if (response is ErrorResponse error)
+				errorText = error.ErrorMessage;
+			Messenger.AddError(title: "Chyba při načítání", message: errorText);
 		}
-		return new GridDataProviderResult<Payment>()
-			{
-				Data = [],
-				TotalCount = 0
-			};
-		// you usually pass the data-request to your API/DataLayer
+		else if (response is List<T> list)
+			return list;
+		return [];
 	}
-	private async Task<GridDataProviderResult<RecordAttribute>> GetAttributeData(GridDataProviderRequest<RecordAttribute> request)
+
+	private async Task Request<T>(EForm e, T obj) where T: ACreation, new()
 	{
-		var response = await _service.GetAllAsync<RecordAttribute>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
 
-		if (response is null)
-			Console.WriteLine($"NO RESPONSE");
-		else if (response is ErrorResponse response1)
-			Console.WriteLine($"{response1.ErrorMessage}");
-		else if (response is List<RecordAttribute> list)
+		// ACreation
+		obj.CreationDate = DateTime.Now;
+		obj.CreationUserId = moduleWorkspace.UserId;
+
+		// HTTP Request
+		object? response = null;
+		if (e == EForm.Update)
+			response = await _service.UpdateAsync(obj, moduleWorkspace.Id);
+		else if (e == EForm.Insert)
+			response = await _service.InsertAsync(obj, moduleWorkspace.Id);
+
+
+		if (response is null || response is ErrorResponse)
 		{
-			attributeList = list;
-			listCount = list.Count;
-			return request.ApplyTo(list);
+			var errorText = "Vyskytla se neočekávaná chyba";
+			if (response is ErrorResponse error)
+				errorText = error.ErrorMessage;
+			Messenger.AddError(title: "Chyba při ukladani", message: errorText);
 		}
-		return new GridDataProviderResult<RecordAttribute>()
+		else
+		{
+			Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně uložen.");
+
+			switch (obj)
 			{
-				Data = [],
-				TotalCount = 0
-			};
-		// you usually pass the data-request to your API/DataLayer
-	}
+				case Payment p:
+					paymentForm = new();
+					paymentFormType = EForm.Insert;
+					paymentList.Clear();
+					break;
+				case RecordAttribute ra:
+					attributeForm = new();
+					attributeFormType = EForm.Insert;
+					attributeList.Clear();
+					break;
+			}			
+			StateHasChanged();
+
+            await Task.Delay(1000);
+			Messenger.Clear();
+		}
+    }
+	private async Task DeleteItemClicked<T>(T deleteItem)
+    {
+  //       ListItems?.Remove(editableCultureInfo);
+		// await gridComponent.RefreshDataAsync();
+    }
+
 }

@@ -64,7 +64,21 @@ namespace Pobytne.Server.Service
             }
         }
         //---------------------------- InsUpDel-------------------------------
-        public async Task<int> Update(Record updateRecord)//TODO: DB PROCEDURA
+        public async Task<int> Update(RecordAttribute updateAttribute)
+        {
+			//SET Server time
+			updateAttribute.CreationDate = DateTime.Now;
+
+            return await _recordTable.Update(updateAttribute);
+        }
+		public async Task<int?> Insert(RecordAttribute insertAttribute)
+		{
+            //SET Server time
+			insertAttribute.CreationDate = DateTime.Now;
+
+			return await _recordTable.Insert(insertAttribute);
+		}
+		public async Task<int> Update(Record updateRecord)//TODO: DB PROCEDURA
         {
             //SET Server time
             updateRecord.CreationDate = DateTime.Now;
@@ -75,41 +89,14 @@ namespace Pobytne.Server.Service
                 if (dateRange.Item1.Value < updateRecord.ValidFrom || dateRange.Item2.Value > updateRecord.ValidTo)
                     throw new Exception("Záznam byl použit mimo období plastnosti. Opravte platnost záznamu!");
 
-            return await _recordTable.UpdateRecord(updateRecord);
+            return await _recordTable.Update(updateRecord);
         }
-        public async Task<int> Insert(Record insertRecord)
+        public async Task<int?> Insert(Record insertRecord)
         {
             //SET Server time
             insertRecord.CreationDate = DateTime.Now;
 
-            using IDbConnection cnn = Database.CreateConnection();
-            cnn.Open();
-            using (var tran = cnn.BeginTransaction())
-            {
-                try
-                {
-                    var insertId = await _recordTable.InsertRecord(insertRecord, tran);
-                    if (insertId.HasValue)
-                    {
-                        insertRecord.Id = insertId.Value;
-                        if(insertRecord.RootId == 0)
-                            insertRecord.RootId = insertId.Value;
-
-                        if (await _recordTable.InsertRecordStructure(insertRecord, tran) == 1)
-                        {
-                            tran.Commit();
-                            return 2;
-                        }
-                    }
-                    tran.Rollback();
-                    throw new Exception("Nepodarilo se vlozit zaznam");
-                }
-                catch (Exception ex)
-                {
-                    tran.Rollback();
-                    throw new Exception(ex.Message);
-                }
-            }
+            return await _recordTable.Insert(insertRecord);
         }
         public async Task<int> Delete(int id)
         {

@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
+﻿using System.Data;
 using Dapper;
+using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural.DTO;
 
 namespace Pobytne.Data.Tables
 {
-    public class PaymentTable
+	public class PaymentTable
     {
         public async Task<IEnumerable<Payment>> GetPayments(int moduleId)
         {
@@ -36,10 +30,21 @@ namespace Pobytne.Data.Tables
             using IDbConnection cnn = Database.CreateConnection();
             return await cnn.UpdateAsync(payment);
         }
-        public async Task<int> Delete(int id)
+		public async Task<IEnumerable<DeleteError>> IsDeletable(int paymentId)
+		{
+			using IDbConnection cnn = Database.CreateConnection();
+			var sql = @"SELECT * FROM (
+                        SELECT 12 as Id, 'PohybyPokladna' as Error FROM P_PohybyPokladna WHERE IDTypuPlatby = @ID UNION  
+                        SELECT 14 as Id, 'Interakce' as Error FROM P_Interakce  WHERE IDModulu = @ID
+						) as ByloPouzito;";
+
+			var conditions = new { ID = paymentId };
+			return await cnn.QueryAsync<DeleteError>(sql, conditions);
+		}
+		public async Task<int> Delete(int id)
         {
             using IDbConnection cnn = Database.CreateConnection();
-            return await cnn.DeleteAsync(id);
+            return await cnn.DeleteAsync<Payment>(id);
         }
     }
 }

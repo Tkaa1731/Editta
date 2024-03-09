@@ -2,7 +2,7 @@
 
 namespace Pobytne.Shared.Procedural
 {
-	public class Evidence : ACreation, IRecordProperty
+	public class Evidence : ACreation, IRecordAttribute
     {
         public int Id {  get; set; }
 		public int Order {  get; set; }
@@ -17,11 +17,11 @@ namespace Pobytne.Shared.Procedural
 		public DateTime InteractionDate { get; set; }
 		public string InteractionDescription { get; set; } = string.Empty;
 		// UZIVATEL
-		public int CustomerId { get; set; }
+		public int ClientId { get; set; }
 		public string CustomerName { get; set; } = string.Empty;
-		// IRecordProperty
-		public int RecordPropertyId { get; set; }
-		public string RecordPropertyName { get; set; } = string.Empty;
+		// IRecordAttribute
+		public int RecordAttributeId { get; set; }
+		public string RecordAttributeName { get; set; } = string.Empty;
 		public int AccountA { get; set; }
 		public int AccountS { get; set; }
 	}

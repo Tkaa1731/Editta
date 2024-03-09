@@ -23,7 +23,7 @@ namespace Pobytne.Shared.Procedural.DTO
         public string Email { get; set; } = string.Empty;
         [Phone(ErrorMessage = "Vyplňte korektní telefonní číslo")]
         public string PhoneNumber { get; set; } = string.Empty;
-        public int CustomerId { get; set; } = 0;
+        public int ClientId { get; set; } = 0;
         public bool Valid { get; set; } = true;
         [Required(ErrorMessage = "Vyplňte datum")]
         public DateTime ValidFrom { get; set; } = DateTime.Now;

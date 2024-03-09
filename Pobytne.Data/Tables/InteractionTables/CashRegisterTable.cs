@@ -35,8 +35,8 @@ namespace Pobytne.Data.Tables.InteractionTables
 			{
 				string sql = @" SELECT TOP 25 
 									p.*,i.NazevInterakce, i.IDUzivatele, i.Datum, i.IDModulu, i.IDTypuPlatby, 
-									z.Nazev, z.IDZaznamuVlastnosti AS RecordPropertyId,u.JmenoUzivatele,l.JmenoUser AS CreationUserName,
-									zv.Nazev AS RecordPropertyName, zv.UcetA AS AccountA, zv.UcetS AS AccountS
+									z.Nazev, z.IDZaznamuVlastnosti AS RecordAttributeId,u.JmenoUzivatele,l.JmenoUser AS CreationUserName,
+									zv.Nazev AS RecordAttributeName, zv.UcetA AS AccountA, zv.UcetS AS AccountS
 								FROM P_Pokladna p
 								JOIN P_Interakce i ON i.IDInterakce = p.IDInterakce
 								LEFT JOIN S_Uzivatele u ON i.IDUzivatele = u.IDUzivatele	

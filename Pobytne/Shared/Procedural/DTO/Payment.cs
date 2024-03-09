@@ -10,7 +10,7 @@ namespace Pobytne.Shared.Procedural.DTO
     {
         public int Id { get; set; } //IDTypuPlatby
         public string Name { get; set; } = string.Empty; //NazevDokladu
-        public int ModuleId { get; set; } //IDModulu
+        public int ModuleId { get; set; } = -1;//IDModulu
         public EPaymentType Type { get; set; } //TypPlatby
         public string InvoicePrefix { get; set; } = string.Empty; //PrefixDokladu
         public int InvoiceNumber { get; set; } //CisloDokladu

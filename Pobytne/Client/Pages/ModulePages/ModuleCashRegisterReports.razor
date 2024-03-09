@@ -16,8 +16,11 @@
 						TItem="CashRegister"
 						DataProvider="GetGridData"
 						Responsive="true"
+						SelectionEnabled="false"
 						ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
 						TableContainerCssClass="scrollable-table-container_2"
+						HeaderRowCssClass="sticky-top"
+						ItemRowHeight="20"
 						>
 					<Columns>
 						@if (ShowGroups)
@@ -115,7 +118,7 @@
 		overflow: auto;
 	}
 		.scrollable-table-container_2 {
-		max-height: 70svh;
+		max-height: 87svh;
 		overflow: auto;
 	}
 </style>
@@ -161,7 +164,7 @@
 		moduleWorkspace.ModuleId = idModule;
 		filter.ModuleId = moduleWorkspace.Id;
 		//load payment enum
-		var response = await _service.GetAllAsync<Payment>($"?moduleNumber={moduleWorkspace.Id}", moduleWorkspace.Id);
+		var response = await _service.GetAllAsync<Payment>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
 
 		if (response is null)
 			Console.WriteLine($"NO RESPONSE");
@@ -169,13 +172,15 @@
 			Console.WriteLine($"{response1.ErrorMessage}");
 		else if (response is List<Payment> list)
 		{
-			paymentList = list.Select(p => new RKeyValue() { Name = p.Name, Id = p.Id }).ToList();
-			var selectedP = paymentList.FirstOrDefault();
-			if(selectedP is not null)
-				filter.PaymentId = selectedP.Id;
+			if (list.Any())
+			{
+				paymentList = list.Select(p => new RKeyValue() { Name = p.Name, Id = p.Id }).ToList();
+				filter.PaymentId = list.First().Id;
+				
+				await ApplyFilter(filter);
+			}
 		}
 
-		await ApplyFilter(filter);
 	}
 	private Task<GridDataProviderResult<CashRegister>> GetGridData(GridDataProviderRequest<CashRegister> request)
 	{
@@ -202,12 +207,12 @@
 			default:
 				return Task.FromResult(
 					request.ApplyTo(
-						reportsList.GroupBy(r => r.RecordPropertyId)
+						reportsList.GroupBy(r => r.RecordAttributeId)
 						.Select(g =>
 							new CashRegister()
 							{
 								Id = g.Key,
-								RecordName = g.First().RecordPropertyName,
+								RecordName = g.First().RecordAttributeName,
 								Price = g.Sum(r=>r.Price),
 								AccountA = g.First().AccountA,
 								AccountS = g.First().AccountS

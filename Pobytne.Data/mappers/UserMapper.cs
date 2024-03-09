@@ -14,7 +14,7 @@ namespace Pobytne.Data.Mappers
             Map(u => u.PasswordIsInicial).ToColumn("JeHesloInicial");
             Map(u => u.LicenseNumber).ToColumn("CisloLicence");
             Map(u => u.PhoneNumber).ToColumn("Telefon");
-            Map(u => u.CustomerId).ToColumn("IDUzivatele");
+            Map(u => u.ClientId).ToColumn("IDUzivatele");
 
             Map(u => u.ValidFrom).ToColumn("PlatiOd");
             Map(u => u.ValidTo).ToColumn("PlatiDo");

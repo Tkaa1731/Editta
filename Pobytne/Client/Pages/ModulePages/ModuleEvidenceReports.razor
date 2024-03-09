@@ -18,7 +18,8 @@
 						Responsive="true"
 						ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
 						TableContainerCssClass="scrollable-table-container_2"
-						>
+						HeaderRowCssClass="sticky-top"
+						ItemRowHeight="20">
 					<Columns>
 						@if (ShowGroups)
 						{
@@ -141,7 +142,7 @@
 </HxModal>
 <style>
 	.scrollable-table-container_2 {
-		max-height: 70svh;
+		max-height: 87svh;
 		overflow: auto;
 	}
 		.scrollable-table-container {
@@ -223,12 +224,12 @@
 			case 2:
 				return Task.FromResult(
 					request.ApplyTo(
-						reportsList.GroupBy(r => r.RecordPropertyId)
+						reportsList.GroupBy(r => r.RecordAttributeId)
 						.Select(g =>
 							new Evidence()
 								{
 									Id = g.Key,
-									RecordName = g.First().RecordPropertyName,
+									RecordName = g.First().RecordAttributeName,
 									Quantity = g.Sum(r => r.Quantity),
 									Adult = g.Sum(e => e.Adult),
 									Child = g.Sum(e => e.Child),
@@ -241,7 +242,7 @@
 			default:
 				return Task.FromResult(
 					request.ApplyTo(
-						reportsList.GroupBy(r => r.CustomerId)
+						reportsList.GroupBy(r => r.ClientId)
 						.Select(g =>
 							new Evidence()
 								{

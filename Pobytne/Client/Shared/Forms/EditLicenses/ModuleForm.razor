@@ -1,5 +1,4 @@
-﻿@if(module is not null)
-{
+﻿
     <EditForm Model="@module" OnValidSubmit=OnValidSubmitHandler>
         <DataAnnotationsValidator />
         <div class="mx-3 mt-3">
@@ -16,8 +15,14 @@
                     <HxInputNumber Label="Číslo licence" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="module.LicenseNumber" Enabled="false" />
                 </div>
                 <div class="col"/>
-                <div class="col-3">
-                    <HxInputNumber Label="Typ evidence" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="module.EvidenceType" ValidationMessageMode="ValidationMessageMode.Regular" />
+                <div class="col">
+                    <HxSelect TItem="RKeyValue"
+                              TValue="int"
+                              Label="Typ evidence"
+                              Data="evidenceTypeList"
+                              @bind-Value="selectedType"
+                              TextSelector="@(et => et.Name)"
+                              ValueSelector="@(et => et.Id)" />
                 </div>
             </div>
             <div class="my-2">
@@ -30,12 +35,12 @@
         </div>
 
     </EditForm>
-}
+
 
 @code {
     [EditorRequired]
     [Parameter]
-    public Module? module { get; set; }
+    public Module module { get; set; } = new();
     [EditorRequired]
     [Parameter]
     public EForm formType { get; set; }
@@ -50,12 +55,24 @@
             return "Aktualizovat";
         }
     }
-    private async Task OnValidSubmitHandler()
-    {
-        if(module is not null)
-        {    
-           await OnValidSubmit.InvokeAsync(formType);
-        }
+    private List<RKeyValue> evidenceTypeList = [];
+    private int selectedType 
+    { 
+        get => (int)module.EvidenceType; 
+        set { module.EvidenceType = (EEvidenceType)value; } 
     }
+    protected override void OnInitialized()
+    {
+        foreach (EEvidenceType et in Enum.GetValues(typeof(EEvidenceType)))
+        {
+            var field = et.GetType().GetField(et.ToString());
+            var displayAttribute = (DisplayAttribute)Attribute.GetCustomAttribute(field!, typeof(DisplayAttribute))!;
+            var name = displayAttribute?.Name ?? et.ToString();
+
+            evidenceTypeList.Add(new RKeyValue() { Name = name, Id = (int)et });
+        }
+        base.OnInitialized();
+    }
+    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
 
 }

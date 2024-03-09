@@ -13,7 +13,7 @@ namespace Pobytne.Data.Tables
 		{
 			using (IDbConnection cnn = Database.CreateConnection())
 			{
-				string sql = @"SELECT z.*, sz.*, u.JmenoUser AS CreationUserName, zv.Nazev AS RecordPropertiesName
+				string sql = @"SELECT z.*, sz.*, u.JmenoUser AS CreationUserName, zv.Nazev AS RecordAttributeName
                                 FROM S_Zaznamy z
                                 JOIN S_StrukturaZaznamu sz ON z.IDZaznamu = sz.IDZaznamu
 								LEFT JOIN S_ZaznamyVlastnosti zv ON z.IDZaznamuVlastnosti = zv.IDZaznamuVlastnosti
@@ -27,7 +27,7 @@ namespace Pobytne.Data.Tables
         {
             using (IDbConnection cnn = Database.CreateConnection())
             {
-                string sql = @"SELECT z.*, sz.*, u.JmenoUser AS CreationUserName, zv.Nazev AS RecordPropertiesName
+                string sql = @"SELECT z.*, sz.*, u.JmenoUser AS CreationUserName, zv.Nazev AS RecordAttributeName
                                 FROM S_Zaznamy z
                                 JOIN S_StrukturaZaznamu sz ON z.IDZaznamu = sz.IDZaznamu
 								LEFT JOIN S_ZaznamyVlastnosti zv ON z.IDZaznamuVlastnosti = zv.IDZaznamuVlastnosti
@@ -77,32 +77,58 @@ namespace Pobytne.Data.Tables
             using IDbConnection cnn = Database.CreateConnection();
             return await cnn.GetAsync<Record>(id);
         }
-        public async Task<int> UpdateRecord(Record record)
+        public async Task<int> Update(RecordAttribute attribute){
+			using IDbConnection cnn = Database.CreateConnection();
+			return await cnn.UpdateAsync(attribute);
+		}
+        public async Task<int> Update(Record record)
         {
             using IDbConnection cnn = Database.CreateConnection();
             return await cnn.UpdateAsync(record);   
         }
-        public async Task<int> InsertRecordStructure(Record record, IDbTransaction tran)
+        public async Task<int?> Insert(RecordAttribute attribute)
         {
-            var conditions = new { IDZaznamu = record.Id, IDModulu = record.ModuleId, IDParent = record.ParentId, IDRoot = record.RootId, Uroven = record.StructDepth};
-            if (tran is not null && tran.Connection is not null)
-                if (tran.Connection.State == ConnectionState.Open)
-                { 
-                    var sql = @"INSERT INTO S_StrukturaZaznamu (IDZaznamu, IDModulu, IDParent, IDRoot, Uroven)
-                        		VALUES  (@IDZaznamu, @IDModulu, @IDParent, @IDRoot, @Uroven)";
-                    return await tran.ExecuteAsync(sql,conditions);
-                }
-
-            throw new Exception("Connection closed");
+            using IDbConnection cnn = Database.CreateConnection(); 
+            return await cnn.InsertAsync(attribute);
         }
-        public async Task<int?> InsertRecord(Record record, IDbTransaction tran)
+        public async Task<int?> Insert(Record record)
         {
-            if (tran is not null && tran.Connection is not null)
-                if (tran.Connection.State == ConnectionState.Open)
-                {
-                    return await tran.Connection.InsertAsync(record, tran);
-                }
-            throw new Exception("Connection closed");
+
+			using IDbConnection cnn = Database.CreateConnection();
+			cnn.Open();
+			using (var tran = cnn.BeginTransaction())
+			{
+				try
+				{
+					var insertId = await cnn.InsertAsync(record, tran);
+					if (insertId.HasValue)
+					{
+                        //Set values for structure
+						record.Id = insertId.Value;
+						if (record.RootId == 0)
+							record.RootId = insertId.Value;
+
+
+                        var sql = @"INSERT INTO S_StrukturaZaznamu (IDZaznamu, IDModulu, IDParent, IDRoot, Uroven)
+                        VALUES  (@IDZaznamu, @IDModulu, @IDParent, @IDRoot, @Uroven)";
+						var conditions = new { IDZaznamu = record.Id, IDModulu = record.ModuleId, IDParent = record.ParentId, IDRoot = record.RootId, Uroven = record.StructDepth };
+
+							
+						if (await tran.ExecuteAsync(sql, conditions) == 1)
+						{
+							tran.Commit();
+							return 2;
+						}
+					}
+					tran.Rollback();
+					throw new Exception("Nepodarilo se vlozit zaznam");
+				}
+				catch (Exception ex)
+				{
+					tran.Rollback();
+					throw new Exception(ex.Message);
+				}
+			}
         }
         public async Task<(DateTime?,DateTime?)> GetUsedDateRange(int id)
         {
@@ -145,7 +171,7 @@ namespace Pobytne.Data.Tables
             {
                 var deleted = 0;
                 deleted += await tran.ExecuteAsync("DELETE S_StrukturaZaznamu WHERE IDZaznamu = @IDZaznamu;", new { IDZaznamu = id });
-                deleted += await cnn.DeleteAsync(id,tran);
+                deleted += await cnn.DeleteAsync<Record>(id,tran);
                 if(deleted != 2)
                     tran.Rollback();
                 else

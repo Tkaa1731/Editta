@@ -5,8 +5,8 @@
         string Name { get; set; }
         int Order { get; set; }
         int Stock { get; set; }
-        int? RecordPropertiesId { get; set; }
-        string RecordPropertiesName { get; set; }
+        int? RecordAttributeId { get; set; }
+        string RecordAttributeName { get; set; }
         int Quantity { get; set; }
         float Price { get; set; }
         bool IsSeasonTicket { get; set; }

@@ -2,7 +2,7 @@
 
 namespace Pobytne.Shared.Procedural
 {
-	public class CashRegister : ACreation, IRecordProperty
+	public class CashRegister : ACreation, IRecordAttribute
 	{
 		public int Id { get; set; }
 		public int Order { get; set; }
@@ -11,7 +11,7 @@ namespace Pobytne.Shared.Procedural
 		public int PaymentId { get; set; }
 		//public string PaymentName { get; set; } = string.Empty;
 		// UZIVATEL
-		public int CustomerId {  get; set; }
+		public int ClientId {  get; set; }
 		public string CustomerName { get; set; } = string.Empty;
 		// INTERAKCE
 		public int InteractionId { get; set; }
@@ -20,9 +20,9 @@ namespace Pobytne.Shared.Procedural
 		// ZAZNAM
 		public int RecordId { get; set; }
 		public string RecordName { get; set; } = string.Empty;
-		// IRecordProperty
-		public int RecordPropertyId { get; set; }
-		public string RecordPropertyName { get; set; } = string.Empty;
+		// IRecordAttribute
+		public int RecordAttributeId { get; set; }
+		public string RecordAttributeName { get; set; } = string.Empty;
 		public int AccountA { get; set; }
 		public int AccountS { get; set; }
 	}

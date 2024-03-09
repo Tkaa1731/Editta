@@ -7,7 +7,7 @@
 		<div class="mx-3 mt-3">
 			<div class="row">
 				<div class="col">
-					<HxInputText @bind-Value="recAttribute.Name" Label="Název vlastnosti" Type="InputType.Text" ValidationMessageMode="ValidationMessageMode.Regular"/>
+					<HxInputText @bind-Value="recAttribute.Name" Label="Název vlastnosti" Type="InputType.Text" ValidationMessageMode="ValidationMessageMode.Regular" Enabled="Enabled"/>
 				</div>
 				<div class="col">
                     <HxSelect TItem="RKeyValue"
@@ -16,24 +16,28 @@
                               Data="recordTypeList"
                               @bind-Value="selectedType"
                               TextSelector="@(r => r.Name)"
-                              ValueSelector="@(r => r.Id)"/>
+                              ValueSelector="@(r => r.Id)"
+                               Enabled="Enabled"/>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col">
-					<HxInputText @bind-Value="recAttribute.AccountA" Label="ÚčetA" ValidationMessageMode="ValidationMessageMode.Regular"/>
+					<HxInputText @bind-Value="recAttribute.AccountA" Label="ÚčetA"  Enabled="Enabled" ValidationMessageMode="ValidationMessageMode.Regular"/>
 				</div>
+                <div class="col"/>
 				<div class="col">
-					<HxInputText @bind-Value="recAttribute.AccountS" Label="ÚčetS" ValidationMessageMode="ValidationMessageMode.Regular"/>
+					<HxInputText @bind-Value="recAttribute.AccountS" Label="ÚčetS"  Enabled="Enabled" ValidationMessageMode="ValidationMessageMode.Regular"/>
 				</div>
+            </div>
+			<div class="row">
                 <div class="col">
-                    <HxInputText @bind-Value="recAttribute.OrderNumber" Label="Číslo zakázky" ValidationMessageMode="ValidationMessageMode.Regular" />
+                    <HxInputText @bind-Value="recAttribute.OrderNumber" Label="Číslo zakázky"  Enabled="Enabled" ValidationMessageMode="ValidationMessageMode.Regular" />
 				</div>
 				<div class="col">
-					<HxInputText @bind-Value="recAttribute.CentreNumber" Label="Číslo střediska" ValidationMessageMode="ValidationMessageMode.Regular"/>
+					<HxInputText @bind-Value="recAttribute.CentreNumber" Label="Číslo střediska"  Enabled="Enabled" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>				
                 <div class="col">
-                    <HxInputText @bind-Value="recAttribute.ProjectNumber" Label="Číslo projektu" ValidationMessageMode="ValidationMessageMode.Regular" />
+                    <HxInputText @bind-Value="recAttribute.ProjectNumber" Label="Číslo projektu"  Enabled="Enabled" ValidationMessageMode="ValidationMessageMode.Regular" />
                 </div>
 			</div>
 			<div class="row">
@@ -45,7 +49,7 @@
         </div>
 
         <div class="d-grid gap-2">
-            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+            <HxSubmit Color="ThemeColor.Success"  Enabled="Enabled">@ButtonText</HxSubmit>
         </div>
 
     </EditForm>
@@ -60,7 +64,9 @@
     public EForm formType { get; set; }
     [EditorRequired]
     [Parameter]
-    public EventCallback<EForm> OnValidSubmit{ get; set; }
+    public EventCallback<(EForm,RecordAttribute)> OnValidSubmit{ get; set; }
+    [Parameter]
+    public bool Enabled { get; set; } = true;
     private string ButtonText
     {
         get
@@ -75,7 +81,7 @@
         get => (int)recAttribute.Type;
         set { recAttribute.Type = (ERecordType)value; }
     }
-    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
+    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync((formType,recAttribute));
         protected override void OnInitialized()
     {
         foreach (ERecordType pt in Enum.GetValues(typeof(ERecordType)))

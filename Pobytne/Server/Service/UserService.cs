@@ -23,7 +23,7 @@ namespace Pobytne.Server.Service
         }
         public async Task<IEnumerable<User>> GetUsersByLicense(int licenseNumber)
         {
-            var users = await _userTable.GetAll(new{ LicenseNumber = licenseNumber});
+            var users = await _userTable.GetByLicense(licenseNumber);
             return users;
         }
         public async Task<IEnumerable<User>> GetUsersExsModule(int moduleNumber)
@@ -44,9 +44,12 @@ namespace Pobytne.Server.Service
             insertUser.Password = GeneratePassword();
             return await _userTable.Insert(insertUser);
         }
-        public async Task<int> Delete(int it)
+        public async Task<int> Delete(int id)
         {
-            return await _userTable.Delete(it);
+			//var errors = await _userTable.IsDeletable(id);
+			//if (errors.Any())
+			//	throw new Exception($"Pro modul {id},který se pokoušíte smazat existuje platný záznam v tabulce {errors}");
+			return await _userTable.Delete(id);
         }
         private string GeneratePassword()
         {

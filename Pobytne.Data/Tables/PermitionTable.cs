@@ -1,11 +1,10 @@
 ﻿using Dapper;
 using Pobytne.Shared.Procedural.DTO;
 using System.Data;
-using System.Data.SqlClient;
 
 namespace Pobytne.Data.Tables
 {
-    public class PermitionTable //: IDataTable<Permition>
+	public class PermitionTable //: IDataTable<Permition>
     {
         public async Task<IEnumerable<Permition>> GetAllOfUser(int idLogin)
         {
@@ -58,7 +57,7 @@ namespace Pobytne.Data.Tables
         public async Task<int> Delete(int id)
         {
             using IDbConnection cnn = Database.CreateConnection();
-            return await cnn.DeleteAsync(id);
+            return await cnn.DeleteAsync<Permition>(id);
         }
     }
 }
