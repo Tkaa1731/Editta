@@ -20,7 +20,7 @@ namespace Pobytne.Data.Mappers
 			Map(c => c.InteractionDescription).ToColumn("NazevInterakce");
 			Map(c => c.InteractionDate).ToColumn("Datum");
 
-			Map(c => c.CustomerId).ToColumn("IDUzivatele");
+			Map(c => c.ClientId).ToColumn("IDUzivatele");
 			Map(c => c.CustomerName).ToColumn("JmenoUzivatele");
 
             Map(c => c.CreationUserId).ToColumn("Kdo");

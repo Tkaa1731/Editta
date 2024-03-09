@@ -14,7 +14,7 @@ namespace Pobytne.Data.Mappers
 			Map(c => c.PaymentId).ToColumn("IDTypuPlatby");
 			//Map(c => c.PaymentName).ToColumn("NazevDokladu");
 
-			Map(c => c.CustomerId).ToColumn("IDUzivatele");
+			Map(c => c.ClientId).ToColumn("IDUzivatele");
 			Map(c => c.CustomerName).ToColumn("JmenoUzivatele");
 
 			Map(c => c.InteractionId).ToColumn("IDInterakce");

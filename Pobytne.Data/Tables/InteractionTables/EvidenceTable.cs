@@ -34,10 +34,10 @@ namespace Pobytne.Data.Tables.InteractionTables
         {
 			using (IDbConnection cnn = Database.CreateConnection()) // TODO: odstranit omezeni TOP 15
 			{
-				string sql = @" SELECT TOP 20 
+				string sql = @" SELECT TOP 30
                                     e.*, i.NazevInterakce, i.IDUzivatele, i.Datum, i.IDModulu, u.JmenoUzivatele, 
-                                    z.Nazev, z.IDZaznamuVlastnosti AS RecordPropertyId, l.JmenoUser AS CreationUserName,
-                                    zv.Nazev AS RecordPropertyName, zv.UcetA AS AccountA, zv.UcetS AS AccountS
+                                    z.Nazev, z.IDZaznamuVlastnosti AS RecordAttributeId, l.JmenoUser AS CreationUserName,
+                                    zv.Nazev AS RecordAttributeName, zv.UcetA AS AccountA, zv.UcetS AS AccountS
                                 FROM P_Evidence e
                                 JOIN P_Interakce i ON i.IDInterakce = e.IDInterakce
                                 LEFT JOIN S_Uzivatele u ON i.IDUzivatele = u.IDUzivatele	

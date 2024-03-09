@@ -4,5 +4,6 @@
     {
         public int Id { get; set; }
         public string Error { get; set; } = string.Empty;
+        public override string ToString() => Error;
     }
 }

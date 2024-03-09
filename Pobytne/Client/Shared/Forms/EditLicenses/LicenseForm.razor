@@ -30,11 +30,8 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidFrom" Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.DateOfLaunch"  Label="Datum vystavení"/>
                 </div>                
-                <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidTo" MinDate="license.ValidFrom.AddDays(1)" Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
                 <div class="col">
                     <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.DateOfPayment"  Label="Datum platby" Enabled="license.IsPayed" />
                 </div>
@@ -62,6 +59,14 @@
                 </div>
                 <div class="col-3">
                     <HxInputText @bind-Value="license.PostNumber" Label="PSČ" Type="InputType.Text" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidFrom" Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                </div>                
+                <div class="col">
+                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidTo" MinDate="license.ValidFrom.AddDays(1)" Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
             </div>
         </div>

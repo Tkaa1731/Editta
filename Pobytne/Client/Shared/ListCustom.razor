@@ -22,7 +22,8 @@
             SelectedDataItem="selectedItem" 
             ContentNavigationMode="GridContentNavigationMode.InfiniteScroll" 
             TableContainerCssClass="scrollable-table-container"
-            HeaderRowCssClass="sticky-top">
+            HeaderRowCssClass="sticky-top"
+            ItemRowHeight="20">
             <Columns>
                 <HxGridColumn HeaderText="Id" ItemTextSelector="@(item => item.Id.ToString())" SortKeySelector="@(item => item.Id)" IsDefaultSortColumn="false" />
                 <HxGridColumn HeaderText="Název" ItemTextSelector="@(item => item.Name)" SortKeySelector="@(item => item.Name)" />

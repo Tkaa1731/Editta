@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pobytne.Server.Service;
+using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural.DTO;
 using Pobytne.Shared.Struct;
+using System.Net;
 
 namespace Pobytne.Server.Controllers
 {
@@ -19,7 +21,7 @@ namespace Pobytne.Server.Controllers
         [HttpGet]
         [PermissionAuthorize(permition, EAccess.ReadOnly)]
         [Route("PermitionList")]
-        public async Task<IEnumerable<Permition>> GetByModule([FromQuery] int idModule)
+        public async Task<IEnumerable<Permition>> Get([FromQuery] int idModule)
         {
             return await _permitionService.GetAllOfModule(idModule);
         }
@@ -30,20 +32,17 @@ namespace Pobytne.Server.Controllers
         {
             if (insertPermition is null)
             {
-                return BadRequest("Invalid data");
-            }
+                return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest, "No data to insert"));
+			}
             try
             {
-                int? rowsAffected = await _permitionService.Insert(insertPermition);
-                if (rowsAffected > 0)
-                    return Ok("Insert successful");
-                else
-                    return BadRequest("Insert failed");
+                await _permitionService.Insert(insertPermition);
+                return Ok();
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal Server Error :{ex.Message}");
-            }
+                return Conflict(new ErrorResponse(HttpStatusCode.Conflict, ex.Message));
+			}
         }
         [HttpPost]
         [PermissionAuthorize(permition, EAccess.FullAccess)]
@@ -52,20 +51,17 @@ namespace Pobytne.Server.Controllers
         {
             if (updatePermition is null)
             {
-                return BadRequest("Invalid data");
-            }
+                return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest, "No data to insert"));
+			}
             try
             {
-                int rowsAffected = await _permitionService.Update(updatePermition);
-                if (rowsAffected > 0)
-                    return Ok("Update successful");
-                else
-                    return BadRequest("Update failed");
+                await _permitionService.Update(updatePermition);
+                return Ok();
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal Server Error :{ex.Message}");
-            }
+                return Conflict(new ErrorResponse(HttpStatusCode.Conflict, ex.Message));
+			}
         }
     }
 }

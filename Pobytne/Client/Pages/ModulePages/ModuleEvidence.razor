@@ -275,7 +275,7 @@
     }
     private async Task LoadPayments()
     {
-        var response = await _service.GetAllAsync<Payment>($"?moduleNumber={moduleWorkspace.Id}", moduleWorkspace.Id);
+        var response = await _service.GetAllAsync<Payment>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
         List<Payment> payments = new();
         if (response is null)
             Console.WriteLine($"NO RESPONSE");

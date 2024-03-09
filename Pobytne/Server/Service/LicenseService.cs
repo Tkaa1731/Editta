@@ -3,13 +3,12 @@ using Pobytne.Shared.Procedural.DTO;
 
 namespace Pobytne.Server
 {
-    public class LicenseService(LicenseTable license)
+    public class LicenseService(LicenseTable licenseTable)
     {
-        private readonly LicenseTable _licenseTable = license;
-
+        private readonly LicenseTable _licenseTable = licenseTable;
         public async Task<IEnumerable<License>> GetLicenses()
 		{
-			return await _licenseTable.GetAll(new {});
+			return await _licenseTable.GetAll();
 		}
         //---------------------------- InsUpDel-------------------------------
         public async Task<int> Update(License updateLicense)
@@ -20,9 +19,14 @@ namespace Pobytne.Server
         {
             return await _licenseTable.Insert(insertLicense);
         }
-        public async Task<int> Delete(int it)
+        public async Task<int> Delete(int id)
         {
-            return await _licenseTable.Delete(it);
+            //Kontrola na existenci navazujících tabulek
+            var errors = await _licenseTable.IsDeletable(id);
+            if (errors.Any())
+                throw new Exception($"Pro licenci ID:{id},kterou se pokoušíte smazat existuje platný záznam v tabulce {errors}");
+
+			return await _licenseTable.Delete(id);
         }
     }
 }

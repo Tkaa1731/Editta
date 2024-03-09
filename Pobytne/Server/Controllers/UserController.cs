@@ -24,7 +24,7 @@ namespace Pobytne.Server.Controllers
         [HttpGet]
         [PermissionAuthorize(permition, EAccess.ReadOnly)]
         [Route("UsersList")]
-        public async Task<IEnumerable<User>> GetByLicense([FromQuery]int licenseNumber)//, [FromQuery]int userOfModule = -1
+        public async Task<IEnumerable<User>> GetByLicense([FromQuery]int licenseNumber)
         {
             return await _userService.GetUsersByLicense(licenseNumber);
         }
@@ -101,11 +101,11 @@ namespace Pobytne.Server.Controllers
             }
         }
         // DELETE api/<ItemsController>/5
-        [PermissionAuthorize(permition, EAccess.FullAccess)]
-        [HttpDelete("{id}")]
-        public async Task<bool> Delete(int id)
-        {
-            return await _userService.Delete(id) > 0; 
-        }
+        //[PermissionAuthorize(permition, EAccess.FullAccess)]
+        //[HttpDelete("{id}")]
+        //public async Task<bool> Delete(int id)
+        //{
+        //    return await _userService.Delete(id) > 0; 
+        //}
     }
 }

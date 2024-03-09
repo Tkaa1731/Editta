@@ -1,23 +1,20 @@
-﻿using System.Data.SqlClient;
-using System.Data;
+﻿using System.Data;
 using Dapper;
-using System;
+using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural.DTO;
 
 namespace Pobytne.Data.Tables
 {
-    public class LicenseTable //: IDataTable<License>
+	public class LicenseTable //: IDataTable<License>
     {
-        public async Task<IEnumerable<License>> GetAll(object condition)
+        public async Task<IEnumerable<License>> GetAll()
         {
-            using (IDbConnection cnn = Database.CreateConnection())
-            {
-                string sql = @"select l.*, c.JmenoUser AS CreationUserName
+			using IDbConnection cnn = Database.CreateConnection();
+			string sql = @"select l.*, c.JmenoUser AS CreationUserName
                                from S_Licence l
                                JOIN S_LoginUser c ON l.Kdo = c.IDLogin;";
-                return await cnn.QueryAsync<License>(sql);
-            }
-        }
+			return await cnn.QueryAsync<License>(sql);
+		}
         public async Task<bool> CheckLicense(int license_numb)// checking if license is active
         {
             using (IDbConnection cnn = Database.CreateConnection())
@@ -30,7 +27,12 @@ namespace Pobytne.Data.Tables
                 return true;
             }
         }
+        public async Task<License> GetById(int id)
+        {
+			using IDbConnection cnn = Database.CreateConnection();
+			return await cnn.GetAsync<License>(id);
 
+		}
         public async Task<IEnumerable<License>> Select(int id)
         {
             using (IDbConnection cnn = Database.CreateConnection())
@@ -40,48 +42,6 @@ namespace Pobytne.Data.Tables
                 return  await cnn.QueryAsync<License>(sql, param);
             }
         }
-		public async Task<int> InsUpTran(DynamicParameters param)
-		{
-			string cashRegisterSQL = "p_sp_Licence_InsUp";
-			using IDbConnection cnn = Database.CreateConnection();
-			int success = await cnn.ExecuteAsync(cashRegisterSQL, param, commandType: CommandType.StoredProcedure);
-
-			if (success == 1)
-				return 1;
-
-			throw new Exception($"Failed 'p_sp_Licence_InsUp' {success}");
-		}
-		public DynamicParameters GetParamsForTrans(License license, bool delete)
-		{
-			var result = new DynamicParameters();
-			result.Add("@IDLicence", license.Id, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
-			object? template = new
-			{
-				CisloLicence = license.LicenseNumber,
-				license.ICO,
-				NazevOrganizace = license.NameOfOrganization,
-				Ulice = license.Street,
-				Obec = license.City,
-				PSC = license.PostNumber,
-				KontaktniOsoba = license.ContactPerson,
-				Telefon = license.PhoneNumber,
-				license.Email,
-				TypVerze = license.VersionType,
-				JeDemo = license.IsDemo,
-				JeZaplacena = license.IsPayed,
-				JeBlokovana = license.IsBlocked,
-				DatumVystaveni = license.DateOfLaunch,
-				DatumPlatby = license.DateOfPayment,
-				PlatiOd = license.ValidFrom,
-				PlatiDo = license.ValidTo,
-				Kdo = license.CreationUserId,
-				Kdy = license.CreationDate,
-
-				Smazat = delete ? 1 : 0,
-			};
-			result.AddDynamicParams(template);
-			return result;
-		}
         public async Task<int?> Insert(License license)
         {
             using IDbConnection cnn = Database.CreateConnection();
@@ -93,10 +53,20 @@ namespace Pobytne.Data.Tables
             using IDbConnection cnn = Database.CreateConnection();
             return await cnn.UpdateAsync(license);
         }
+		public async Task<IEnumerable<DeleteError>> IsDeletable(int licenseId)
+		{
+			using IDbConnection cnn = Database.CreateConnection();
+			var sql = @"SELECT * FROM (
+                        SELECT 3 as Id, 'Moduly' as Error FROM S_Moduly m JOIN S_Licence l ON m.CisloLicence = l.CisloLicence WHERE l.IDLicence = @ID UNION  
+                        SELECT 4 as Id, 'Uživatelé' as Error FROM S_LoginUser u JOIN S_Licence l ON l.CisloLicence = u.CisloLicence WHERE l.IDLicence = @ID) as ByloPouzito;";
+
+			var conditions = new { ID = licenseId };
+			return await cnn.QueryAsync<DeleteError>(sql, conditions);
+		}
 		public async Task<int> Delete(int id)
         {
             using IDbConnection cnn = Database.CreateConnection();
-            return await cnn.DeleteAsync(id);
+            return await cnn.DeleteAsync<License>(id);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Pobytne.Data.Mappers
             Map(r => r.Name).ToColumn("Nazev");
             Map(r => r.RecordType).ToColumn("TypZaznamu");
 
-            Map(r => r.RecordPropertiesId).ToColumn("IDZaznamuVlastnosti");
+            Map(r => r.RecordAttributeId).ToColumn("IDZaznamuVlastnosti");
 
             Map(r => r.Quantity).ToColumn("Jednotka");
             Map(r => r.GroupQuantity).ToColumn("JednotkaCelkem");

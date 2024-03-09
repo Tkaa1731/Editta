@@ -26,9 +26,9 @@ namespace Pobytne.Shared.Procedural
         public string Name { get; set; } = string.Empty;
         public ERecordType RecordType { get; set; }
         // S_ZaznamyVlastnosti
-        public int? RecordPropertiesId {  get; set; }
+        public int? RecordAttributeId {  get; set; }
         [Editable(false)]
-        public string RecordPropertiesName { get; set; } = string.Empty;
+        public string RecordAttributeName { get; set; } = string.Empty;
         [Required(ErrorMessage = "Vyplňte množství")]
         public int Quantity { get; set; }
         [Required(ErrorMessage = "Vyplňte počet dospělých")]

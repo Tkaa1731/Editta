@@ -19,5 +19,10 @@ namespace Pobytne.Server.Service
         {
             return await _permitionTable.Insert(insertPermition);
         }
-    }
+		public async Task<int> Delete(int it)
+		{
+			//Kontrola na existenci navazujících tabulek
+			return await _permitionTable.Delete(it);
+		}
+	}
 }

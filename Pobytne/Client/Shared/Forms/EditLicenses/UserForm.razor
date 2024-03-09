@@ -20,6 +20,9 @@
 				<div class="col">
 					<HxInputText @bind-Value="user.PhoneNumber" Label="Telefonní číslo" Type="InputType.Tel" ValidationMessageMode="ValidationMessageMode.Regular"/>
 				</div>
+                <div class="col">
+					<HxInputNumber Label="Číslo klienta" CssClass="mb-3" Decimals="0" TValue="int" @bind-Value="user.ClientId" />
+                </div>
 			</div>
 			<div class="row align-items-center">
 				<div class="col">

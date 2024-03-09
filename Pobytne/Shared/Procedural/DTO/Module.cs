@@ -17,9 +17,7 @@ namespace Pobytne.Shared.Procedural.DTO
         [Required(ErrorMessage = "Vyplňte zkrácený název")]
         public string ModuleShortName { get; set; } = string.Empty;
         public int LicenseNumber { get; set; }
-        [Required(ErrorMessage = "Vyplňte typ evidence")]
-        [Range(0, 4, ErrorMessage = "Vyplňte číslo v rozsahu 0-4")]
-        public int EvidenceType { get; set; }
+        public EEvidenceType EvidenceType { get; set; } = EEvidenceType.Basic;
         public bool OnlyUsersByIdOfModule { get; set; }
         //IListItem
         [Editable(false)]

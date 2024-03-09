@@ -2,22 +2,24 @@
 using System.Data;
 using Dapper;
 using Pobytne.Shared.Procedural.DTO;
+using Pobytne.Shared.Extensions;
 
 namespace Pobytne.Data.Tables
 {
     public class ModuleTable
     {
 
-        public async Task<IEnumerable<Module>> GetAll(object condition)
+        public async Task<IEnumerable<Module>> GetByLicense(int license)
         {
             using (IDbConnection cnn = Database.CreateConnection())
             {
                 string sql = @"select m.*, c.JmenoUser AS CreationUserName
                                from S_Moduly m
                                JOIN S_LoginUser c ON m.Kdo = c.IDLogin
-                               WHERE m.CisloLicence = @CisloLicence;";
+                               WHERE m.CisloLicence = @License;";
 
-                return await cnn.QueryAsync<Module>(sql,condition);
+				var conditions = new { License = license };
+				return await cnn.QueryAsync<Module>(sql,conditions);
             }
 		}
 		public async Task<IEnumerable<Module>> GetByUser(int userId)
@@ -46,36 +48,6 @@ namespace Pobytne.Data.Tables
                 return result.FirstOrDefault();
             }
         }
-		public async Task<int> InsUpTran(DynamicParameters param)
-		{
-			string cashRegisterSQL = "p_sp_Moduly_InsUp";
-			using IDbConnection cnn = Database.CreateConnection();
-			int success = await cnn.ExecuteAsync(cashRegisterSQL, param, commandType: CommandType.StoredProcedure);
-
-			if (success == 1)
-				return 1;
-
-			throw new Exception($"Failed 'p_sp_Moduly_InsUp' {success}");
-		}
-		public DynamicParameters GetParamsForTrans(Module module, bool delete)
-		{
-			var result = new DynamicParameters();
-			result.Add("@IDModulu", module.Id, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
-			object? template = new
-			{
-				Nazev = module.Name,
-				ZkracenyNazev = module.ModuleShortName,
-				CisloLicence = module.LicenseNumber,
-				TypEvidence = module.EvidenceType,
-				JenUzivatelDleIDModulu = module.OnlyUsersByIdOfModule,
-				Kdo = module.CreationUserId,
-				Kdy = module.CreationDate,
-
-				Smazat = delete ? 1 : 0,
-			};
-			result.AddDynamicParams(template);
-			return result;
-		}
 		public async Task<int?> Insert(Module item)
         {
             using IDbConnection cnn = Database.CreateConnection();
@@ -87,10 +59,23 @@ namespace Pobytne.Data.Tables
             using IDbConnection cnn = Database.CreateConnection();
             return await cnn.UpdateAsync(item);
         }
-        public async Task<int> Delete(int id)
+		public async Task<IEnumerable<DeleteError>> IsDeletable(int id)
+		{
+			using IDbConnection cnn = Database.CreateConnection();
+			var sql = @"SELECT * FROM (
+                        --SELECT 4 as Id, 'PohybyPokladna' as Error FROM P_PohybyPokladna p WHERE p.M = @ID UNION
+                        SELECT 5 as Id, 'Opravneni' as Error FROM S_Opravneni WHERE IDModulu = @ID UNION
+                        SELECT 9 as Id, 'Klienti' as Error FROM S_Uzivatele WHERE IDModulu = @ID UNION  
+                        SELECT 10 as Id, 'Zaznamy' as Error FROM S_Zaznamy  WHERE IDModulu = @ID UNION
+                        SELECT 14 as Id, 'Interakce' as Error FROM P_Interakce  WHERE IDModulu = @ID
+						) as ByloPouzito;";
+			var conditions = new { ID = id };
+			return await cnn.QueryAsync<DeleteError>(sql, conditions);
+		}
+		public async Task<int> Delete(int id)
         {
             using IDbConnection cnn = Database.CreateConnection();
-            return await cnn.DeleteAsync(id);
+            return await cnn.DeleteAsync<Module>(id);
         }
     }
 }

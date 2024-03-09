@@ -1,4 +1,5 @@
-﻿using Pobytne.Data.Tables;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using Pobytne.Data.Tables;
 using Pobytne.Shared.Procedural.DTO;
 
 namespace Pobytne.Server.Service
@@ -20,9 +21,14 @@ namespace Pobytne.Server.Service
         {
             return await _paymentTable.Insert(insertPayment);
         }
-        public async Task<int> Delete(int it)
+        public async Task<int> Delete(int id)
         {
-            return await _paymentTable.Delete(it);
+			//Kontrola na existenci navazujících tabulek
+			var errors = await _paymentTable.IsDeletable(id);//TODO: KDE VSUDE?
+			if (errors.Any())
+				throw new Exception($"Pro typ platby ID:{id},který se pokoušíte smazat existuje platný záznam v tabulce {errors}");
+
+			return await _paymentTable.Delete(id);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿@inject IJSRuntime js
-@inject PobytneService service
+﻿@inject PobytneService service
 @inject IHxMessengerService Messenger
 
 <HxModal @ref="myModal" Backdrop="ModalBackdrop.Static" Size="ModalSize.Large" OnClosed="HandleHideClick">
@@ -120,7 +119,7 @@
                     await CompleteReq(request, record);
                     break;
                 default:
-                    await js.InvokeVoidAsync("alert", "neni implementovano");
+                    Messenger.AddError(title: "Chyba při ukladani", message: "Neexistujici formular");
                     break;
             }
 

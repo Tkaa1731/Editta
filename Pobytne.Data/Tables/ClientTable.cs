@@ -1,11 +1,11 @@
-﻿using System.Data.SqlClient;
-using System.Data;
+﻿using System.Data;
 using Dapper;
+using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural.DTO;
 
 namespace Pobytne.Data.Tables
 {
-    public class ClientTable
+	public class ClientTable
     {
         public async Task<IEnumerable<Client>> GetAll(object conditions)
         {
@@ -67,10 +67,21 @@ namespace Pobytne.Data.Tables
             using IDbConnection cnn = Database.CreateConnection();
             return await cnn.UpdateAsync(client);
         }
-        public async Task<int> Delete(int id)
+		public async Task<IEnumerable<DeleteError>> IsDeletable(int clientId)
+		{
+			using IDbConnection cnn = Database.CreateConnection();
+			var sql = @"SELECT * FROM (
+                        SELECT 12 as Id, 'PohybyPokladna' as Error FROM P_PohybyPokladna WHERE IDTypuPlatby = @ID UNION  
+                        SELECT 14 as Id, 'Interakce' as Error FROM P_Interakce  WHERE IDModulu = @ID
+						) as ByloPouzito;";
+
+			var conditions = new { ID = clientId };
+			return await cnn.QueryAsync<DeleteError>(sql, conditions);
+		}
+		public async Task<int> Delete(int id)
         {
             using IDbConnection cnn = Database.CreateConnection();
-            return await cnn.DeleteAsync(id);
+            return await cnn.DeleteAsync<Client>(id);
         }
     }
 }

@@ -4,8 +4,8 @@
     {
         string Name { get; set; }
         int Order { get; set; }
-        int? RecordPropertiesId { get; set; }
-        string RecordPropertiesName { get; set; }
+        int? RecordAttributeId { get; set; }
+        string RecordAttributeName { get; set; }
         int Adult {  get; set; }
         int Child {  get; set; }
         int Quantity { get; set; }
