@@ -25,7 +25,7 @@
                     }
                     else
                     {
-                        <div>@item.Price</div>
+                    <div>@item.Price.ToString("C", new CultureInfo("cs-CZ"))</div>
                     }
                 </ItemTemplate>
             </HxGridColumn>

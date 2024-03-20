@@ -9,17 +9,32 @@ namespace Pobytne.Data.Tables
     {
         public async Task<IEnumerable<Payment>> GetPayments(int moduleId)
         {
-            var conditions = new { IDModulu = moduleId };
             using (IDbConnection cnn = Database.CreateConnection())
             {
                 string sql = @"  SELECT p.*, u.JmenoUser AS CreationUserName
                                   FROM S_TypyPlatby p
                                   JOIN S_LoginUser u ON u.IDLogin = p.Kdo
                                   WHERE IDModulu = @IDModulu;";
+                var conditions = new { IDModulu = moduleId };
 
                 return await cnn.QueryAsync<Payment>(sql, conditions);
             }
         }
+        public async Task<Payment> GetById(int id)
+        {
+            using (IDbConnection cnn = Database.CreateConnection())
+            {
+                string sql = @"  SELECT p.*, u.JmenoUser AS CreationUserName
+                                  FROM S_TypyPlatby p
+                                  JOIN S_LoginUser u ON u.IDLogin = p.Kdo
+                                  WHERE IDTypuPlatby = @IDTypuPlatby;";
+                var conditions = new { IDTypuPlatby = id};
+
+                return await cnn.QueryFirstAsync<Payment>(sql, conditions);
+            }
+        }
+        //---------------------------- InsUpDel-------------------------------
+
         public async Task<int?> Insert(Payment payment)
         {
             using IDbConnection cnn = Database.CreateConnection();
@@ -35,7 +50,7 @@ namespace Pobytne.Data.Tables
 			using IDbConnection cnn = Database.CreateConnection();
 			var sql = @"SELECT * FROM (
                         SELECT 12 as Id, 'PohybyPokladna' as Error FROM P_PohybyPokladna WHERE IDTypuPlatby = @ID UNION  
-                        SELECT 14 as Id, 'Interakce' as Error FROM P_Interakce  WHERE IDModulu = @ID
+                        SELECT 14 as Id, 'Interakce' as Error FROM P_Interakce  WHERE IDTypuPlatby = @ID
 						) as ByloPouzito;";
 
 			var conditions = new { ID = paymentId };

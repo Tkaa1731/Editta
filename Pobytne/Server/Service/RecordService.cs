@@ -6,33 +6,20 @@ using System.Data;
 
 namespace Pobytne.Server.Service
 {
-    public class RecordService(RecordTable recordTable)
+    public class RecordService(RecordTable recordTable,RecordAttributeTable attributeTable,RecordStockTable stockTable)
     {
         private readonly RecordTable _recordTable = recordTable;
+        private readonly RecordAttributeTable _attributeTable = attributeTable;
+        private readonly RecordStockTable _stockTable = stockTable;
 
         public async Task<IEnumerable<Record>> GetBranch(int parentId)
         {
             List<int> parameter = [parentId];
-            try
-            {
-                var records = await _recordTable.GetSubRecords(new { IDParent = parameter});
-                return records.OrderBy(r => r.Order);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return [];
-            }
+            return await _recordTable.GetSubRecords(new { IDParent = parameter});
         }
         public async Task<IEnumerable<Record>> GetRoot(int moduleId)
         {
-            var records = await _recordTable.GetRoot(new { ModuleID = moduleId});
-            return records.OrderBy(r => r.Order);
-        }
-        public async Task<int> GetMaxDepth(int moduleId)
-        {
-            var depth = await _recordTable.GetMaxDepth(new { ModuleID = moduleId });
-            return depth;
+            return await _recordTable.GetRoot(new { ModuleID = moduleId});
         }
         public async Task<IEnumerable<int>> GetAllSubRecords(List<int> pivot)
         {
@@ -49,36 +36,27 @@ namespace Pobytne.Server.Service
             }
             return result;
 		}
-        public async Task<IEnumerable<RecordAttribute>> GetAttibutesByModule(int moduleId)
+        public async Task<int> GetMaxDepth(int moduleId)
         {
-            try
-            {
-                var attributes = await _recordTable.GetAttributesByModule(moduleId);
-                return attributes;
+            return await _recordTable.GetMaxDepth(new { ModuleID = moduleId });
+        }
 
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return [];
-            }
+ 
+        public async Task<IEnumerable<RecordStock>> GetStockByRecord(int recordId)
+        {
+            return await _stockTable.GetStockByRecord(recordId);
         }
         //---------------------------- InsUpDel-------------------------------
-        public async Task<int> Update(RecordAttribute updateAttribute)
+        public async Task<RecordStock?> Insert(RecordStock insertStock)
         {
 			//SET Server time
-			updateAttribute.CreationDate = DateTime.Now;
+			insertStock.CreationDate = DateTime.Now;
 
-            return await _recordTable.Update(updateAttribute);
+            //TODO: Insert to stock table + update stock od Record
+            return null;
         }
-		public async Task<int?> Insert(RecordAttribute insertAttribute)
-		{
-            //SET Server time
-			insertAttribute.CreationDate = DateTime.Now;
 
-			return await _recordTable.Insert(insertAttribute);
-		}
-		public async Task<int> Update(Record updateRecord)//TODO: DB PROCEDURA
+		public async Task<Record?> Update(Record updateRecord)//TODO: DB PROCEDURA
         {
             //SET Server time
             updateRecord.CreationDate = DateTime.Now;
@@ -89,14 +67,20 @@ namespace Pobytne.Server.Service
                 if (dateRange.Item1.Value < updateRecord.ValidFrom || dateRange.Item2.Value > updateRecord.ValidTo)
                     throw new Exception("Záznam byl použit mimo období plastnosti. Opravte platnost záznamu!");
 
-            return await _recordTable.Update(updateRecord);
+            var rows = await _recordTable.Update(updateRecord);
+            if(rows > 0)
+                return await _recordTable.GetById(updateRecord.Id);
+            return null;
         }
-        public async Task<int?> Insert(Record insertRecord)
+        public async Task<Record?> Insert(Record insertRecord)
         {
             //SET Server time
             insertRecord.CreationDate = DateTime.Now;
 
-            return await _recordTable.Insert(insertRecord);
+            var id = await _recordTable.Insert(insertRecord);
+            if(id.HasValue)
+                return await _recordTable.GetById(id.Value);
+            return null;
         }
         public async Task<int> Delete(int id)
         {
@@ -111,18 +95,13 @@ namespace Pobytne.Server.Service
             else 
             {
                 var isDeletable = await _recordTable.IsDeletable(record.Id);
-                if (isDeletable.Any()) //Kam predavat data od tabulkach obsahujici zazmamy
-                {
-                    foreach (var e in isDeletable)
-                    {
-                        Console.WriteLine($"ERROR: While Delete {record.Name} => ID:{e.Id}, TABLE:{e.Error}");
-                    }
+                if (isDeletable.Any())
                     throw new Exception("Záznam byl již použit v systému, a proto jej není možno smazat!");
-                }
+
 
                 // if WARE and kontrolaNaZustatek and zustate>0
                 if (record.RecordType == ERecordType.Ware && record.IsBalanceCheck && record.Stock > 0)
-                    throw new Exception("Zůstatek pro položku je větší než nula.");
+                    throw new Exception("Nelze smazat naskladněný záznam.");
             }
             return await _recordTable.Delete(id);
         }

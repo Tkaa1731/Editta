@@ -12,8 +12,9 @@ namespace Pobytne.Client.Extensions.IDirectory
         List<IListItem> ItemsList { get; }
         Task OnSelect(); // EventCallback onSelect
         Task OnExpanded(); // EventCallback onExpanded
-        Task Refresh();
+        void Insert(IListItem item);
+        void Update(IListItem item);
         //Task LoadData(); //LoadData from DB
-        IListItem GetNew();// New IDirectory
+        IListItem GetNew();// New IListItem for form
     }
 }

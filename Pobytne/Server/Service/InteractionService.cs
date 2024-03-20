@@ -24,8 +24,11 @@ namespace Pobytne.Server.Service
             _recordService = recordService;
         }
 
-        public async Task<int?> Insert(Interaction interaction)
+        public async Task<int> Insert(Interaction interaction)
         {
+            //SET Server time
+            interaction.CreationDate = DateTime.Now;
+
             int result = 0;
 
             //insert Id = 0, delete = false
@@ -72,11 +75,10 @@ namespace Pobytne.Server.Service
                     }
                     tran.Commit();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     tran.Rollback();
-                    Console.WriteLine(ex.Message);
-                    return null;
+                    throw;
                 }
             }
             

@@ -6,7 +6,7 @@ namespace Pobytne.Shared.Procedural
 {
 	[Serializable]
 	[Table("S_ZaznamyVlastnosti")]
-	public class RecordAttribute : ACreation
+	public class RecordAttribute : ACreation, ICloneable
 	{
 		public int Id {  get; set; }
 		public int ModuleId { get; set; } = -1;
@@ -18,5 +18,9 @@ namespace Pobytne.Shared.Procedural
 		public string CentreNumber { get; set; } = string.Empty;
 		public string OrderNumber { get; set; } = string.Empty;
 		public string ProjectNumber { get; set; } = string.Empty;
+		public object Clone()
+		{
+			return MemberwiseClone();
+		}
 	}
 }

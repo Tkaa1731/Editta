@@ -1,6 +1,6 @@
 ﻿namespace Pobytne.Shared.Struct
 {
-    public interface IListItem
+    public interface IListItem : ICloneable
     {
         int Id { get; set; }
         string Name { get; }

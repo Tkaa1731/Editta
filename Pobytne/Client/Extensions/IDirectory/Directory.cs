@@ -5,6 +5,7 @@ using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural.DTO;
 using Pobytne.Shared.Struct;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Pobytne.Client.Extensions.IDirectory
 {
@@ -32,8 +33,8 @@ namespace Pobytne.Client.Extensions.IDirectory
 		public async Task Refresh() => await LoadData();
 		private async Task LoadData()
 		{
-			var response = await _service.GetAllAsync<License>("",-1);
-            List<License> licenses = new();
+			var response = await _service.GetAllAsync<License>(string.Empty,-1);
+            List<License> licenses = [];
 
 			if(response is null)
                 Console.WriteLine($"NO RESPONSE");
@@ -43,8 +44,7 @@ namespace Pobytne.Client.Extensions.IDirectory
 				licenses = list;
 
 			Licenses.Clear();
-			foreach (License l in licenses)
-				Licenses.Add(new LicenseDir(_service, l));
+			Licenses.AddRange(licenses.Select(l => new LicenseDir(_service, l)));
 		}
 		public async Task OnSelect()
 		{
@@ -64,6 +64,21 @@ namespace Pobytne.Client.Extensions.IDirectory
         public Task OnExpanded()
         {
             throw new NotImplementedException();
+        }
+
+        public void Insert(IListItem item)
+        {
+            if(item is License l)
+                Licenses.Add(new LicenseDir(_service, l));
+        }
+
+        public void Update(IListItem item)
+        {
+            var index = Licenses.FindIndex(i => i.Id == item.Id);
+            if (index != -1 && item is License l)
+            {
+                Licenses[index].License = l;
+            }
         }
     }
 }

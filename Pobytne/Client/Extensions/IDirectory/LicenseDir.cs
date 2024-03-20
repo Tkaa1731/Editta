@@ -20,14 +20,10 @@ namespace Pobytne.Client.Extensions.IDirectory
         }
         public License License { get; set; }
         public int Id => License.Id;
-        public List<IDirectory> Modules { get; set; }
+        public List<ModuleDir> Modules { get; set; }
         public IDirectory Users { get; set; }
-        public List<IListItem> ItemsList { 
-            get {
-                List<ModuleDir?> modules = Modules.Select(m => m as ModuleDir).ToList();
-                return modules.Select(m => m!.Module as IListItem).ToList();
-            } 
-        }
+        public List<IListItem> ItemsList  => Modules.Select(m => m!.Module as IListItem).ToList();
+        
         public List<IDirectory> SubDirectories
         {
             get
@@ -67,6 +63,21 @@ namespace Pobytne.Client.Extensions.IDirectory
         public Task OnExpanded()
         {
             throw new NotImplementedException();
+        }
+
+        public void Insert(IListItem item)
+        {
+            if(item is Module m)
+                Modules.Add(new ModuleDir(_service, m));
+        }
+
+        public void Update(IListItem item)
+        {
+            var index = Modules.FindIndex(i => i.Id == item.Id);
+            if (index != -1 && item is Module m)
+            {
+                Modules[index].Module = m;
+            }
         }
     }
 }

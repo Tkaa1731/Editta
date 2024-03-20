@@ -90,7 +90,7 @@
             else
             {   
                 int module = permition.ModuleId;
-                var response =  await service.GetAllAsync<User>($"GetRest?moduleId={module}", -1);
+                var response =  await service.GetAllAsync<User>($"?moduleId={module}", -1);
 
                 if (response is null)
                     Console.WriteLine($"NO RESPONSE");

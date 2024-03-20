@@ -48,9 +48,9 @@
 		       Trigger="TooltipTrigger.Manual"
                Html="true"
 		       Text="Copied <i class='bi bi-check'/>">
-            <HxButton Icon="BootstrapIcon.Copy" Text="Kopírovat" OnClick="OnCopy" Color="ThemeColor.Light" Spinner="false" Size="ButtonSize.Small" CssClass="mx-1"/>
+            <HxButton Icon="BootstrapIcon.Copy" Text="Kopírovat do schránky" OnClick="OnCopy" Color="ThemeColor.Light" Spinner="false" Size="ButtonSize.Small" CssClass="mx-1"/>
         </HxTooltip>
-        <HxButton Icon="BootstrapIcon.BoxArrowInDown"  Text="Vložit" OnClick="OnPaste"Color="ThemeColor.Light" Size="ButtonSize.Small" CssClass="mx-1"/>
+        <HxButton Icon="BootstrapIcon.BoxArrowInDown"  Text="Vložit ze schránky" Enabled="pasteEnable" OnClick="OnPaste"Color="ThemeColor.Light" Size="ButtonSize.Small" CssClass="mx-1"/>
     </div>
 
 <script>
@@ -85,43 +85,51 @@
     [Parameter]
     public RenderFragment? ValidationMessage { get; set; }
 
+    public const int PERMITION_LENGHT = 50;
     private static readonly int PermitionCount = Enum.GetValues(typeof(EPermition)).Length;
     private HxTooltip? copyToolTip;
     private bool keyUp = false;
+    private bool pasteEnable = false;
     private string text = string.Empty;
     private int? selected;
-    private string[] pinCodes = new string[PermitionCount];
+    private char[] pinCodes = new char[PermitionCount];
     private List<RKeyValue> permition = [];
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         int i = 0;
+        //fill permitions input
         foreach (EPermition rec in Enum.GetValues(typeof(EPermition)))
         {
             var field = rec.GetType().GetField(rec.ToString());
             var displayAttribute = (DisplayAttribute)Attribute.GetCustomAttribute(field!, typeof(DisplayAttribute))!;
             var name = displayAttribute?.Name ?? rec.ToString();
-        
+
             permition.Add(new RKeyValue(){Name = name, Id = i});
-        
+
             if ((int)rec < CurrentValue?.Length)
-                pinCodes[i] = CurrentValue[(int)rec].ToString();
+                pinCodes[i] = CurrentValue[(int)rec];
             else
-                pinCodes[i] = "0";
+                pinCodes[i] = '0';
             i ++;
         }
-        base.OnInitialized();
+        //check valid value for PASTE
+        string condition = "012";
+        var paste = await js.InvokeAsync<string>("navigator.clipboard.readText");
+        if (paste.Length == i && !paste.Where(p => !condition.Contains(p)).Any())
+            pasteEnable = true;
+        await base.OnInitializedAsync();
     }
 
     /// <summary>
     /// private fnc
     /// </summary>
     private void OnInput(int index,ChangeEventArgs e)
-  {
+    {
         string condition = "012";
         var inputValue = e.Value?.ToString() ?? "";
 
-        pinCodes[index] = (inputValue.Length == 0||condition.Contains(inputValue[0]))?inputValue:"0";
+        pinCodes[index] = (inputValue.Length == 0||condition.Contains(inputValue[0]))?inputValue[0]:'0';
         //set output permition string
         SetCurrentValue();
         //move next
@@ -151,28 +159,32 @@
     }
     private async Task OnCopy()
     {
-        await copyToolTip.ShowAsync();
-        await js.InvokeVoidAsync("navigator.clipboard.writeText", CurrentValue);
+        await copyToolTip!.ShowAsync();
+        await js.InvokeVoidAsync("navigator.clipboard.writeText", string.Join("",pinCodes));
+
+        pasteEnable = true;
+
         await Task.Delay(500);
         await copyToolTip.HideAsync();
     }
     private async Task OnPaste()
     {
-        string condition = "012";
+        // string condition = "012";
         var paste = await js.InvokeAsync<string>("navigator.clipboard.readText");
 
-        for (int i = 0; i < pinCodes.Length; i++)
-        {
-            if (paste.Length > i && condition.Contains(paste[i]))
-                pinCodes[i] = paste[i].ToString();
-            else
-                pinCodes[i] = "0";
-        }
+        pinCodes = paste.ToArray();
+        // for (int i = 0; i < pinCodes.Length; i++)
+        // {
+        //     if (paste.Length > i && condition.Contains(paste[i]))
+        //         pinCodes[i] = paste[i].ToString();
+        //     else
+        //         pinCodes[i] = "0";
+        // }
         SetCurrentValue();
     }
     private void SetCurrentValue()
     {
-        string[] output = Enumerable.Repeat("0",50).ToArray();// 50 Constant
+        char[] output = Enumerable.Repeat('0',PERMITION_LENGHT).ToArray();
 
         int i = 0;
         foreach (EPermition rec in Enum.GetValues(typeof(EPermition)))

@@ -6,7 +6,7 @@ namespace Pobytne.Shared.Procedural.DTO
 {
     [Serializable]
     [Table("S_TypyPlatby")]
-    public class Payment : ACreation
+	public class Payment :  ACreation, ICloneable
     {
         public int Id { get; set; } //IDTypuPlatby
         public string Name { get; set; } = string.Empty; //NazevDokladu
@@ -19,5 +19,10 @@ namespace Pobytne.Shared.Procedural.DTO
         public DateTime ValidFrom { get; set; } = DateTime.Now;
         [Required(ErrorMessage = "Vyplňte datum")]
         public DateTime ValidTo { get; set; } = DateTime.Now.AddYears(1);
-    }
+
+		public object Clone()
+		{
+			return MemberwiseClone();
+		}
+	}
 }

@@ -1,4 +1,5 @@
-﻿using Pobytne.Data;
+﻿using Microsoft.AspNetCore.Components;
+using Pobytne.Data;
 using Pobytne.Data.Tables;
 using Pobytne.Shared.Authentication;
 using Pobytne.Shared.Procedural.DTO;
@@ -15,7 +16,8 @@ namespace Pobytne.Server.Service
             var user = await _userTable.GetByLogin(userAccount.Name);
 
             if (user == null || user.Id <= 0) throw new Exception("Neplatné přihlašovací údaje");
-            if (!user.CheckPassword(userAccount.Password)) throw new Exception("Špatné heslo");
+            if (!user.CheckPassword(userAccount.Password)) throw new Exception("Neplatné přihlašovací údaje");//TODO:Kontrola Hashe
+            //TODO: Load user from other DB
             if (!await _licenseTable.CheckLicense(user.LicenseNumber)) throw new Exception("Neaktivní licence");
 
             UserAccount result = new(user);
@@ -23,33 +25,36 @@ namespace Pobytne.Server.Service
         }
         public async Task<IEnumerable<User>> GetUsersByLicense(int licenseNumber)
         {
-            var users = await _userTable.GetByLicense(licenseNumber);
-            return users;
+            return await _userTable.GetByLicense(licenseNumber);
         }
         public async Task<IEnumerable<User>> GetUsersExsModule(int moduleNumber)
         {
             return await  _userTable.GetByLicenseExsModule(moduleNumber);
         }
-        public async Task<User> GetUserById(int id)
+        public async Task<User?> GetUserById(int id)
         {
-            var user = await _userTable.GetById(id);
-			return user is null ? throw new Exception($"No user with id {id}.") : user;
+            return await _userTable.GetById(id);
 		}
-		public async Task<int> Update(User updateUser)
+		public async Task<User?> Update(User updateUser)
         {
-            return await _userTable.Update(updateUser);
+            //SET Server time
+            updateUser.CreationDate = DateTime.Now;
+
+            var rows =  await _userTable.Update(updateUser);
+            if(rows > 0)
+                return await GetUserById(updateUser.Id);
+            return null;
         }
-        public async Task<int?> Insert(User insertUser)
+        public async Task<User?> Insert(User insertUser)
         {
+            //SET Server time
+            insertUser.CreationDate = DateTime.Now;
+
             insertUser.Password = GeneratePassword();
-            return await _userTable.Insert(insertUser);
-        }
-        public async Task<int> Delete(int id)
-        {
-			//var errors = await _userTable.IsDeletable(id);
-			//if (errors.Any())
-			//	throw new Exception($"Pro modul {id},který se pokoušíte smazat existuje platný záznam v tabulce {errors}");
-			return await _userTable.Delete(id);
+            var id = await _userTable.Insert(insertUser);
+            if (id.HasValue)
+                return await GetUserById(id.Value);
+            return null;
         }
         private string GeneratePassword()
         {

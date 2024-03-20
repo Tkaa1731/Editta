@@ -1,5 +1,7 @@
 ﻿@page "/{idModule}/RecordSettings"
 @inject PobytneService service
+@inject IHxMessengerService Messenger
+@inject IHxMessageBoxService MessageBox
 
 <ModuleNav idModule="@idModule" PageTitle="Evidence položek"></ModuleNav>
 
@@ -18,10 +20,29 @@
                             ItemChildrenSelector="@(p => p.SubDirectories)" />
             </div>
             <div class="col-lg-9 mh-100 overflow-hidden">
-                <ListCustom ListTitle="Počet záznamů" ListItems=@listOfItems selectedItem=selectedItem selectedItemChanged=OnItemSelect EventNewItem="OnNewItem"></ListCustom>
+                <ListCustom 
+                    ListTitle="Počet záznamů" 
+                    ListItems=@listOfItems 
+                    selectedItem=selectedItem 
+                    selectedItemChanged=OnItemSelect 
+                    EventNewItem="OnNewItem">
+
+                    <MenuGridColumn>
+		                <HxContextMenuGridColumn TItem="IListItem" Context="item">
+
+			                <HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" Tooltip="Smazat" CssClass="px-3" OnClick="async()=> await OnDeleteItem(item)"/>
+                            @if(item is Record r && r.IsBalanceCheck)
+                            {
+                            <HxButton Icon="@BootstrapIcon.BagPlus" Color="ThemeColor.Link" style="color:#50a732; padding: 0px;" Tooltip="Naskladnit" CssClass="px-3" OnClick="async()=>await OnStockAdd(item)" />
+                            }
+                        </HxContextMenuGridColumn>
+	                </MenuGridColumn>
+
+                </ListCustom>
             </div>
         </div>
         <FormModal @ref=formModal formItem="formItem" OnSuccessRequest="OnSuccessRequestHandler"/>
+        
     </Authorized>
     <NotAuthorized>
         JSTE V NOACCESS MODU PRO  PRISTUP - APLICATION
@@ -37,6 +58,8 @@
     [EditorRequired]
     [Parameter]
     public string idModule { get; set; } = "-1";
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
 
     private IDirectory? selectedDirectory;
     private IListItem? selectedItem;
@@ -46,6 +69,34 @@
 
     private FormModal? formModal;
 
+
+    private async Task OnDeleteItem(IListItem deleteItem)
+    {
+        var deleteMessage = await MessageBox.ShowAsync("Smazat položku",$"Opravdu chcete smazat položku: {deleteItem.Name}", MessageBoxButtons.YesNo);
+        if (deleteMessage == MessageBoxButtons.No)
+            return;
+
+        var response = await service.DeleteAsync<Record>(deleteItem.Id, moduleWorkspace.Id);
+
+        if(response is ErrorResponse error)
+            Messenger.AddError(title: "Chyba při smazáni", message: error.ErrorMessage );
+        else
+        {
+            listOfItems?.Remove(deleteItem);
+            StateHasChanged();//UpdateTreeView
+            Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně smazán.");
+            await Task.Delay(1500);
+            Messenger.Clear();
+        }
+    }
+    private async Task OnStockAdd(IListItem item)
+    {
+        if(item is Record r && formModal is not null)
+        {
+            formItem = new RecordStock() { RecordId = r.Id};
+            await formModal.InsertForm();     
+        }
+    }
     private async Task OnSelect(IDirectory e)
     {
         this.selectedDirectory = e;
@@ -72,13 +123,15 @@
     {
         if (i is not null && formModal is not null)
         {
-            formItem = i;
+            formItem = (IListItem)i.Clone();
             await formModal.UpdateForm();
         }
         selectedItem = null;
     }
     protected override async Task OnInitializedAsync()
     {
+		moduleWorkspace.ModuleId = idModule;
+
         fileSystem.Add(
             new RecordDir(
                 service,
@@ -89,7 +142,7 @@
                         ModuleId = int.Parse(idModule),
                         RootId = 0,
                         ParentId = 0,
-                        StructDepth = -1,//!prvni rada bude 0
+                        StructDepth = -1,//!First depthLevel must be 0
                     }
             )
             {
@@ -106,13 +159,18 @@
             await formModal.InsertForm();
         }
     }
-    private async Task OnSuccessRequestHandler()
+    private async Task OnSuccessRequestHandler((IListItem,EForm) item)
     {
-        if (selectedDirectory is not null)
+        switch (item.Item2)
         {
-            await selectedDirectory.Refresh();
-            await OnSelect(selectedDirectory);
+            case EForm.Insert:
+                selectedDirectory?.Insert(item.Item1);
+                break;
+            case EForm.Update:
+                selectedDirectory?.Update(item.Item1);
+                break;
         }
+        await OnSelect(selectedDirectory!); // Update ListCustom   
         StateHasChanged();
     }
 }

@@ -7,7 +7,6 @@ using Havit.Blazor.Components.Web;
 using Microsoft.AspNetCore.Authorization;
 using Pobytne.Client.Services;
 using Microsoft.AspNetCore.Components;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using Pobytne.Client.Extensions;
 
 namespace Pobytne.Client
@@ -26,6 +25,7 @@ namespace Pobytne.Client
 			services.AddBlazoredLocalStorage();
             services.AddHxServices();
             services.AddHxMessenger();
+            services.AddHxMessageBoxHost();
             services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
             services.AddScoped<ExcelExportService>();
 			services.AddScoped<IAuthorizationHandler, PermitionRequirementHandler>();

@@ -41,5 +41,10 @@ namespace Pobytne.Shared.Procedural.DTO
         public bool Active => Valid && ValidTo >= DateTime.Now;
 
         public bool CheckPassword(string password) => Password == password;
+
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 }

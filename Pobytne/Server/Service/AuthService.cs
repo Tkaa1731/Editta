@@ -12,34 +12,21 @@ using System.Text;
 
 namespace Pobytne.Server.Service
 {
-    public class AuthService
-	{
-		private readonly UserService _userService;
-		private readonly IConfiguration _configuration;
-		private readonly IMemoryCache _memoryCache;
-		public AuthService(UserService userService, IMemoryCache memoryCache, IConfiguration configuration)
-		{
-			_userService = userService;
-			_memoryCache = memoryCache;
-			_configuration = configuration;
-		}
-		public async Task<object> Login(LoginRequest request)
-		{
-			try
-			{
-				var userAccount = await _userService.GetAccount(request);
+    public class AuthService(UserService userService, IMemoryCache memoryCache, IConfiguration configuration)
+    {
+		private readonly UserService _userService = userService;
+		private readonly IConfiguration _configuration = configuration;
+		private readonly IMemoryCache _memoryCache = memoryCache;
 
-				userAccount.Refresh = GenerateRefreshToken();
-				StoreRefreshToken(userAccount.User.Id, userAccount.Refresh);
-				GenerateJwtToken(userAccount);
-				
-				return userAccount;
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex.Message);
-				return new ErrorResponse(HttpStatusCode.Unauthorized, ex.Message);
-			}
+        public async Task<object> Login(LoginRequest request)
+		{
+			var userAccount = await _userService.GetAccount(request);
+			
+			userAccount.Refresh = GenerateRefreshToken();
+			StoreRefreshToken(userAccount.User.Id, userAccount.Refresh);
+			GenerateJwtToken(userAccount);
+			
+			return userAccount;
 		}
 		public async Task<UserAccount?> Refresh(RefreshRequest request)
 		{
@@ -70,7 +57,7 @@ namespace Pobytne.Server.Service
 			}
 			return null;
 		}
-		private static string GenerateRefreshToken()
+		private string GenerateRefreshToken()
 		{
 			byte[] randomNumber = new byte[32];
 			using RandomNumberGenerator rng = RandomNumberGenerator.Create();
@@ -102,11 +89,11 @@ namespace Pobytne.Server.Service
 			User user = userAccount.User;
 			var claimList = new List<Claim>
 				{
-					new Claim(ClaimTypes.Sid,user.Id.ToString()),
-					new Claim(ClaimTypes.Name,user.UserLogin),
-					new Claim(ClaimTypes.Email,user.Email),
-					new Claim(ClaimTypes.GivenName,user.UserName),
-					new Claim("License",user.LicenseNumber.ToString()),
+					new(ClaimTypes.Sid,user.Id.ToString()),
+					new(ClaimTypes.Name,user.UserLogin),
+					new(ClaimTypes.Email,user.Email),
+					new(ClaimTypes.GivenName,user.UserName),
+					new("License",user.LicenseNumber.ToString()),
 				};
 			//add perminition strings
 			foreach (var p in user.AccessPermition)

@@ -26,6 +26,11 @@ namespace Pobytne.Shared.Procedural.DTO
         public bool Valid { get; set; }
         [Editable(false)]
         public bool Active => Valid;
+
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 
     //other properties needed for DB insert
