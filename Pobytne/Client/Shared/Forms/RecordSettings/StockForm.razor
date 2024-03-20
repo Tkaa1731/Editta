@@ -1,0 +1,94 @@
+﻿@inject PobytneService _service
+
+@if(selected is not null)
+{
+    <div class="mb-2 text-end" style="font-size:smaller;"><b>Poslední úprava:</b> @selected.CreationUserName  @selected.CreationDate.ToShortDateString()</div>
+}
+<HxGrid @ref=stockGrid 
+    TItem="RecordStock" 
+    DataProvider="GetGridData" 
+    PageSize="5" 
+    Responsive="true"
+    SelectedDataItemChanged="(item)=> selected = item"
+    >
+    <Columns>
+        <HxGridColumn HeaderText="Id" ItemTextSelector="stock => stock.Id.ToString()" />
+        <HxGridColumn HeaderText="Počet kusů" ItemTextSelector="stock=> stock.Quantity.ToString()" />
+        <HxGridColumn HeaderText="Částka za kus" ItemTextSelector="@(stock => stock.Price.ToString("C", new CultureInfo("cs-CZ")))" />
+        <HxGridColumn HeaderText="Datum" ItemTextSelector="stock => stock.Date.ToShortDateString()" />
+    </Columns>
+    
+</HxGrid>
+<hr class="w-100"/>
+<EditForm Model="@recordStock" OnValidSubmit="OnValidSubmitHandler">
+    <DataAnnotationsValidator />
+    <div class="mx-3 mt-3">
+        <div class="row">
+            <div class="col">
+                <HxInputNumber @bind-Value="recordStock.Quantity" Label="Počet kusů"TValue="int" ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+            <div class="col">
+                <HxInputNumber @bind-Value="recordStock.Price" Label="Nákupní cena" TValue="float" Decimals="2" ValidationMessageMode="ValidationMessageMode.Regular" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="recordStock.Date" Label="Datum naskladnění" ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+            <div class="col"/>
+        </div>
+    </div>
+    <div class="d-grid gap-2">
+        <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+    </div>
+ 
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
+    [Parameter]
+    [EditorRequired]
+    public RecordStock recordStock { get; set; } = new();
+    [Parameter]
+    [EditorRequired]
+    public EForm formType { get; set; }
+    [Parameter]
+    [EditorRequired]
+    public EventCallback<EForm> OnValidSubmit{ get; set; }
+    private HxGrid<RecordStock> stockGrid = default!;
+    private RecordStock selected = default!;
+    private string ButtonText
+    {
+        get
+        {
+            if (formType == EForm.Insert) return "Vložit";
+            return "Aktualizovat";
+        }
+    }
+    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
+    protected async override Task OnParametersSetAsync()
+    {
+        if(stockGrid is not null)
+            await stockGrid.RefreshDataAsync();
+        await base.OnParametersSetAsync();
+    }
+    private async Task<GridDataProviderResult<RecordStock>> GetGridData(GridDataProviderRequest<RecordStock> request)
+    {
+        var response = await _service.GetAllAsync<RecordStock>($"?recordId={recordStock.RecordId}", moduleWorkspace.Id);
+
+        List<RecordStock> stockList = [];
+        if (response is null)
+            Console.WriteLine($"NO RESPONSE");
+        else if (response is ErrorResponse response1)
+            Console.WriteLine($"{response1.ErrorMessage}");
+        else if (response is List<RecordStock> list)
+            stockList.AddRange(list);
+
+        return new GridDataProviderResult<RecordStock>()
+                {
+                    Data = stockList.Skip(request.StartIndex).Take(request.Count??int.MaxValue),
+                    TotalCount = stockList.Count
+                };
+    }
+}

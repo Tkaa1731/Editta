@@ -29,7 +29,7 @@ namespace Pobytne.Data.Tables
                 return user;
             }
         }
-        public async Task<User?> GetById(int idLogin)
+        public async Task<User> GetById(int idLogin)
         {
             using (IDbConnection cnn = Database.CreateConnection())
             {
@@ -39,8 +39,8 @@ namespace Pobytne.Data.Tables
                                where u.IDLogin = @IDLogin;";
 
                 var conditions = new { IDLogin = idLogin };
-                var users = await cnn.QueryAsync<User>(sql, conditions);
-                return users.FirstOrDefault();
+
+                return await cnn.QueryFirstAsync<User>(sql, conditions);
             }
         }
         public async Task<IEnumerable<User>> GetByLicense(int license)
@@ -84,11 +84,6 @@ namespace Pobytne.Data.Tables
         {
             using IDbConnection cnn = Database.CreateConnection();
             return await cnn.UpdateAsync(user);
-        }
-        public async Task<int> Delete(int id)
-        {
-            using IDbConnection cnn = Database.CreateConnection();
-            return await cnn.DeleteAsync(id);
         }
     }
 }

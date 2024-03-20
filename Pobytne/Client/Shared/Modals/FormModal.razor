@@ -26,6 +26,9 @@
                 break;
             case Record record:
                 <RecordTabPanelForm record="record" formType="formType" OnValidSubmit="Request"/>
+                break;            
+            case RecordStock recordStock:
+                <StockForm recordStock="recordStock" formType="formType" OnValidSubmit="Request"/>
                 break;
         }
     </BodyTemplate>
@@ -37,7 +40,7 @@
     private ModuleWorkplace moduleWorkspace { get; set; } = default!;
 
     [Parameter]
-    public EventCallback OnSuccessRequest{ get; set; }
+    public EventCallback<(IListItem,EForm)> OnSuccessRequest{ get; set; }
     [Parameter]
     [EditorRequired]
     public required IListItem formItem{ get; set; }
@@ -47,13 +50,11 @@
 
     public async Task UpdateForm()
     {
-        var t = formItem;
         formType = EForm.Update;
         await myModal.ShowAsync();
     }
     public async Task InsertForm()
     {
-        var t = formItem;
         formType = EForm.Insert;
         await myModal.ShowAsync();
     }
@@ -61,7 +62,6 @@
     {
         Messenger.Clear();
     }
-
     private async Task  CompleteReq<T>(EForm e,T obj)
     {
         object? response = null;
@@ -70,24 +70,22 @@
         else if(e == EForm.Insert)
             response = await service.InsertAsync(obj, moduleWorkspace.Id);
 
+        if(response is IListItem newItem)
+        {
+            Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně uložen.");
 
-        if (response is null || response is ErrorResponse)
+            if(newItem is not RecordStock)
+                await OnSuccessRequest.InvokeAsync((newItem,e));  // Set new values
+
+            await Task.Delay(1500);
+            await myModal.HideAsync();
+        }
+        else
         {
             var errorText = "Vyskytla se neočekávaná chyba";
             if (response is ErrorResponse error)
                 errorText = error.ErrorMessage;
             Messenger.AddError(title: "Chyba při ukladani", message: errorText );
-        }
-        else
-        {
-            Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně uložen.");
-
-            await OnSuccessRequest.InvokeAsync();  
-
-            await Task.Delay(1000);
-            await myModal.HideAsync();
-            
-            //TODO: Set parameter only if request is success
         }
     }
     private async Task Request(EForm request)
@@ -118,14 +116,13 @@
                 case Record record:
                     await CompleteReq(request, record);
                     break;
+                case RecordStock recordStock:
+                    await CompleteReq(request, recordStock);
+                    break;
                 default:
                     Messenger.AddError(title: "Chyba při ukladani", message: "Neexistujici formular");
                     break;
             }
-
-            // await Task.Delay(1000);
-
-            // await myModal.HideAsync();
         }
     }
 }

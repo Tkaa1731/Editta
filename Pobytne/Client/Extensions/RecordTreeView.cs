@@ -29,7 +29,7 @@ namespace Pobytne.Client.Extensions
 		}
 		public async Task LoadData()
 		{
-			var response = await _service.GetAllAsync<Record>($"RecordsBranch?parentId={Record.Id}", Record.ModuleId);
+			var response = await _service.GetAllAsync<Record>($"?parentId={Record.Id}", Record.ModuleId);
 
 			if (response is null)
 				Console.WriteLine($"NO RESPONSE");

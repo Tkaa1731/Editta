@@ -51,9 +51,13 @@ namespace Pobytne.Shared.Procedural
         public DateTime ValidTo { get; set; } = DateTime.Now.AddYears(1);
         // ---------------IListItem
         [Editable(false)]
-        public string Description => Note;
+        public string Description => (IsBalanceCheck)?$"Sklad: {Stock}":Note;
         [Editable(false)]
         public bool Active => ValidTo >= DateTime.Now;
 
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 }

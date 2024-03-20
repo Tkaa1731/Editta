@@ -13,8 +13,10 @@ namespace Pobytne.Shared.Procedural.DTO
         [Editable(false)]
         public int Id { get; set; }
         [Required(ErrorMessage = "Vyplňte název modulu")]
+        [MaxLength(50)]
         public string ModuleName { get; set; } = string.Empty;
         [Required(ErrorMessage = "Vyplňte zkrácený název")]
+        [MaxLength(15)]
         public string ModuleShortName { get; set; } = string.Empty;
         public int LicenseNumber { get; set; }
         public EEvidenceType EvidenceType { get; set; } = EEvidenceType.Basic;
@@ -26,5 +28,10 @@ namespace Pobytne.Shared.Procedural.DTO
         public string Description => $"Typ evidence: {EvidenceType}";
         [Editable(false)]
         public bool Active => true;
+
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 }

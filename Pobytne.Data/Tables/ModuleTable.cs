@@ -63,10 +63,15 @@ namespace Pobytne.Data.Tables
 		{
 			using IDbConnection cnn = Database.CreateConnection();
 			var sql = @"SELECT * FROM (
-                        --SELECT 4 as Id, 'PohybyPokladna' as Error FROM P_PohybyPokladna p WHERE p.M = @ID UNION
                         SELECT 5 as Id, 'Opravneni' as Error FROM S_Opravneni WHERE IDModulu = @ID UNION
-                        SELECT 9 as Id, 'Klienti' as Error FROM S_Uzivatele WHERE IDModulu = @ID UNION  
-                        SELECT 10 as Id, 'Zaznamy' as Error FROM S_Zaznamy  WHERE IDModulu = @ID UNION
+                        SELECT 9 as Id, 'Uzivatele' as Error FROM S_Uzivatele WHERE IDModulu = @ID UNION
+                        SELECT 29 as Id, 'Dohody' as Error FROM P_Dohoda WHERE IDModulu = @ID UNION  
+                        SELECT 37 as Id, 'Další jevy' as Error FROM S_DalsiJevy WHERE IDModulu = @ID UNION  
+                        SELECT 10 as Id, 'Záznamy' as Error FROM S_Zaznamy  WHERE IDModulu = @ID UNION                        
+                        SELECT 10 as Id, 'Struktura záznamu' as Error FROM S_StrukturaZaznamu  WHERE IDModulu = @ID UNION                        
+						SELECT 6 as Id, 'Vlastnosti záznamu' as Error FROM S_ZaznamyVlastnosti  WHERE IDModulu = @ID UNION
+						SELECT 38 as Id, 'Změna záznamu' as Error FROM S_ZmenaZaznamu  WHERE IDModulu = @ID UNION
+						SELECT 7 as Id, 'Typ platby' as Error FROM S_TypyPlatby WHERE IDModulu = @ID UNION
                         SELECT 14 as Id, 'Interakce' as Error FROM P_Interakce  WHERE IDModulu = @ID
 						) as ByloPouzito;";
 			var conditions = new { ID = id };

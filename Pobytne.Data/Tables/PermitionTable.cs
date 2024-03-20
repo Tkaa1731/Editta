@@ -33,18 +33,22 @@ namespace Pobytne.Data.Tables
                 return await cnn.QueryAsync<Permition>(sql, condition);
             }
         }
-        public async Task<int> InsUpTran(DynamicParameters param)
-		{
-			string cashRegisterSQL = "p_sp_Opravneni_InsUp";
-			using IDbConnection cnn = Database.CreateConnection();
-			int success = await cnn.ExecuteAsync(cashRegisterSQL, param, commandType: CommandType.StoredProcedure);
+        public async Task<Permition> GetById(int permitionId)
+        {
+            using (IDbConnection cnn = Database.CreateConnection())
+            {
+                string sql = @"SELECT m.Nazev AS ModuleName,o.*,l.JmenoUser AS CreationUserName, u.JmenoUser AS UserName
+                                from S_Opravneni o
+                                JOIN S_Moduly m ON m.IDModulu = o.IDModulu
+                                JOIN S_LoginUser u ON u.IDLogin = o.IDLogin 
+                                JOIN S_LoginUser l ON l.IDLogin = o.Kdo
+                                WHERE o.IDOpravneni = @IDOpravneni;";
+                var condition = new { IDOpravneni = permitionId };
 
-			if (success == 1)
-				return 1;
-
-			throw new Exception($"Failed 'p_sp_Opravneni_InsUp' {success}");
-		}
-		public async Task<int?> Insert(Permition item)
+                return await cnn.QueryFirstAsync<Permition>(sql, condition);
+            }
+        }
+        public async Task<int?> Insert(Permition item)
         {
             using IDbConnection cnn = Database.CreateConnection();
             return await cnn.InsertAsync(item);

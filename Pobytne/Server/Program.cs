@@ -59,6 +59,7 @@ namespace Pobytne
 			builder.Services.AddScoped<PermitionService>();
             builder.Services.AddScoped<ClientService>();
             builder.Services.AddScoped<RecordService>();
+            builder.Services.AddScoped<RecordAttributeService>();
             builder.Services.AddScoped<InteractionService>();
             builder.Services.AddScoped<PaymentService>();
             builder.Services.AddScoped<AuthService>();
@@ -70,6 +71,8 @@ namespace Pobytne
             builder.Services.AddScoped<PermitionTable>();
             builder.Services.AddScoped<ClientTable>();
             builder.Services.AddScoped<RecordTable>();
+            builder.Services.AddScoped<RecordAttributeTable>();
+            builder.Services.AddScoped<RecordStockTable>();
             builder.Services.AddScoped<InteractionTable>();
             builder.Services.AddScoped<EvidenceTable>();
             builder.Services.AddScoped<CashRegisterTable>();

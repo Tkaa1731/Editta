@@ -133,7 +133,7 @@
         moduleWorkspace.ModuleId = idModule;
         //update moduleWorkspace
 
-        var depth = await _service.GetCountAsync<Record>($"RecordsMaxDepth?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
+        var depth = await _service.GetCountAsync<Record>($"Depth?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
         if (ServiceRequest<int>(depth) && depth is int d)
         {
             maxDepth = d+1;
@@ -141,7 +141,7 @@
             for (int i = 0; i < maxDepth; i++)
                 records[i] = new();
 
-            var root = await _service.GetAllAsync<Record>($"RecordsRoot?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
+            var root = await _service.GetAllAsync<Record>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
             if (ServiceRequest<List<Record>>(root) && root is List<Record> r)
             {
                 List<RecordTreeView> rootTV = [];
