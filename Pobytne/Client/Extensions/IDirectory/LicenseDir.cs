@@ -79,5 +79,14 @@ namespace Pobytne.Client.Extensions.IDirectory
                 Modules[index].Module = m;
             }
         }
+
+        public void Delete(IListItem item)
+        {
+            var index = Modules.FindIndex(i => i.Id == item.Id);
+            if (index != -1 && item is Module m)
+            {
+                Modules.RemoveAt(index);
+            }
+        }
     }
 }

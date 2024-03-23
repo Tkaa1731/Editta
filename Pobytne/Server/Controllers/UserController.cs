@@ -25,7 +25,7 @@ namespace Pobytne.Server.Controllers
 
         [HttpGet]
         [PermissionAuthorize(permition, EAccess.ReadOnly)]
-        public async Task<IActionResult> Get([FromQuery]int licenseNumber = -1, [FromQuery] int moduleId = -1)
+        public async Task<IActionResult> Get([FromQuery]int licenseNumber = -1, [FromQuery] int moduleId = -1, [FromQuery] string filterJSON = "")
         {
             try
             {
@@ -45,6 +45,13 @@ namespace Pobytne.Server.Controllers
             {
                 return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
             }
+        }
+        [HttpGet]
+        [PermissionAuthorize(permition, EAccess.ReadOnly)]
+        [Route("Count")]
+        public async Task<IActionResult> GetCount([FromBody] LazyList lazyValues, [FromQuery] int licenseNumber)
+        {
+            throw new NotImplementedException();
         }
 
         [HttpGet("{id}")]

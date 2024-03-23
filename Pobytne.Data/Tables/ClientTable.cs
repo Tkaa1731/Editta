@@ -71,7 +71,7 @@ namespace Pobytne.Data.Tables
 		{
 			using IDbConnection cnn = Database.CreateConnection();
 			var sql = @"SELECT * FROM (
-                        SELECT 12 as Id, 'PohybyPokladna' as Error FROM P_PohybyPokladna WHERE IDUzivatele = @ID UNION  
+                        SELECT 12 as Id, 'Dohody osoby' as Error FROM P_DohodaOsoba WHERE IDUzivatele = @ID UNION  
                         SELECT 15 as Id, 'Permanentky' as Error FROM P_Permanentka WHERE IDUzivatele = @ID UNION  
                         SELECT 14 as Id, 'Interakce' as Error FROM P_Interakce  WHERE IDUzivatele = @ID
 						) as ByloPouzito;";

@@ -154,8 +154,10 @@
             Messenger.AddError(title: "Chyba při smazáni", message: error.ErrorMessage );
         else
         {
-            listOfItems?.Remove(deleteItem);
+            selectedDirectory!.Delete(deleteItem);
+            await OnSelect(selectedDirectory!);// Update ListCustom   
             StateHasChanged();//Update TreeView
+
             Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně smazán.");
             await Task.Delay(1500);
             Messenger.Clear();

@@ -13,15 +13,19 @@ namespace Pobytne.Shared.Procedural.DTO
         [Editable(false)]
         public int Id { get; set; }
         [Required(ErrorMessage = "Vyplňte login")]
+		[MaxLength(35)]
         public string UserLogin { get; set; } = string.Empty;
         [Required(ErrorMessage = "Vyplňte jméno")]
+		[MaxLength(35)]
         public string UserName { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public bool PasswordIsInicial { get; set; } = false;
         public int LicenseNumber { get; set; }
         [EmailAddress(ErrorMessage ="Vyplňte korektní email")]
+		[MaxLength(50)]
         public string Email { get; set; } = string.Empty;
         [Phone(ErrorMessage = "Vyplňte korektní telefonní číslo")]
+		[MaxLength(35)]
         public string PhoneNumber { get; set; } = string.Empty;
         public int ClientId { get; set; } = 0;
         public bool Valid { get; set; } = true;

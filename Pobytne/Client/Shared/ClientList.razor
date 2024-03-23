@@ -7,7 +7,8 @@
 	ListItems="AllClients" 
 	selectedItemChanged="OnItemSelect" 
 	EventNewItem="OnNewItem" 
-	selectedItem="Value" 
+	selectedItem="Value"
+	PageSize="PageSize"
 	Editable="Editable">
 
 	<MenuGridColumn>
@@ -31,6 +32,9 @@
 	public IListItem? Value { get; set; }
 	[Parameter]
 	public EventCallback<IListItem?> ValueChanged { get; set; }
+	[Parameter]
+    public int PageSize { get; set; } = 10;
+
 	private IListItem itemForm = default!;
 
 	private List<IListItem> AllClients = [];
@@ -102,8 +106,8 @@
         {
             AllClients?.Remove(deleteItem);
             Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně smazán.");
+			await Task.Delay(1500);
+			Messenger.Clear();
         }
-        await Task.Delay(1500);
-        Messenger.Clear();
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Pobytne.Shared.Authentication;
 using Pobytne.Shared.Extensions;
+using Pobytne.Shared.Struct;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -12,7 +13,6 @@ namespace Pobytne.Client.Services
 {
     public class PobytneService(HttpClient httpClient, ILocalStorageService localStorage, IServiceProvider serviceProvider)
     {
-
         private readonly HttpClient _httpClient = httpClient;
         private readonly ILocalStorageService _storageService = localStorage;
 		private readonly IServiceProvider serviceProvider = serviceProvider;
@@ -69,8 +69,13 @@ namespace Pobytne.Client.Services
             return result;
         }
 
-        public async Task<object?> GetAllAsync<T>(string requestUri, int ModuleId)
+        public async Task<object?> GetAllAsync<T>(string requestUri, int ModuleId, LazyList? filter = null)
         {
+            if (filter is not null)
+            {
+                string filterJSON = JsonConvert.SerializeObject(filter);
+                requestUri += $"?filterJSON={filterJSON}";
+            }
             var request = $"/{GetControler(typeof(T))}/{requestUri}";
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, request);
 
@@ -78,7 +83,6 @@ namespace Pobytne.Client.Services
 
             return await SendAsyncAuthorizedHandler<IEnumerable<T>>(requestMessage);
         }
-
         public async Task<object?> GetByIdAsync<T>(int Id, int ModuleId)
         {
             var request = $"/{GetControler(typeof(T))}/{Id}";
@@ -88,26 +92,20 @@ namespace Pobytne.Client.Services
 
             return await SendAsyncAuthorizedHandler<T>(requestMessage);
         }
-        public async Task<object?> GetCountAsync<T>(string requestUri, int ModuleId)
+
+        public async Task<object?> GetCountAsync<T>(string requestUri, int ModuleId, LazyList? filter = null)
         {
-            var request = $"/{GetControler(typeof(T))}/{requestUri}";
+            if (filter is not null)
+            {
+                string filterJSON = JsonConvert.SerializeObject(filter);
+                requestUri += $"?filterJSON={filterJSON}";
+            }
+            var request = $"/{GetControler(typeof(T))}/Count{requestUri}";
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, request);
 
             await UpdateHeader(ModuleId);
 
             return await SendAsyncAuthorizedHandler<int>(requestMessage);
-		}
-		public async Task<object?> GetFilteredReports<T,P>(T obj, int ModuleId)
-		{
-			var request = $"/{GetControler(typeof(P))}/Filter";
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, request);
-
-            var jsonContent = JsonConvert.SerializeObject(obj);
-            requestMessage.Content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-            await UpdateHeader(ModuleId);
-
-            return await SendAsyncAuthorizedHandler<P>(requestMessage);
         }
 		public async Task<object?> InsertAsync<T>(T obj, int ModuleId)
         {

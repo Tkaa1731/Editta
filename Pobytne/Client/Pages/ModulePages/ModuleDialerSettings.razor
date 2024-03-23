@@ -5,16 +5,15 @@
 
 <ModuleNav idModule="@idModule" PageTitle="Číselník"></ModuleNav>
 
-<div class="w-100 h-100">
 
 	<HxTabPanel NavVariant="NavVariant.Pills" InitialActiveTabId="@dialerName" CssClass="card floating-card w-25 ms-4 mt-4 p-4 position-fixed" RenderMode="TabPanelRenderMode.ActiveTabOnly">
-		<HxTab Title="Číselník typu plateb" TitleCssClass="mb-3" Id="PaymentDialer" ContentCssClass="h-100">
+		<HxTab Title="Číselník typu plateb" TitleCssClass="mb-3" Id="PaymentDialer">
 			<Content>
-				<div class="d-flex h-100">
+				<div class="d-flex">
 
 					<div class="col">
-						<div class="h-25 my-4" />
-						<div class="card floating-card p-3 h-auto me-4 ">
+						<div class="my-4" style="height:25vh;"/>
+						<div class="card floating-card p-3 me-4 ">
 							<PaymentForm formType="paymentFormType" payment="paymentForm" Enabled=@(paymentForm.ModuleId > 0)  OnValidSubmit="(args) => Request(args.Item1,args.Item2)"/>
 						</div>
 					</div>
@@ -32,10 +31,9 @@
 								DataProvider="async(request)=>{if(!paymentList.Any()){paymentList = await LoadData<Payment>(); StateHasChanged();} return request.ApplyTo(paymentList);}" 
 								Responsive="true" 
 								SelectedDataItemChanged="(item)=>{paymentForm = (Payment)item.Clone(); paymentFormType = EForm.Update;}" 
-								TableContainerCssClass="scrollable-table-container" 
-								ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
+								ContentNavigationMode="GridContentNavigationMode.Pagination"
 								HeaderRowCssClass="sticky-top"
-								ItemRowHeight="20">
+								PageSize="15">
 								<Columns>
 									<HxGridColumn HeaderText="Id" ItemTextSelector="payment => payment.Id.ToString()" />
 									<HxGridColumn HeaderText="Název dokladu" ItemTextSelector="payment => payment.Name" />
@@ -53,12 +51,12 @@
 				</div>
 			</Content>
 		</HxTab>
-		<HxTab Title="Číselník vlastnosti záznamů" Id="ConstantDialer"  ContentCssClass="h-100">
+		<HxTab Title="Číselník vlastnosti záznamů" Id="ConstantDialer">
 			<Content>
-				<div class="d-flex h-100">
+				<div class="d-flex">
 					<div class="col">
-							<div class="h-25 my-4" />
-							<div class="card floating-card p-3 h-auto me-4">
+							<div class="my-4" style="height:25vh;" />
+							<div class="card floating-card p-3 me-4">
 								<RecordAttributeForm formType="attributeFormType"  recAttribute="attributeForm" Enabled=@(attributeForm.ModuleId > 0) OnValidSubmit="(args) => Request(args.Item1,args.Item2)" />
 							</div>
 					</div>
@@ -75,10 +73,9 @@
 								DataProvider="async(request)=>{if(!attributeList.Any()){attributeList = await LoadData<RecordAttribute>(); StateHasChanged();} return request.ApplyTo(attributeList);}" 
 								Responsive="true" 
 								SelectedDataItemChanged="(item)=>{attributeForm = (RecordAttribute)item.Clone(); attributeFormType = EForm.Update;}" 
-								TableContainerCssClass="scrollable-table-container" 
-								ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
+								ContentNavigationMode="GridContentNavigationMode.Pagination"
 								HeaderRowCssClass="sticky-top"
-								ItemRowHeight="20">
+								PageSize="15">
 								<Columns>
 									<HxGridColumn HeaderText="Id" ItemTextSelector="attribute => attribute.Id.ToString()" />
 									<HxGridColumn HeaderText="Název vlastnosti" ItemTextSelector="attribute => attribute.Name" />
@@ -98,15 +95,10 @@
 			</Content>
 		</HxTab>
 	</HxTabPanel>
-</div>
+
 <style>
 	.tab-content{
 		height: 100% !important;
-	}
-
-	.scrollable-table-container {
-		max-height: 80svh;
-		overflow: auto;
 	}
 </style>
 @code {

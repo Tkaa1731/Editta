@@ -130,7 +130,7 @@ namespace Pobytne.Data.Tables
 						if (await tran.ExecuteAsync(sql, conditions) == 1)
 						{
 							tran.Commit();
-							return 2;
+							return insertId;
 						}
 					}
 					tran.Rollback();

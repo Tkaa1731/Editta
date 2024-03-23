@@ -1,4 +1,4 @@
-﻿@inject IJSRuntime js
+﻿@inject PobytneService _service
 <HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card">
         <TitleTemplate>
             @ListTitle <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@ListItems?.Count</HxBadge>
@@ -20,10 +20,9 @@
             DataProvider="LoadDataItems" 
             SelectedDataItemChanged="HandleSelectedDataItemChanged"
             SelectedDataItem="selectedItem" 
-            ContentNavigationMode="GridContentNavigationMode.InfiniteScroll" 
-            TableContainerCssClass="scrollable-table-container"
+            ContentNavigationMode="GridContentNavigationMode.Pagination"
             HeaderRowCssClass="sticky-top"
-            ItemRowHeight="20">
+            PageSize="PageSize">
             <Columns>
                 <HxGridColumn HeaderText="Id" ItemTextSelector="@(item => item.Id.ToString())" IsDefaultSortColumn=false/>
                 <HxGridColumn HeaderText="Název" ItemTextSelector="@(item => item.Name)" />
@@ -66,6 +65,8 @@
     [Parameter]
     public bool Editable { get; set; } = true;
     [Parameter]
+    public int PageSize { get; set; } = 15;
+    [Parameter]
     public bool LazyLoading { get; set; } = false;
     [Parameter]
     public EventCallback<(int,int)> LoadMore { get; set; }
@@ -95,22 +96,19 @@
 
     protected async override Task OnParametersSetAsync()
     {
-        base.OnParametersSet();
         await gridComponent.RefreshDataAsync();
+        await base.OnParametersSetAsync();
     }
 
     private async Task HandleSelectedDataItemChanged(IListItem selection)
     {
         selectedItem = selection;
         await selectedItemChanged.InvokeAsync(selectedItem);
-        // await dataItemEditComponent.ShowAsync();
     }
 
 
-    private async Task NewItemClicked()// async
+    private async Task NewItemClicked()
     {
-        //currentItem = new();
-        // await dataItemEditComponent.ShowAsync();
         await EventNewItem.InvokeAsync();
     }
 }

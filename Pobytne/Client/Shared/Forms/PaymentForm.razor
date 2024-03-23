@@ -6,7 +6,7 @@
 		<div class="mx-3 mt-3">
 			<div class="row">
 				<div class="col">
-                <HxInputText @bind-Value="payment.Name" Label="Název dokladu" Type="InputType.Text" Enabled="Enabled" ValidationMessageMode="ValidationMessageMode.Regular" />
+                    <HxInputText @bind-Value="payment.Name" Label="Název dokladu" Type="InputType.Text" Enabled="Enabled" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular" />
 				</div>
 				<div class="col">
                     <HxSelect TItem="RKeyValue"
@@ -21,7 +21,7 @@
 			</div>
 			<div class="row">
 				<div class="col">
-                    <HxInputText @bind-Value="payment.InvoicePrefix" Label="Prefix dokladu" Enabled="Enabled" ValidationMessageMode="ValidationMessageMode.Regular" />
+                    <HxInputText @bind-Value="payment.InvoicePrefix" Label="Prefix dokladu" Enabled="Enabled" MaxLength=10 ValidationMessageMode="ValidationMessageMode.Regular" />
 				</div>
                 <div class="col"/>
 				<div class="col">
@@ -42,7 +42,7 @@
             }
         </div>
 
-        <div class="d-grid gap-2">
+        <div class="d-grid gap-2 mt-3">
             <HxSubmit Color="ThemeColor.Success" Enabled="Enabled">@ButtonText</HxSubmit>
         </div>
 

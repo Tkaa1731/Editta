@@ -1,6 +1,8 @@
-﻿namespace Pobytne.Shared.Procedural
+﻿using Pobytne.Shared.Struct;
+
+namespace Pobytne.Shared.Procedural
 {
-    public class SeasonTicket : Record
+    public class SeasonTicket : ACreation
     {
         public int SeasonTicketId {  get; set; }
     }

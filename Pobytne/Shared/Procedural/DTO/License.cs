@@ -16,8 +16,10 @@ namespace Pobytne.Shared.Procedural.DTO
         [Range(1000_0000, 9999_9999, ErrorMessage = "Vyplňte osmimístné číslo")]
         public int ICO { get; set; }
         [Required(ErrorMessage = "Vyplňte název organizace")]
+		[MaxLength(50)]
         public string NameOfOrganization { get; set; } = string.Empty;
         [Required(ErrorMessage = "Vyplňte kontaktní osobu")]
+		[MaxLength(35)]
         public string ContactPerson { get; set; } = string.Empty;
         [Required(ErrorMessage = "Vyplňte typ verze")]
         public int VersionType { get; set; }
@@ -28,16 +30,21 @@ namespace Pobytne.Shared.Procedural.DTO
         public DateTime DateOfLaunch { get; set; } = DateTime.Now;
         public DateTime DateOfPayment { get; set; } = SqlDateTime.MinValue.Value;
         [Required(ErrorMessage = "Vyplňte město")]
+		[MaxLength(50)]
         public string City { get; set; } = string.Empty;
         [Required(ErrorMessage = "Vyplňte ulici")]
+		[MaxLength(50)]
         public string Street { get; set; } = string.Empty;
         [Required(ErrorMessage = "Vyplňte PSČ")]
+		[MaxLength(10)]
         public string PostNumber { get; set; } = string.Empty;
         [Required]
         [EmailAddress(ErrorMessage = "Vyplňte validní email")]
+		[MaxLength(50)]
         public string Email { get; set; } = string.Empty;
         [Required]
         [Phone(ErrorMessage = "Vyplňte validní telefonní číslo")]
+		[MaxLength(35)]
         public string PhoneNumber { get; set; } = string.Empty;
         [Required(ErrorMessage = "Vyplňte datum")]
         public DateTime ValidFrom { get; set; } = DateTime.Now;

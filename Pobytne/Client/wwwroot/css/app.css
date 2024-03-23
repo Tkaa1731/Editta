@@ -4,7 +4,6 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 body {
-    overflow-y: hidden;
     background-color: #f9fafd !important;
 }
 h1:focus {
@@ -149,4 +148,10 @@ a.no-link {
 }
 .bg-orange {
     background-color: #f5c75d !important;
+}
+div.mh-max{
+    max-height: calc(100vh - 6.5rem);
+}
+div.h-max {
+    height: calc(100vh - 6.5rem);
 }

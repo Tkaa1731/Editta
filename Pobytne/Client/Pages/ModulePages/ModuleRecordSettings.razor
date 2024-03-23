@@ -8,18 +8,18 @@
 <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Record,EAccess.ReadOnly,idModule)>
     <Authorized>
 
-        <div class="row h-100">
-            <div class="col-lg-3 mh-100 overflow-hidden">
+        <div class="row">
+            <div class="col-lg-3 h-max">
                 <HxTreeView TItem="IDirectory"
                             SelectedItemChanged="OnSelect"
                             OnItemExpanded="OnExpanded"
                             Items="@fileSystem"
-                            CssClass="p-3 card floating-card h-auto"
+                            CssClass="p-3 card floating-card mh-100 h-auto"
                             ItemTitleSelector="@(p => p.Name)"
                             ItemIconSelector="@(p => p.Icon)"
                             ItemChildrenSelector="@(p => p.SubDirectories)" />
             </div>
-            <div class="col-lg-9 mh-100 overflow-hidden">
+            <div class="col-lg-9">
                 <ListCustom 
                     ListTitle="Počet záznamů" 
                     ListItems=@listOfItems 
@@ -48,12 +48,6 @@
         JSTE V NOACCESS MODU PRO  PRISTUP - APLICATION
     </NotAuthorized>
 </AuthorizeView>
-<style>
-    .scrollable-table-container {
-		max-height: 70svh;
-		overflow: auto;
-	}
-</style>
 @code {
     [EditorRequired]
     [Parameter]
@@ -82,8 +76,10 @@
             Messenger.AddError(title: "Chyba při smazáni", message: error.ErrorMessage );
         else
         {
-            listOfItems?.Remove(deleteItem);
-            StateHasChanged();//UpdateTreeView
+            selectedDirectory!.Delete(deleteItem);
+            await OnSelect(selectedDirectory!);// Update ListCustom   
+            StateHasChanged();//Update TreeView
+
             Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně smazán.");
             await Task.Delay(1500);
             Messenger.Clear();
