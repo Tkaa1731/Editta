@@ -80,5 +80,14 @@ namespace Pobytne.Client.Extensions.IDirectory
                 Licenses[index].License = l;
             }
         }
+
+        public void Delete(IListItem item)
+        {
+            var index = Licenses.FindIndex(i => i.Id == item.Id);
+            if (index != -1 && item is License)
+            {
+                Licenses.RemoveAt(index);
+            }
+        }
     }
 }

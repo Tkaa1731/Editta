@@ -62,5 +62,10 @@ namespace Pobytne.Client.Extensions.IDirectory
                 ItemsList[index] = item;
             }
         }
+
+        public void Delete(IListItem item)
+        {
+            ItemsList.Remove(item);
+        }
     }
 }

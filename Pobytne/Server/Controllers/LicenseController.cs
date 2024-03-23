@@ -19,7 +19,7 @@ namespace Pobytne.Server.Controllers
 
 		[HttpGet]
         [PermissionAuthorize(permition, EAccess.ReadOnly)]
-		public async Task<IActionResult> Get()
+		public async Task<IActionResult> Get([FromQuery] string filterJSON = "")
 		{
             try
             {

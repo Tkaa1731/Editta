@@ -5,7 +5,7 @@
         <div class="mx-3">
             <div class="row">
                 <div class="col-7">
-                    <HxInputText @bind-Value="license.NameOfOrganization" Label="Název organizace" Type="InputType.Text" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                    <HxInputText @bind-Value="license.NameOfOrganization" Label="Název organizace" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
                 <div class="col">
                     <HxInputNumber Label="ICO" Decimals="0" TValue="int" @bind-Value="license.ICO" @oninput="ICOChangedHandler" Enabled="formType == EForm.Insert" InputMode="InputMode.Decimal"  />
@@ -39,26 +39,26 @@
             <hr style="height: 2px;color: #999;">
             <div class="row">
                 <div class="col">
-                    <HxInputText @bind-Value="license.ContactPerson" Label="Jméno kontaktní osoby" Type="InputType.Text" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                    <HxInputText @bind-Value="license.ContactPerson" Label="Jméno kontaktní osoby" Type="InputType.Text" MaxLength=35 ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
             </div>
             <div class="row">
                 <div class="col-7">
-                    <HxInputText @bind-Value="license.Email" Label="Email" Type="InputType.Email" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                    <HxInputText @bind-Value="license.Email" Label="Email" Type="InputType.Email" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
                 <div class="col">
-                    <HxInputText @bind-Value="license.PhoneNumber" Label="Telefonní číslo" Type="InputType.Tel" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                    <HxInputText @bind-Value="license.PhoneNumber" Label="Telefonní číslo" Type="InputType.Tel" MaxLength=35 ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
-                    <HxInputText @bind-Value="license.City" Label="Obec" Type="InputType.Text" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                    <HxInputText @bind-Value="license.City" Label="Obec" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
                 <div class="col">
-                    <HxInputText @bind-Value="license.Street" Label="Ulice" Type="InputType.Text" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                    <HxInputText @bind-Value="license.Street" Label="Ulice" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
                 <div class="col-3">
-                    <HxInputText @bind-Value="license.PostNumber" Label="PSČ" Type="InputType.Text" ValidationMessageMode="ValidationMessageMode.Regular"/>
+                    <HxInputText @bind-Value="license.PostNumber" Label="PSČ" Type="InputType.Text" MaxLength=10 ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>
             </div>
             <div class="row">

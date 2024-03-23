@@ -76,17 +76,18 @@
 		</a>
 	</div>
 </div>
-@* <div class="top-0 w-100 card floating-card mb-3 d-flex flex-row justify-content-between">
+<div class="card floating-card d-flex flex-row justify-content-between custom-bar">
 	<div class="p-3">
 		@PageTitle
 	</div>
 	@if (moduleWorkspace.ModulesDic.ContainsKey(IdModule))
 	{
 		<div class="text-capitalize p-3">
-			@moduleWorkspace.ModulesDic[IdModule]
+			@moduleWorkspace.Name
+			<span class="ms-3">@moduleWorkspace.LicenseNumber</span>
 		</div>
 	}
-</div> *@
+</div>
 <style>
 	a{
 		color:white;	
@@ -96,7 +97,10 @@
 	li.nav-item{
 		margin-inline:1.8rem;
 	}
-
+	div.custom-bar{
+		margin: -1.5rem;
+		margin-bottom : 1.5rem;
+	}
 </style>
 @code {
 	[Parameter]

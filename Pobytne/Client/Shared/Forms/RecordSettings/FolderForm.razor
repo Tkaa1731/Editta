@@ -5,7 +5,7 @@
         <div class="mx-3 mt-3">
             <div class="row">
                 <div class="col">
-                    <HxInputText @bind-Value="Folder.Name" Label="Název položky" Type="InputType.Text" ValidationMessageMode="ValidationMessageMode.Regular" />
+                    <HxInputText @bind-Value="Folder.Name" Label="Název položky" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular" />
                 </div>
                 <div class="col-3">
                     <HxInputNumber Label="Pořadí položky v seznamu" TValue="int" @bind-Value="Folder.Order" ValidationMessageMode="ValidationMessageMode.Regular" />
@@ -13,7 +13,7 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <HxInputText @bind-Value="Folder.Note" Label="Poznámka" Type="InputType.Text" />
+                    <HxInputText @bind-Value="Folder.Note" Label="Poznámka" MaxLength=100 Type="InputType.Text" />
                 </div>
             </div>
             <div class="row">

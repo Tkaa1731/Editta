@@ -56,7 +56,7 @@ namespace Pobytne.Server.Service
             return null;
         }
 
-		public async Task<Record?> Update(Record updateRecord)//TODO: DB PROCEDURA
+		public async Task<Record?> Update(Record updateRecord)
         {
             //SET Server time
             updateRecord.CreationDate = DateTime.Now;

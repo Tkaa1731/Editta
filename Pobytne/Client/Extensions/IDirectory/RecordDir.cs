@@ -97,7 +97,7 @@ namespace Pobytne.Client.Extensions.IDirectory
 			if (index != -1 && item is Record r)
 			{
 				subRecords[index] = r;
-				if (r.RecordType == ERecordType.Folder)
+                if (r.RecordType == ERecordType.Folder)
                 {
                     var dirIndex = SubDirectories.FindIndex(i => i.Id == item.Id);
                     var recordDir = SubDirectories[dirIndex];
@@ -106,7 +106,21 @@ namespace Pobytne.Client.Extensions.IDirectory
                         rd.Record = r;
                     }
                 }
-			}
+            }
 		}
+
+        public void Delete(IListItem item)
+        {
+            var index = subRecords.FindIndex(i => i.Id == item.Id);
+            if (index != -1 && item is Record r)
+            {
+                subRecords.RemoveAt(index);
+                var dirIndex = SubDirectories.FindIndex(i => i.Id == item.Id);
+                if (r.RecordType == ERecordType.Folder && dirIndex != -1)
+                {
+                    SubDirectories.RemoveAt(dirIndex);
+                }
+            }
+        }
     }
 }

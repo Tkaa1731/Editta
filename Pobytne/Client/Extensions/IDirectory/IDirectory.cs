@@ -14,6 +14,7 @@ namespace Pobytne.Client.Extensions.IDirectory
         Task OnExpanded(); // EventCallback onExpanded
         void Insert(IListItem item);
         void Update(IListItem item);
+        void Delete(IListItem item);
         //Task LoadData(); //LoadData from DB
         IListItem GetNew();// New IListItem for form
     }

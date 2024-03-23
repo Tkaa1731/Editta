@@ -9,9 +9,11 @@ namespace Pobytne.Shared.Procedural.DTO
 	public class Payment :  ACreation, ICloneable
     {
         public int Id { get; set; } //IDTypuPlatby
+		[MaxLength(50)]
         public string Name { get; set; } = string.Empty; //NazevDokladu
         public int ModuleId { get; set; } = -1;//IDModulu
         public EPaymentType Type { get; set; } //TypPlatby
+		[MaxLength(10)]
         public string InvoicePrefix { get; set; } = string.Empty; //PrefixDokladu
         public int InvoiceNumber { get; set; } //CisloDokladu
         public int DefaultPayment { get; set; } //VychoziPlatba

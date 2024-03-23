@@ -19,10 +19,11 @@ namespace Pobytne.Server.Controllers
 
         [HttpGet]
 		[PermissionAuthorize(permition, EAccess.ReadOnly)]
-        public async Task<IActionResult> Get([FromQuery] int moduleId)
+        public async Task<IActionResult> Get([FromQuery] int moduleId, [FromQuery] string filterJSON = "")
         {
             try
             {
+
                 var clients = await _clientService.GetClientsByModule(moduleId);
                 return Ok(clients);
             }
@@ -41,7 +42,7 @@ namespace Pobytne.Server.Controllers
             }
             try
             {
-                var updatedClient = await _clientService.Insert(updateClient);
+                var updatedClient = await _clientService.Update(updateClient);
                 if (updatedClient is not null)
                     return Ok(updatedClient);
 
