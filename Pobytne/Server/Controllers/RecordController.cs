@@ -44,7 +44,7 @@ namespace Pobytne.Server.Controllers
 
         [HttpGet]
         [PermissionAuthorize(permition, EAccess.ReadOnly)]
-        [Route("Depth")]
+        [Route("Count")]
         public async Task<IActionResult> GetMaxDepth([FromQuery] int moduleId)
         {
             try

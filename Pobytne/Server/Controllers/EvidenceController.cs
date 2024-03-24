@@ -7,6 +7,7 @@ using Pobytne.Shared.Procedural;
 using Pobytne.Shared.Struct;
 using Pobytne.Shared.Extensions;
 using System.Net;
+using Newtonsoft.Json;
 
 namespace Pobytne.Server.Controllers
 {
@@ -18,14 +19,17 @@ namespace Pobytne.Server.Controllers
         private readonly InteractionService _interactionService = interactionService;
 		private const EPermition permition = EPermition.EvidenceSummary;
 
-        [HttpPost]
+		[HttpGet]
 		[PermissionAuthorize(permition, EAccess.ReadOnly)]
-		[Route("Filter")]
-		public async Task<IActionResult> GetFiltered(EvidenceFilter filter)
+		public async Task<IActionResult> Get([FromQuery] string filterJSON)
 		{
             try
             {
-                var reports = await _interactionService.GetFilteredReports(filter);
+				var filter = JsonConvert.DeserializeObject<EvidenceFilter>(filterJSON);
+				if (filter is null)
+					return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest, "Vyskytla se chyba v dotazu."));
+
+				var reports = await _interactionService.GetFilteredReports(filter);
                 return Ok(reports);
             }
             catch (Exception ex)

@@ -1,6 +1,7 @@
 ﻿using AuthRequirementsData.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Pobytne.Server.Service;
 using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural.FilterReports;
@@ -17,14 +18,17 @@ namespace Pobytne.Server.Controllers
 		private readonly InteractionService _interactionService = interactionService;
 		private const EPermition permition = EPermition.CashSummary;
 
-        [HttpPost]
+        [HttpGet]
 		[PermissionAuthorize(permition, EAccess.ReadOnly)]
-		[Route("Filter")]
-		public async Task<IActionResult> GetFiltered(CashRegisterFilter filter)
+		public async Task<IActionResult> Get([FromQuery] string filterJSON)
 		{
             try
             {
-                var reports = await _interactionService.GetFilteredReports(filter);
+                var filter = JsonConvert.DeserializeObject<CashRegisterFilter>(filterJSON);
+                if(filter is null)
+					return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest, "Vyskytla se chyba v dotazu."));
+
+				var reports = await _interactionService.GetFilteredReports(filter);
                 return Ok(reports);
             }
             catch (Exception ex)

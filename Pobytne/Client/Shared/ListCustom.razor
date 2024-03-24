@@ -1,4 +1,5 @@
 ﻿@inject PobytneService _service
+
 <HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card">
         <TitleTemplate>
             @ListTitle <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@ListItems?.Count</HxBadge>
@@ -79,19 +80,11 @@
     private bool ShowActive = false;
     private string SearchText = string.Empty;
 
-    private async Task<GridDataProviderResult<IListItem>> LoadDataItems(GridDataProviderRequest<IListItem> request)
+    private  Task<GridDataProviderResult<IListItem>> LoadDataItems(GridDataProviderRequest<IListItem> request)
     {
         IEnumerable<IListItem>? result = ListItems?.Where(c => c.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase)).ToList();
 
-        await Task.Delay(500);
-
-        Console.WriteLine($"startIndex: {request.StartIndex} Count: {request.Count}");
-
-        return new GridDataProviderResult<IListItem>()
-			{
-				Data = result?.Skip(request.StartIndex).Take(request.Count??15),
-				TotalCount = result?.Count()
-			};
+        return Task.FromResult(request.ApplyTo(result));
     }
 
     protected async override Task OnParametersSetAsync()

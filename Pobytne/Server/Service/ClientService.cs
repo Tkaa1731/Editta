@@ -1,4 +1,5 @@
 ﻿using Pobytne.Data.Tables;
+using Pobytne.Shared.Struct;
 using ClientDTO = Pobytne.Shared.Procedural.DTO.Client;
 
 
@@ -9,9 +10,27 @@ namespace Pobytne.Server.Service
         
         private readonly ClientTable _clientTable = clientTable;
 
-        public async Task<IEnumerable<ClientDTO>> GetClientsByModule(int moduleNumber)
+        public async Task<IEnumerable<ClientDTO>> Get(int ModuleId, LazyList filter)
         {
-            return await _clientTable.GetAll(new { ModuleNumber = moduleNumber});
+            var conditions = new {
+                ModuleId,
+                filter.StartIndex,
+                filter.Count,
+                Valid = filter.Active ? 0 : -1,
+                filter.Subfix
+            };
+
+            return await _clientTable.GetList(conditions);
+        }
+        public async Task<int> GetCount(int ModuleId, LazyList filter)
+        {
+            var conditions = new
+            {
+                ModuleId,
+                Valid = filter.Active ? 0 : -1,
+                filter.Subfix
+            };
+            return await _clientTable.GetCount(conditions);
         }
         public async Task<ClientDTO> GetClientById(int id)
         {

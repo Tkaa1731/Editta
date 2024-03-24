@@ -57,11 +57,12 @@ namespace Pobytne.Server.Service
                         param = _evidTable.GetParamsForTrans(r, delete);
                         param.AddDynamicParams(interactionParam);
                         param.Add("@IDEvidence", 0, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
-                        // TODO: Dodelat odecitani ze skladu zasob
-                        if (r.IsBalanceCheck)
+                        // Odecitani ze skladu zasob
+                        if (r.IsBalanceCheck && r.Quantity != 0)
                         {
                             //edit skladu
-                            // kontrola zustatku + update zustatku?? atomicka operace?
+                            int deduction = r.Quantity * -1;
+                            await _recordService.UpdateStock(r.RecordId,deduction, tran);
                         }
                         result += await _evidTable.InsUpTran(param, tran, cnn);
                     }
@@ -81,8 +82,8 @@ namespace Pobytne.Server.Service
                     throw;
                 }
             }
-            
-            return result;
+			cnn.Close();
+			return result;
         }
         public async Task<IEnumerable<CashRegister>> GetFilteredReports(CashRegisterFilter filter)
         {

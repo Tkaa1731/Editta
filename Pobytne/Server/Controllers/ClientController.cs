@@ -1,6 +1,7 @@
 ﻿using AuthRequirementsData.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Pobytne.Server.Service;
 using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Struct;
@@ -18,14 +19,36 @@ namespace Pobytne.Server.Controllers
         public const EPermition permition = EPermition.Client;
 
         [HttpGet]
-		[PermissionAuthorize(permition, EAccess.ReadOnly)]
-        public async Task<IActionResult> Get([FromQuery] int moduleId, [FromQuery] string filterJSON = "")
+        [PermissionAuthorize(permition, EAccess.ReadOnly)]
+        public async Task<IActionResult> Get([FromQuery] int moduleId, [FromQuery] string filterJSON)
         {
             try
             {
+                var filter = JsonConvert.DeserializeObject<LazyList>(filterJSON);
+                if (filter is null)
+                    return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest, "Vyskytla se chyba v dotazu."));
 
-                var clients = await _clientService.GetClientsByModule(moduleId);
+                var clients = await _clientService.Get(moduleId,filter);
                 return Ok(clients);
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+            }
+        }
+        [HttpGet]
+        [PermissionAuthorize(permition, EAccess.ReadOnly)]
+        [Route("Count")]
+        public async Task<IActionResult> GetCount([FromQuery] int moduleId, [FromQuery] string filterJSON)
+        {
+            try
+            {
+                var filter = JsonConvert.DeserializeObject<LazyList>(filterJSON);
+                if (filter is null)
+                    return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest, "Vyskytla se chyba v dotazu."));
+
+                var count = await _clientService.GetCount(moduleId,filter);
+                return Ok(count);
             }
             catch (Exception ex)
             {

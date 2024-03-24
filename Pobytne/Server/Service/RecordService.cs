@@ -52,10 +52,40 @@ namespace Pobytne.Server.Service
 			//SET Server time
 			insertStock.CreationDate = DateTime.Now;
 
-            //TODO: Insert to stock table + update stock od Record
-            return null;
-        }
+            int stockId;
 
+            using IDbConnection cnn = Database.CreateConnection();
+			cnn.Open();
+			using ( var tran = cnn.BeginTransaction() )
+            {
+                try
+                {
+                    var insertedStock = await _stockTable.Insert(insertStock, tran);
+                    if (!insertedStock.HasValue)
+                        throw new Exception("Nastala chyba při vložení záznamu.");
+
+                    stockId = insertedStock.Value;
+                    var rows = await _recordTable.UpdateStock(insertStock.RecordId, insertStock.Quantity, tran);
+                    if(rows != 1)
+						throw new Exception("Nastala chyba při aktualizaci zůstatku.");
+
+					tran.Commit();
+                }
+                catch ( Exception ex )
+                {
+                    tran.Rollback();
+					throw;
+				}
+            }
+            cnn.Close();
+            return await _stockTable.GetById(stockId);
+        }
+		public async Task UpdateStock(int recordId, int stock, IDbTransaction tran)
+		{
+			var rows = await _recordTable.UpdateStock(recordId, stock, tran);
+			if (rows != 1)
+				throw new Exception("Nastala chyba při aktualizaci zůstatku.");
+		}
 		public async Task<Record?> Update(Record updateRecord)
         {
             //SET Server time
