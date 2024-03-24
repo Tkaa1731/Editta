@@ -7,7 +7,7 @@
 		<div class="mx-3 mt-3">
 			<div class="row">
 				<div class="col">
-					<HxInputText @bind-Value="recAttribute.Name" Label="Název vlastnosti" Type="InputType.Text" ValidationMessageMode="ValidationMessageMode.Regular" Enabled="Enabled"/>
+					<HxInputText @bind-Value="recAttribute.Name" Label="Název vlastnosti" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular" Enabled="Enabled"/>
 				</div>
 				<div class="col">
                     <HxSelect TItem="RKeyValue"
@@ -22,22 +22,22 @@
 			</div>
 			<div class="row">
 				<div class="col">
-					<HxInputText @bind-Value="recAttribute.AccountA" Label="ÚčetA"  Enabled="Enabled" ValidationMessageMode="ValidationMessageMode.Regular"/>
+					<HxInputText @bind-Value="recAttribute.AccountA" Label="ÚčetA"  Enabled="Enabled" MaxLength=12 ValidationMessageMode="ValidationMessageMode.Regular"/>
 				</div>
                 <div class="col"/>
 				<div class="col">
-					<HxInputText @bind-Value="recAttribute.AccountS" Label="ÚčetS"  Enabled="Enabled" ValidationMessageMode="ValidationMessageMode.Regular"/>
+					<HxInputText @bind-Value="recAttribute.AccountS" Label="ÚčetS"  Enabled="Enabled" MaxLength=12 ValidationMessageMode="ValidationMessageMode.Regular"/>
 				</div>
             </div>
 			<div class="row">
                 <div class="col">
-                    <HxInputText @bind-Value="recAttribute.OrderNumber" Label="Číslo zakázky"  Enabled="Enabled" ValidationMessageMode="ValidationMessageMode.Regular" />
+                    <HxInputText @bind-Value="recAttribute.OrderNumber" Label="Číslo zakázky"  Enabled="Enabled" MaxLength=12 ValidationMessageMode="ValidationMessageMode.Regular" />
 				</div>
 				<div class="col">
-					<HxInputText @bind-Value="recAttribute.CentreNumber" Label="Číslo střediska"  Enabled="Enabled" ValidationMessageMode="ValidationMessageMode.Regular"/>
+					<HxInputText @bind-Value="recAttribute.CentreNumber" Label="Číslo střediska"  Enabled="Enabled" MaxLength=12 ValidationMessageMode="ValidationMessageMode.Regular"/>
                 </div>				
                 <div class="col">
-                    <HxInputText @bind-Value="recAttribute.ProjectNumber" Label="Číslo projektu"  Enabled="Enabled" ValidationMessageMode="ValidationMessageMode.Regular" />
+                    <HxInputText @bind-Value="recAttribute.ProjectNumber" Label="Číslo projektu"  Enabled="Enabled" MaxLength=12 ValidationMessageMode="ValidationMessageMode.Regular" />
                 </div>
 			</div>
 			<div class="row">
@@ -48,7 +48,7 @@
             }
         </div>
 
-        <div class="d-grid gap-2">
+        <div class="d-grid gap-2 mt-3">
             <HxSubmit Color="ThemeColor.Success"  Enabled="Enabled">@ButtonText</HxSubmit>
         </div>
 

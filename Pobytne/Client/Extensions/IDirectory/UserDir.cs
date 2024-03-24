@@ -19,11 +19,10 @@ namespace Pobytne.Client.Extensions.IDirectory
         public int Id => 0;
         public IconBase Icon => BootstrapIcon.People;
         public List<IListItem> ItemsList { get; set; } = [];
-        public List<IDirectory> SubDirectories => [];
-        public async Task Refresh() => await LoadData();
+        public List<IDirectory> SubDirectories => [];// NO subdir
         private async Task LoadData()
         {
-            var response = await _service.GetAllAsync<User>($"UsersList?licenseNumber={_licenseNumber}", -1);
+            var response = await _service.GetAllAsync<User>($"?licenseNumber={_licenseNumber}", -1);
             List<User> users = [];
 
             if (response is null)
@@ -48,6 +47,25 @@ namespace Pobytne.Client.Extensions.IDirectory
         public Task OnExpanded()
         {
             throw new NotImplementedException();
+        }
+
+        public void Insert(IListItem item)
+        {
+            ItemsList.Add(item);
+        }
+
+        public void Update(IListItem item)
+        {
+            var index = ItemsList.FindIndex(i => i.Id == item.Id);
+            if (index != -1)
+            {
+                ItemsList[index] = item;
+            }
+        }
+
+        public void Delete(IListItem item)
+        {
+            ItemsList.Remove(item);
         }
     }
 }

@@ -17,6 +17,7 @@ namespace Pobytne.Data
                 configure.AddMap(new ClientMapper());
                 configure.AddMap(new RecordMapper());
                 configure.AddMap(new RecordAttributeMapper());
+                configure.AddMap(new RecordStockMapper());
 				configure.AddMap(new PaymentMapper());
                 configure.AddMap(new CashRegisterMapper());
                 configure.AddMap(new EvidenceMapper());

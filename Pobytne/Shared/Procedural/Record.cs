@@ -23,6 +23,7 @@ namespace Pobytne.Shared.Procedural
         [Required(ErrorMessage = "Vyplňte pořadí v seznamu")]
         public int Order {  get; set; }
         [Required(ErrorMessage = "Vyplňte název položky")]
+		[MaxLength(50)]
         public string Name { get; set; } = string.Empty;
         public ERecordType RecordType { get; set; }
         // S_ZaznamyVlastnosti
@@ -44,6 +45,7 @@ namespace Pobytne.Shared.Procedural
         public bool IsSeasonTicket{  get; set; }
         public int GroupQuantity { get; set; }
         public float GroupPrice { get; set; }
+		[MaxLength(100)]
         public string Note {  get; set; } = string.Empty;
         [Required(ErrorMessage = "Vyplňte datum")]
         public DateTime ValidFrom { get; set; } = DateTime.Now;
@@ -51,9 +53,13 @@ namespace Pobytne.Shared.Procedural
         public DateTime ValidTo { get; set; } = DateTime.Now.AddYears(1);
         // ---------------IListItem
         [Editable(false)]
-        public string Description => Note;
+        public string Description => (IsBalanceCheck)?$"Sklad: {Stock}":Note;
         [Editable(false)]
         public bool Active => ValidTo >= DateTime.Now;
 
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 }

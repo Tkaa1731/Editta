@@ -5,24 +5,33 @@ using Pobytne.Server.Service;
 using Pobytne.Shared.Procedural.FilterReports;
 using Pobytne.Shared.Procedural;
 using Pobytne.Shared.Struct;
+using Pobytne.Shared.Extensions;
+using System.Net;
 
 namespace Pobytne.Server.Controllers
 {
 	[Route("Evidence")]
 	[Authorize]
 	[ApiController]
-	public class EvidenceController : ControllerBase
+	public class EvidenceController(InteractionService interactionService) : ControllerBase
 	{
-        private readonly InteractionService _interactionService;
+        private readonly InteractionService _interactionService = interactionService;
 		private const EPermition permition = EPermition.EvidenceSummary;
-		public EvidenceController(InteractionService interactionService) => _interactionService = interactionService;
 
-		[HttpPost]
+        [HttpPost]
 		[PermissionAuthorize(permition, EAccess.ReadOnly)]
-		[Route("Filtered")]
-		public Task<IEnumerable<Evidence>> GetFiltered(EvidenceFilter filter)
+		[Route("Filter")]
+		public async Task<IActionResult> GetFiltered(EvidenceFilter filter)
 		{
-			return _interactionService.GetFilteredReports(filter);
+            try
+            {
+                var reports = await _interactionService.GetFilteredReports(filter);
+                return Ok(reports);
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+            }
 		}
 	}
 }

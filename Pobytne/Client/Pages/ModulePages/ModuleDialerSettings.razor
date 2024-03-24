@@ -1,19 +1,19 @@
 ﻿@page "/{idModule}/DialerSettings/{dialerName}"
 @inject PobytneService _service
 @inject IHxMessengerService Messenger
+@inject IHxMessageBoxService MessageBox
 
 <ModuleNav idModule="@idModule" PageTitle="Číselník"></ModuleNav>
 
-<div class="w-100 h-100">
 
 	<HxTabPanel NavVariant="NavVariant.Pills" InitialActiveTabId="@dialerName" CssClass="card floating-card w-25 ms-4 mt-4 p-4 position-fixed" RenderMode="TabPanelRenderMode.ActiveTabOnly">
-		<HxTab Title="Číselník typu plateb" TitleCssClass="mb-3" Id="PaymentDialer" ContentCssClass="h-100">
+		<HxTab Title="Číselník typu plateb" TitleCssClass="mb-3" Id="PaymentDialer">
 			<Content>
-				<div class="d-flex h-100">
+				<div class="d-flex">
 
 					<div class="col">
-						<div class="h-25 my-4" />
-						<div class="card floating-card p-3 h-auto me-4 ">
+						<div class="my-4" style="height:25vh;"/>
+						<div class="card floating-card p-3 me-4 ">
 							<PaymentForm formType="paymentFormType" payment="paymentForm" Enabled=@(paymentForm.ModuleId > 0)  OnValidSubmit="(args) => Request(args.Item1,args.Item2)"/>
 						</div>
 					</div>
@@ -26,14 +26,14 @@
 							<HxButton Text="Nová položka" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="()=>{paymentForm = new(){ModuleId = moduleWorkspace.Id}; paymentFormType = EForm.Insert;}" />
 						</CommandsTemplate>
 						<DataTemplate>
-							<HxGrid TItem="Payment" 
+							<HxGrid @ref=paymentGrid
+								TItem="Payment" 
 								DataProvider="async(request)=>{if(!paymentList.Any()){paymentList = await LoadData<Payment>(); StateHasChanged();} return request.ApplyTo(paymentList);}" 
 								Responsive="true" 
-								SelectedDataItemChanged="(item)=>{paymentForm = item; paymentFormType = EForm.Update;}" 
-								TableContainerCssClass="scrollable-table-container" 
-								ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
+								SelectedDataItemChanged="(item)=>{paymentForm = (Payment)item.Clone(); paymentFormType = EForm.Update;}" 
+								ContentNavigationMode="GridContentNavigationMode.Pagination"
 								HeaderRowCssClass="sticky-top"
-								ItemRowHeight="20">
+								PageSize="15">
 								<Columns>
 									<HxGridColumn HeaderText="Id" ItemTextSelector="payment => payment.Id.ToString()" />
 									<HxGridColumn HeaderText="Název dokladu" ItemTextSelector="payment => payment.Name" />
@@ -51,12 +51,12 @@
 				</div>
 			</Content>
 		</HxTab>
-		<HxTab Title="Číselník vlastnosti záznamů" Id="ConstantDialer"  ContentCssClass="h-100">
+		<HxTab Title="Číselník vlastnosti záznamů" Id="ConstantDialer">
 			<Content>
-				<div class="d-flex h-100">
+				<div class="d-flex">
 					<div class="col">
-							<div class="h-25 my-4" />
-							<div class="card floating-card p-3 h-auto me-4">
+							<div class="my-4" style="height:25vh;" />
+							<div class="card floating-card p-3 me-4">
 								<RecordAttributeForm formType="attributeFormType"  recAttribute="attributeForm" Enabled=@(attributeForm.ModuleId > 0) OnValidSubmit="(args) => Request(args.Item1,args.Item2)" />
 							</div>
 					</div>
@@ -68,15 +68,14 @@
 							<HxButton Text="Nová položka" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="()=>{attributeForm = new(){ModuleId = moduleWorkspace.Id}; attributeFormType = EForm.Insert;}" />
 						</CommandsTemplate>
 						<DataTemplate>
-							<HxGrid
+							<HxGrid @ref=attributeGrid
 								TItem="RecordAttribute" 
 								DataProvider="async(request)=>{if(!attributeList.Any()){attributeList = await LoadData<RecordAttribute>(); StateHasChanged();} return request.ApplyTo(attributeList);}" 
 								Responsive="true" 
-								SelectedDataItemChanged="(item)=>{attributeForm = item; attributeFormType = EForm.Update;}" 
-								TableContainerCssClass="scrollable-table-container" 
-								ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
+								SelectedDataItemChanged="(item)=>{attributeForm = (RecordAttribute)item.Clone(); attributeFormType = EForm.Update;}" 
+								ContentNavigationMode="GridContentNavigationMode.Pagination"
 								HeaderRowCssClass="sticky-top"
-								ItemRowHeight="20">
+								PageSize="15">
 								<Columns>
 									<HxGridColumn HeaderText="Id" ItemTextSelector="attribute => attribute.Id.ToString()" />
 									<HxGridColumn HeaderText="Název vlastnosti" ItemTextSelector="attribute => attribute.Name" />
@@ -96,15 +95,10 @@
 			</Content>
 		</HxTab>
 	</HxTabPanel>
-</div>
+
 <style>
 	.tab-content{
 		height: 100% !important;
-	}
-
-	.scrollable-table-container {
-		max-height: 80svh;
-		overflow: auto;
 	}
 </style>
 @code {
@@ -117,11 +111,12 @@
 	[CascadingParameter]
 	private ModuleWorkplace moduleWorkspace { get; set; } = default!;
 
-
+	private HxGrid<Payment> paymentGrid = default!;
 	private List<Payment> paymentList = [];
 	private Payment paymentForm = new();
 	private EForm paymentFormType = EForm.Insert;
 
+	private HxGrid<RecordAttribute> attributeGrid = default!;
 	private List<RecordAttribute> attributeList = [];
 	private RecordAttribute attributeForm = new();
 	private EForm attributeFormType = EForm.Insert;
@@ -149,7 +144,6 @@
 
 	private async Task Request<T>(EForm e, T obj) where T: ACreation, new()
 	{
-
 		// ACreation
 		obj.CreationDate = DateTime.Now;
 		obj.CreationUserId = moduleWorkspace.UserId;
@@ -176,26 +170,93 @@
 			switch (obj)
 			{
 				case Payment p:
-					paymentForm = new();
-					paymentFormType = EForm.Insert;
-					paymentList.Clear();
+					await OnSuccessRequest(p, e);
 					break;
 				case RecordAttribute ra:
-					attributeForm = new();
-					attributeFormType = EForm.Insert;
-					attributeList.Clear();
+					await OnSuccessRequest(ra, e);
 					break;
 			}			
-			StateHasChanged();
 
-            await Task.Delay(1000);
+			await Task.Delay(1000);
 			Messenger.Clear();
 		}
-    }
-	private async Task DeleteItemClicked<T>(T deleteItem)
-    {
-  //       ListItems?.Remove(editableCultureInfo);
-		// await gridComponent.RefreshDataAsync();
+	}
+	private async Task OnSuccessRequest(Payment p, EForm f)
+	{
+		paymentForm = new();
+		paymentFormType = EForm.Insert;
+
+		switch (f)
+		{
+			case EForm.Insert:
+				paymentList.Add(p);
+				break;
+			case EForm.Update:
+				var index = paymentList.FindIndex(i => i.Id == p.Id);
+				if (index != -1)
+					paymentList[index] = p;
+				break;
+		}
+		await paymentGrid.RefreshDataAsync();
+
+	}
+	private async Task OnSuccessRequest(RecordAttribute ra, EForm f)
+	{
+		attributeForm = new();
+		attributeFormType = EForm.Insert;
+
+		switch (f)
+		{
+			case EForm.Insert:
+				attributeList.Add(ra);
+				break;
+			case EForm.Update:
+				var index = attributeList.FindIndex(i => i.Id == ra.Id);
+				if (index != -1)
+					attributeList[index] = ra;
+				break;
+		}
+		await attributeGrid.RefreshDataAsync();
+	}
+	private async Task DeleteItemClicked<T>(T deleteItem) where T : class
+	{
+		MessageBoxButtons deleteMessage;
+		object? response;
+		switch (deleteItem)
+		{
+			case Payment p:
+				deleteMessage = await MessageBox.ShowAsync("Smazat položku",$"Opravdu chcete smazat položku: {p.Name}", MessageBoxButtons.YesNo);
+				if (deleteMessage == MessageBoxButtons.No)
+					return;
+				response = await _service.DeleteAsync<Payment>(p.Id, moduleWorkspace.Id);
+				if(response is ErrorResponse error)
+					Messenger.AddError(title: "Chyba při smazáni", message: error.ErrorMessage );
+				else
+				{
+					paymentList.Remove(p);
+					await paymentGrid.RefreshDataAsync();
+					Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně smazán.");
+				}
+				break;
+			case RecordAttribute ra:
+				deleteMessage = await MessageBox.ShowAsync("Smazat položku",$"Opravdu chcete smazat položku: {ra.Name}", MessageBoxButtons.YesNo);
+				if (deleteMessage == MessageBoxButtons.No)
+					return;
+				response = await _service.DeleteAsync<RecordAttribute>(ra.Id, moduleWorkspace.Id);        
+				if(response is ErrorResponse error1)
+					Messenger.AddError(title: "Chyba při smazáni", message: error1.ErrorMessage );
+				else
+				{
+					attributeList?.Remove(ra);
+					await attributeGrid.RefreshDataAsync();
+					Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně smazán.");
+				}
+                break;
+            default:
+                return;
+        }
+        await Task.Delay(1500);
+        Messenger.Clear();
     }
 
 }

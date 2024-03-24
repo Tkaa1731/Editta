@@ -18,7 +18,8 @@ namespace Pobytne.Data.Tables
                                 JOIN S_StrukturaZaznamu sz ON z.IDZaznamu = sz.IDZaznamu
 								LEFT JOIN S_ZaznamyVlastnosti zv ON z.IDZaznamuVlastnosti = zv.IDZaznamuVlastnosti
                                 JOIN S_LoginUser u ON z.Kdo = u.IDLogin
-                                WHERE sz.IDParent IN @IDParent;";
+                                WHERE sz.IDParent IN @IDParent
+                                ORDER BY z.Poradi;";
 
 				return await cnn.QueryAsync<Record>(sql, conditions);
 			}
@@ -32,24 +33,13 @@ namespace Pobytne.Data.Tables
                                 JOIN S_StrukturaZaznamu sz ON z.IDZaznamu = sz.IDZaznamu
 								LEFT JOIN S_ZaznamyVlastnosti zv ON z.IDZaznamuVlastnosti = zv.IDZaznamuVlastnosti
                                 JOIN S_LoginUser u ON z.Kdo = u.IDLogin
-                                WHERE sz.IDModulu = @ModuleID  AND sz.IDParent = 0;";
+                                WHERE sz.IDModulu = @ModuleID  AND sz.IDParent = 0
+                                ORDER BY z.Poradi;";
 
                 return await cnn.QueryAsync<Record>(sql, conditions);
             }
         }
-		public async Task<IEnumerable<RecordAttribute>> GetAttributesByModule(int moduleId)
-		{
-			using (IDbConnection cnn = Database.CreateConnection())
-			    {
-				string sql = @"SELECT zv.*, lu.JmenoUser AS CreationUserName
-                                FROM S_ZaznamyVlastnosti zv
-                                JOIN S_LoginUser lu ON lu.IDLogin = zv.Kdo
-                                WHERE zv.IDModulu = @IDModulu;";
-
-				return await cnn.QueryAsync<RecordAttribute>(sql, new{ IDModulu = moduleId });
-			}
-		}
-		public async Task<int> GetSubRecordCount(int parentId)
+        public async Task<int> GetSubRecordCount(int parentId)
         {
             using (IDbConnection cnn = Database.CreateConnection())
             {
@@ -72,24 +62,47 @@ namespace Pobytne.Data.Tables
                 return await cnn.ExecuteScalarAsync<int>(sql,conditions);
             }
         }
+        public async Task<(DateTime?,DateTime?)> GetUsedDateRange(int id)
+        {
+            using IDbConnection cnn = Database.CreateConnection();
+            var sql = @"SELECT MIN(MinDate) as MinDate, MAX(MaxDate) as MaxDate
+                        FROM (SELECT MIN(a.Datum) as MinDate, MAX(a.Datum) as MaxDate
+                                FROM P_Interakce a
+                                JOIN P_Pokladna b on b.IDInterakce = a.IDInterakce
+                                WHERE b.IDZaznamu = @IDZaznamu 
+                                UNION
+                              SELECT MIN(a.Datum) as MinDate, MAX(a.Datum) as MaxDate
+                                FROM P_Interakce a
+                                JOIN P_Evidence b on b.IDInterakce = a.IDInterakce
+                                WHERE b.IDZaznamu = @IDZaznamu 
+                                UNION
+                              SELECT MIN(Datum) as MinDate, MAX(Datum) as MaxDate
+                                FROM P_PohybyEvidence
+                                WHERE IDZaznamu = @IDZaznamu ) as DateRange;";
+            var conditions = new { IDZaznamu = id };
+            var dateRange = await cnn.QueryFirstAsync(sql, conditions);
+            return (dateRange.MinDate, dateRange.MaxDate);
+        }
         public async Task<Record> GetById(int id)
         {
             using IDbConnection cnn = Database.CreateConnection();
-            return await cnn.GetAsync<Record>(id);
+            string sql = @"SELECT z.*, sz.*, u.JmenoUser AS CreationUserName, zv.Nazev AS RecordAttributeName
+                                FROM S_Zaznamy z
+                                JOIN S_StrukturaZaznamu sz ON z.IDZaznamu = sz.IDZaznamu
+								LEFT JOIN S_ZaznamyVlastnosti zv ON z.IDZaznamuVlastnosti = zv.IDZaznamuVlastnosti
+                                JOIN S_LoginUser u ON z.Kdo = u.IDLogin
+                                WHERE z.IDZaznamu = @IDZaznamu;";
+            var conditions = new { IDZaznamu = id };
+
+            return await cnn.QueryFirstAsync<Record>(sql,conditions);
         }
-        public async Task<int> Update(RecordAttribute attribute){
-			using IDbConnection cnn = Database.CreateConnection();
-			return await cnn.UpdateAsync(attribute);
-		}
+        
+        // ------------------ InsUp ---------------------
+
         public async Task<int> Update(Record record)
         {
             using IDbConnection cnn = Database.CreateConnection();
             return await cnn.UpdateAsync(record);   
-        }
-        public async Task<int?> Insert(RecordAttribute attribute)
-        {
-            using IDbConnection cnn = Database.CreateConnection(); 
-            return await cnn.InsertAsync(attribute);
         }
         public async Task<int?> Insert(Record record)
         {
@@ -117,7 +130,7 @@ namespace Pobytne.Data.Tables
 						if (await tran.ExecuteAsync(sql, conditions) == 1)
 						{
 							tran.Commit();
-							return 2;
+							return insertId;
 						}
 					}
 					tran.Rollback();
@@ -130,37 +143,17 @@ namespace Pobytne.Data.Tables
 				}
 			}
         }
-        public async Task<(DateTime?,DateTime?)> GetUsedDateRange(int id)
-        {
-            using IDbConnection cnn = Database.CreateConnection();
-            var sql = @"SELECT MIN(MinDate) as MinDate, MAX(MaxDate) as MaxDate
-                        FROM (SELECT MIN(a.Datum) as MinDate, MAX(a.Datum) as MaxDate
-                                FROM P_Interakce a
-                                JOIN P_Pokladna b on b.IDInterakce = a.IDInterakce
-                                WHERE b.IDZaznamu = @IDZaznamu 
-                                UNION
-                              SELECT MIN(a.Datum) as MinDate, MAX(a.Datum) as MaxDate
-                                FROM P_Interakce a
-                                JOIN P_Evidence b on b.IDInterakce = a.IDInterakce
-                                WHERE b.IDZaznamu = @IDZaznamu 
-                                UNION
-                              SELECT MIN(Datum) as MinDate, MAX(Datum) as MaxDate
-                                FROM P_PohybyEvidence
-                                WHERE IDZaznamu = @IDZaznamu ) as DateRange;";
-            var conditions = new { IDZaznamu = id };
-            var dateRange = await cnn.QueryFirstAsync(sql, conditions);
-            return (dateRange.MinDate, dateRange.MaxDate);
-        }
         public async Task<IEnumerable<DeleteError>> IsDeletable(int id)
         {
             using IDbConnection cnn = Database.CreateConnection();
             var sql = @"SELECT * FROM (
-                        SELECT 1 as Id, 'StrukturaZaznamů' as Error FROM S_StrukturaZaznamu WHERE IDZaznamu = @IDZaznamu UNION  
-                        SELECT 2 as Id, 'Pokladna' as Error FROM P_Pokladna WHERE IDZaznamu = @IDZaznamu UNION 
-                        SELECT 3 as Id, 'Evidence' as Error FROM P_Evidence WHERE IDZaznamu = @IDZaznamu UNION
-                        SELECT 4 as Id, 'PohybyEvidence' as Error FROM P_PohybyEvidence WHERE IDZaznamu = @IDZaznamu UNION
-                        SELECT 5 as Id, 'Permanentky' as Error FROM P_Permanentka WHERE IDZaznamu = @IDZaznamu) as ByloPouzito;";
-            var conditions = new {IDZaznamu = id};
+                        SELECT 1 as Id, 'StrukturaZaznamů' as Error FROM S_StrukturaZaznamu WHERE IDZaznamu = @ID UNION  
+                        SELECT 2 as Id, 'Pokladna' as Error FROM P_Pokladna WHERE IDZaznamu = @ID UNION 
+                        SELECT 3 as Id, 'Evidence' as Error FROM P_Evidence WHERE IDZaznamu = @ID UNION
+                        SELECT 18 as Id, 'Cinnost' as Error FROM P_Cinnost WHERE IDZaznamu = @ID UNION
+                        SELECT 4 as Id, 'PohybyEvidence' as Error FROM P_PohybyEvidence WHERE IDZaznamu = @ID UNION
+                        SELECT 5 as Id, 'Permanentky' as Error FROM P_Permanentka WHERE IDZaznamu = @ID) as ByloPouzito;";
+            var conditions = new {ID = id};
             return await cnn.QueryAsync<DeleteError>(sql, conditions);
         } 
         public async Task<int> Delete(int id)

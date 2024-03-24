@@ -58,7 +58,8 @@ namespace Pobytne.Data.Tables
 			using IDbConnection cnn = Database.CreateConnection();
 			var sql = @"SELECT * FROM (
                         SELECT 3 as Id, 'Moduly' as Error FROM S_Moduly m JOIN S_Licence l ON m.CisloLicence = l.CisloLicence WHERE l.IDLicence = @ID UNION  
-                        SELECT 4 as Id, 'Uživatelé' as Error FROM S_LoginUser u JOIN S_Licence l ON l.CisloLicence = u.CisloLicence WHERE l.IDLicence = @ID) as ByloPouzito;";
+                        SELECT 9 as Id, 'Uživatelé' as Error FROM S_LoginUser u JOIN S_Licence l ON l.CisloLicence = u.CisloLicence WHERE l.IDLicence = @ID UNION
+                        SELECT 34 as Id, 'OSPOD' as Error FROM S_OSPOD o WHERE o.IDLicence = @ID) as ByloPouzito;";
 
 			var conditions = new { ID = licenseId };
 			return await cnn.QueryAsync<DeleteError>(sql, conditions);

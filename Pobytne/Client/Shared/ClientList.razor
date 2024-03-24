@@ -1,7 +1,27 @@
 ﻿@inject PobytneService _service
+@inject IHxMessengerService Messenger
+@inject IHxMessageBoxService MessageBox
 
-<ListCustom ListTitle="Počet klientů" ListItems="AllClients" selectedItemChanged="OnItemSelect" EventNewItem="OnNewItem" selectedItem="Value" Editable="Editable" />
-<FormModal formItem="Value" @ref=formModal OnSuccessRequest="OnSuccessRequestHandler"></FormModal>
+<ListCustom 
+	ListTitle="Počet klientů" 
+	ListItems="AllClients" 
+	selectedItemChanged="OnItemSelect" 
+	EventNewItem="OnNewItem" 
+	selectedItem="Value"
+	PageSize="PageSize"
+	Editable="Editable">
+
+	<MenuGridColumn>
+		<HxContextMenuGridColumn TItem="IListItem" Context="item">
+			@if (Editable)
+			{
+				<HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" Tooltip="Smazat" OnClick="async()=>await OnDeleteItem(item)"/>
+			}
+		</HxContextMenuGridColumn>
+	</MenuGridColumn>
+</ListCustom>
+
+<FormModal formItem="itemForm" @ref=formModal OnSuccessRequest="OnSuccessRequestHandler"></FormModal>
 
 @code {
 	[CascadingParameter]
@@ -9,15 +29,19 @@
 	[Parameter]
 	public bool Editable { get; set; } = true;
 	[Parameter]
-	public required IListItem Value { get; set; }
+	public IListItem? Value { get; set; }
 	[Parameter]
 	public EventCallback<IListItem?> ValueChanged { get; set; }
+	[Parameter]
+    public int PageSize { get; set; } = 10;
+
+	private IListItem itemForm = default!;
 
 	private List<IListItem> AllClients = [];
-	private FormModal formModal;
+	private FormModal formModal = default!;
 	protected override async Task OnInitializedAsync()
 	{
-		var response = await _service.GetAllAsync<Client>($"ClientsList?moduleNumber={moduleWorkspace.Id}", moduleWorkspace.Id);
+		var response = await _service.GetAllAsync<Client>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
 		List<Client> clients = new();
 		if (response is null)
 			Console.WriteLine($"NO RESPONSE");
@@ -32,22 +56,58 @@
 	private async Task OnItemSelect(IListItem selection)
 	{
 		Value = selection;
-		await ValueChanged.InvokeAsync(Value);
+		await ValueChanged.InvokeAsync(selection);
 		if (Editable)
+		{
+			itemForm = (IListItem)selection.Clone();
 			await formModal.UpdateForm();
+		}
 	}
 	private async Task OnNewItem()
 	{
-		Value = new Client()
+		itemForm = new Client()
 			{
 				ModuleId = moduleWorkspace.Id,
 				Valid = true,
 			};
+		Value = null;
 		await formModal.InsertForm();
 	}
-	private async Task OnSuccessRequestHandler()
+	private void OnSuccessRequestHandler((IListItem,EForm) item)
 	{
 		//UPATE LIST
+		switch (item.Item2)
+		{
+			case EForm.Insert:
+				AllClients.Add(item.Item1);
+				break;
+			case EForm.Update:
+				var index = AllClients.FindIndex(i => i.Id == item.Item1.Id);
+				if(index != -1)
+				{
+					AllClients[index] = item.Item1;
+					Value = null;
+				}
+                break;
+        }
 		StateHasChanged();
 	}
+	private async Task OnDeleteItem(IListItem deleteItem)
+    {
+        var deleteMessage = await MessageBox.ShowAsync("Smazat položku",$"Opravdu chcete smazat položku: {deleteItem.Name}", MessageBoxButtons.YesNo);
+        if (deleteMessage == MessageBoxButtons.No)
+            return;
+
+        var response = await _service.DeleteAsync<Client>(deleteItem.Id, moduleWorkspace.Id);
+
+        if(response is ErrorResponse error)
+            Messenger.AddError(title: "Chyba při smazáni", message: error.ErrorMessage );
+        else
+        {
+            AllClients?.Remove(deleteItem);
+            Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně smazán.");
+			await Task.Delay(1500);
+			Messenger.Clear();
+        }
+    }
 }

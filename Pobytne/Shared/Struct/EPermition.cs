@@ -65,7 +65,7 @@ namespace Pobytne.Shared.Struct
         CashSummary = 20,
 
 		[Display(Name = "SouhrnyEvidenceSklad")]
-        EvidenceStorageSummary = 22,
+        EvidenceStockSummary = 22,
 
 		[Display(Name = "SouhrnyPermanentky")]
         SeasonTicketSummary = 23,

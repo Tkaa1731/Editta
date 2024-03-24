@@ -2,71 +2,93 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pobytne.Server.Service;
+using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Struct;
+using System.Net;
+using ClientDTO = Pobytne.Shared.Procedural.DTO.Client;
 
 namespace Pobytne.Server.Controllers
 {
     [Route("Client")]
     [Authorize]
     [ApiController]
-    public class ClientController : ControllerBase
+    public class ClientController(ClientService clientService) : ControllerBase
 	{
-        private readonly ClientService _clientService;
-        public const EPermition permition = EPermition.Client; 
-        public ClientController(ClientService clientService)
-        {
-            _clientService = clientService;
-        }
+        private readonly ClientService _clientService = clientService;
+        public const EPermition permition = EPermition.Client;
+
         [HttpGet]
 		[PermissionAuthorize(permition, EAccess.ReadOnly)]
-		[Route("ClientsList")]
-        public Task<IEnumerable<Shared.Procedural.DTO.Client>> GetClients(int moduleNumber)
+        public async Task<IActionResult> Get([FromQuery] int moduleId, [FromQuery] string filterJSON = "")
         {
-            return _clientService.GetClientsByModule(moduleNumber);
-        }
-        [HttpPost]
-        [PermissionAuthorize(permition, EAccess.FullAccess)]
-        [Route("Update")]
-        public async Task<IActionResult> Update([FromBody] Shared.Procedural.DTO.Client updateClient)
-        {/////////////////
-            if (updateClient is null)
-            {
-                return BadRequest("Invalid data");
-            }
             try
             {
-                int rowsAffected = await _clientService.Update(updateClient);
-                if (rowsAffected > 0)
-                    return Ok("Update successful");
-                else
-                    return BadRequest("Update failed");
+
+                var clients = await _clientService.GetClientsByModule(moduleId);
+                return Ok(clients);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal Server Error :{ex.Message}");
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
             }
         }
-        // POST api/<ItemsController>
+        [HttpPut]
+        [PermissionAuthorize(permition, EAccess.FullAccess)]
+        public async Task<IActionResult> Update([FromBody] ClientDTO updateClient)
+        {
+            if (updateClient is null)
+            {
+                return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest, "Vyskytla se chyba v dotazu."));
+            }
+            try
+            {
+                var updatedClient = await _clientService.Update(updateClient);
+                if (updatedClient is not null)
+                    return Ok(updatedClient);
+
+                return NotFound(new ErrorResponse(HttpStatusCode.NotFound, "Nepovedlo se uložit záznam."));
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+            }
+        }
         [HttpPost]
         [PermissionAuthorize(permition, EAccess.FullAccess)]
-        [Route("Insert")]
-        public async Task<IActionResult> Insert([FromBody] Shared.Procedural.DTO.Client insertClient)
+        public async Task<IActionResult> Insert([FromBody] ClientDTO insertClient)
         {
             if (insertClient is null)
             {
-                return BadRequest("Invalid data");
+                return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest, "Vyskytla se chyba v dotazu."));
             }
             try
             {
-                int? rowsAffected = await _clientService.Insert(insertClient);
-                if (rowsAffected > 0)
-                    return Ok("Insert successful");
-                else
-                    return BadRequest("Insert failed");
+                var insertedClient = await _clientService.Insert(insertClient);
+                if (insertedClient is not null)
+                    return Ok(insertedClient);
+
+                return NotFound(new ErrorResponse(HttpStatusCode.NotFound, "Nepovedlo se vložit záznam."));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal Server Error :{ex.Message}");
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+            }
+        }
+        [HttpDelete("{id}")]
+        [PermissionAuthorize(permition, EAccess.FullAccess)]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var result = await _clientService.Delete(id);
+                if (result > 0)
+                    return NoContent();
+
+                return NotFound(new ErrorResponse(HttpStatusCode.NotFound, "Nepovedlo se smazat záznam."));
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
             }
         }
     }

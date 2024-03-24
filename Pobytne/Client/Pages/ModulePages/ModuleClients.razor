@@ -3,14 +3,8 @@
 
 <ModuleNav idModule="@idModule" PageTitle="Evidence klientů"></ModuleNav>
 <div class="container-fluid mh-100">
-    <ClientList/>
+    <ClientList PageSize="15"/>
 </div>
-<style>
-	.scrollable-table-container {
-		max-height: 80svh;
-		overflow: auto;
-	}
-</style>
 @code {
     [CascadingParameter]
     private ModuleWorkplace moduleWorkspace { get; set; } = default!;

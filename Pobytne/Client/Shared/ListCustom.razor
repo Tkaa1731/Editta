@@ -1,10 +1,10 @@
-﻿@inject IJSRuntime js
+﻿@inject PobytneService _service
 <HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card">
         <TitleTemplate>
             @ListTitle <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@ListItems?.Count</HxBadge>
         </TitleTemplate>
         <SearchTemplate>
-        <HxCheckbox @bind-Value="ShowAll" @bind-Value:after="gridComponent.RefreshDataAsync" Text="Zobrazit vše" Enabled="ListItems is not null"/>
+        <HxCheckbox @bind-Value="ShowActive" @bind-Value:after="gridComponent.RefreshDataAsync" Text="Zobrazit pouze aktivní" Enabled="ListItems is not null"/>
         <HxInputText Placeholder="Hledat" Type="InputType.Search" @bind-Value="SearchText" @bind-Value:after="gridComponent.RefreshDataAsync" Enabled="ListItems is not null" />
         </SearchTemplate>
         <CommandsTemplate>
@@ -20,35 +20,33 @@
             DataProvider="LoadDataItems" 
             SelectedDataItemChanged="HandleSelectedDataItemChanged"
             SelectedDataItem="selectedItem" 
-            ContentNavigationMode="GridContentNavigationMode.InfiniteScroll" 
-            TableContainerCssClass="scrollable-table-container"
+            ContentNavigationMode="GridContentNavigationMode.Pagination"
             HeaderRowCssClass="sticky-top"
-            ItemRowHeight="20">
+            PageSize="PageSize">
             <Columns>
-                <HxGridColumn HeaderText="Id" ItemTextSelector="@(item => item.Id.ToString())" SortKeySelector="@(item => item.Id)" IsDefaultSortColumn="false" />
-                <HxGridColumn HeaderText="Název" ItemTextSelector="@(item => item.Name)" SortKeySelector="@(item => item.Name)" />
-                <HxGridColumn HeaderText="Popis" ItemTextSelector="@(item => item.Description)" SortKeySelector="@(item => item.Description)" />
-                <HxGridColumn HeaderText="Poslední úprava" ItemTextSelector="@(item => item.CreationDate.ToString())" SortKeySelector="@(item => item.CreationDate)" />
-                @if (Editable)
-                {
-                    <HxContextMenuGridColumn Context="item">
-					    <HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" OnClick="async ()=> await DeleteItemClicked(item)" />
-				    </HxContextMenuGridColumn>                    
-                }
+                <HxGridColumn HeaderText="Id" ItemTextSelector="@(item => item.Id.ToString())" IsDefaultSortColumn=false/>
+                <HxGridColumn HeaderText="Název" ItemTextSelector="@(item => item.Name)" />
+                <HxGridColumn HeaderText="Popis" ItemTextSelector="@(item => item.Description)"/>
+                <HxGridColumn HeaderText="Poslední úprava" ItemTextSelector="@(item => item.CreationDate.ToString())"/>
+
+                @MenuGridColumn                
+  
             </Columns>
         </HxGrid>
     </DataTemplate>
 </HxListLayout>
 @code {
     [Parameter]
+    public RenderFragment? MenuGridColumn { get; set; }
+    [Parameter]
     [EditorRequired]
     public List<IListItem>? ListItems 
     {
         get
         {
-            if(ShowAll)
-                return listItems;
-            return listItems?.Where(l => l.Active).ToList();
+            if(ShowActive)
+                return listItems?.Where(l => l.Active).ToList();
+            return listItems;
         }
         set
         {
@@ -67,52 +65,50 @@
     [Parameter]
     public bool Editable { get; set; } = true;
     [Parameter]
+    public int PageSize { get; set; } = 15;
+    [Parameter]
+    public bool LazyLoading { get; set; } = false;
+    [Parameter]
+    public EventCallback<(int,int)> LoadMore { get; set; }
+    [Parameter]
+    public int TotalCount {get;set;}
+    [Parameter]
     [EditorRequired]
     public required string ListTitle{ get; set; } 
-    private bool ShowAll = false;
+
+    private bool ShowActive = false;
     private string SearchText = string.Empty;
 
-    private Task<GridDataProviderResult<IListItem>> LoadDataItems(GridDataProviderRequest<IListItem> request)
+    private async Task<GridDataProviderResult<IListItem>> LoadDataItems(GridDataProviderRequest<IListItem> request)
     {
-  //       string debugOutput = $"Requesting data: StartIndex={request.StartIndex}, Count={request.Count}";
-		// StateHasChanged();
-
-		// await Task.Delay(500);  // simulate server delay in demo (do not put this in your code)
-
-		// return new GridDataProviderResult<IListItem>()
-		// 	{
-		// 		Data = await DemoDataService.GetEmployeesDataFragmentAsync(request.StartIndex, request.Count, request.CancellationToken),
-		// 		TotalCount = await DemoDataService.GetEmployeesCountAsync(request.CancellationToken)
-		// 	};
         IEnumerable<IListItem>? result = ListItems?.Where(c => c.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase)).ToList();
 
-        return Task.FromResult(request.ApplyTo(result));
+        await Task.Delay(500);
+
+        Console.WriteLine($"startIndex: {request.StartIndex} Count: {request.Count}");
+
+        return new GridDataProviderResult<IListItem>()
+			{
+				Data = result?.Skip(request.StartIndex).Take(request.Count??15),
+				TotalCount = result?.Count()
+			};
     }
 
     protected async override Task OnParametersSetAsync()
     {
-        base.OnParametersSet();
         await gridComponent.RefreshDataAsync();
-    }
-
-    private async Task DeleteItemClicked(IListItem editableCultureInfo)
-    {
-        ListItems?.Remove(editableCultureInfo);
-    await gridComponent.RefreshDataAsync();
+        await base.OnParametersSetAsync();
     }
 
     private async Task HandleSelectedDataItemChanged(IListItem selection)
     {
         selectedItem = selection;
         await selectedItemChanged.InvokeAsync(selectedItem);
-        // await dataItemEditComponent.ShowAsync();
     }
 
 
-    private async Task NewItemClicked()// async
+    private async Task NewItemClicked()
     {
-        //currentItem = new();
-        // await dataItemEditComponent.ShowAsync();
         await EventNewItem.InvokeAsync();
     }
 }

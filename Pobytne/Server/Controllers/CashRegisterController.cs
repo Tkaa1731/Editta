@@ -2,27 +2,35 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pobytne.Server.Service;
-using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural.FilterReports;
 using Pobytne.Shared.Struct;
+using System.Net;
 
 namespace Pobytne.Server.Controllers
 {
-	[Route("CashRegister")]
+    [Route("CashRegister")]
 	[Authorize]
 	[ApiController]
-	public class CashRegisterController : ControllerBase
+	public class CashRegisterController(InteractionService interactionService) : ControllerBase
 	{
-		private readonly InteractionService _interactionService;
+		private readonly InteractionService _interactionService = interactionService;
 		private const EPermition permition = EPermition.CashSummary;
-		public CashRegisterController(InteractionService interactionService) => _interactionService = interactionService;
 
-		[HttpPost]
+        [HttpPost]
 		[PermissionAuthorize(permition, EAccess.ReadOnly)]
-		[Route("Filtered")]
-		public Task<IEnumerable<CashRegister>> GetFiltered(CashRegisterFilter filter)
+		[Route("Filter")]
+		public async Task<IActionResult> GetFiltered(CashRegisterFilter filter)
 		{
-			return _interactionService.GetFilteredReports(filter);
-		}
+            try
+            {
+                var reports = await _interactionService.GetFilteredReports(filter);
+                return Ok(reports);
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+            }
+        }
 	}
 }

@@ -28,8 +28,13 @@ namespace Pobytne.Shared.Procedural.DTO
         [Editable(false)]
         public string Name => UserName;
         [Editable(false)]
-        public string Description => $"{ModuleName}-přístup";
+        public string Description => $"PŘÍSTUP - {ModuleName}";
         [Editable(false)]
         public bool Active => ValidTo >= DateTime.Now;
+
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 }

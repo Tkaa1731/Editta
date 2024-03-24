@@ -1,6 +1,8 @@
 ﻿@page "/EditLicenses"
 @* @attribute [Authorize(Policy = "PermitionPolicy", AuthenticationSchemes = "a")] Policy="PermitionPolicy" Resource=(EPermition.Aplication,EAccess.ReadOnly,String.Empty)*@
 @inject PobytneService service
+@inject IHxMessengerService Messenger
+@inject IHxMessageBoxService MessageBox
 
 <PageTitle>EditLicense</PageTitle>
 <AuthorizeView>
@@ -18,7 +20,22 @@
                         ItemChildrenSelector="@(p => p.SubDirectories)" />
         </div>
         <div class="col-lg-9 mh-100 overflow-hidden">
-            <ListCustom ListTitle="@listTitle" ListItems=@listOfItems selectedItem=selectedItem selectedItemChanged=OnItemSelect EventNewItem="OnNewItem"></ListCustom>
+            <ListCustom 
+                ListTitle="@listTitle" 
+                ListItems=@listOfItems 
+                selectedItem=selectedItem 
+                selectedItemChanged=OnItemSelect 
+                EventNewItem="OnNewItem">
+
+                <MenuGridColumn>
+                    @if(selectedDirectory is not UserDir){
+		                <HxContextMenuGridColumn TItem="IListItem" Context="item">
+			                <HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" Tooltip="Smazat" OnClick="async()=>await DeleteItemClicked(item)"/>
+		                </HxContextMenuGridColumn>
+                    }
+	            </MenuGridColumn>
+
+            </ListCustom>
         </div>
     </div>
 		    <FormModal formItem="formItem" @ref=formModal OnSuccessRequest="OnSuccessRequestHandler"></FormModal>
@@ -64,6 +81,12 @@
         }
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        moduleWorkspace.Id = -1;
+        fileSystem = new List<Directory>() { new Directory(service, "Pobytné licence") };
+        await fileSystem[0].OnSelect();
+    }
     private async Task OnSelect(IDirectory e)
     {
         this.selectedDirectory = e;
@@ -77,16 +100,10 @@
     {
         if(i is not null && formModal is not null)
         {
-            formItem = i;
+            formItem = (IListItem)i.Clone();
             await formModal.UpdateForm();            
         }
         selectedItem = null;
-    }
-    protected override async Task OnInitializedAsync()
-    {
-        moduleWorkspace.Id = -1;
-        fileSystem = new List<Directory>() { new Directory(service, "Pobytné licence") };
-        await fileSystem[0].OnSelect();
     }
     private async Task OnNewItem()
     {
@@ -96,15 +113,55 @@
             await formModal.InsertForm();            
         }
     }
-    private async Task OnSuccessRequestHandler()
+    private async Task OnSuccessRequestHandler((IListItem,EForm) item)
     {
-        if (selectedDirectory is not null)
+        switch (item.Item2)
         {
-            await selectedDirectory.Refresh();
-            await OnSelect(selectedDirectory);            
+            case EForm.Insert:
+                selectedDirectory?.Insert(item.Item1);
+                break;
+            case EForm.Update:
+                selectedDirectory?.Update(item.Item1);
+                break;
         }
-        StateHasChanged();
+
+        await OnSelect(selectedDirectory!); // Update ListCustom          
+
+        StateHasChanged();// Update TreeView
     }
-    //TODO: Delete
+    private async Task DeleteItemClicked(IListItem deleteItem)
+    {
+        var deleteMessage = await MessageBox.ShowAsync("Smazat položku",$"Opravdu chcete smazat položku: {deleteItem.Name}", MessageBoxButtons.YesNo);
+        if (deleteMessage == MessageBoxButtons.No)
+            return;
+
+        object? response;
+        switch (deleteItem)
+        {
+            case License l:
+                response = await service.DeleteAsync<License>(l.Id, moduleWorkspace.Id);
+                break;
+            case Module m:
+                response = await service.DeleteAsync<Module>(m.Id, moduleWorkspace.Id);
+                break;
+            case Permition p:
+                response = await service.DeleteAsync<Permition>(p.Id, moduleWorkspace.Id);
+                break;
+            default:
+                return;
+        }
+        if(response is ErrorResponse error)
+            Messenger.AddError(title: "Chyba při smazáni", message: error.ErrorMessage );
+        else
+        {
+            selectedDirectory!.Delete(deleteItem);
+            await OnSelect(selectedDirectory!);// Update ListCustom   
+            StateHasChanged();//Update TreeView
+
+            Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně smazán.");
+            await Task.Delay(1500);
+            Messenger.Clear();
+        }
+    }
     //TODO: Opraveneni k editu licenci
 }

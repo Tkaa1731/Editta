@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pobytne.Server.Service;
+using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural.DTO;
 using Pobytne.Shared.Struct;
+using System.Net;
 
 
 namespace Pobytne.Server.Controllers
@@ -23,89 +25,93 @@ namespace Pobytne.Server.Controllers
 
         [HttpGet]
         [PermissionAuthorize(permition, EAccess.ReadOnly)]
-        [Route("UsersList")]
-        public async Task<IEnumerable<User>> GetByLicense([FromQuery]int licenseNumber)
-        {
-            return await _userService.GetUsersByLicense(licenseNumber);
-        }
-
-        [HttpGet]
-        [PermissionAuthorize(permition, EAccess.ReadOnly)]
-        [Route("GetRest")]//GetRest?moduleId={module}"
-        public ActionResult<IEnumerable<User>> GetRestOfModule([FromQuery] int moduleId)
-        {
-            return _userService.GetUsersExsModule(moduleId).Result.ToList();
-        }
-
-        [HttpGet]
-        [PermissionAuthorize(permition, EAccess.ReadOnly)]
-        [Route("{id}")]
-        public ActionResult<User> Get(int id)
+        public async Task<IActionResult> Get([FromQuery]int licenseNumber = -1, [FromQuery] int moduleId = -1, [FromQuery] string filterJSON = "")
         {
             try
             {
-                User? u =  _userService.GetUserById(id).Result;
-                if (u is not null)
-                    return u;
-                else
-                    return BadRequest("Insert failed");
+                if(licenseNumber > 0)
+                {
+                    var users =  await _userService.GetUsersByLicense(licenseNumber);
+                    return Ok(users);
+                }
+                if (moduleId > 0)
+                {
+                    var users = await _userService.GetUsersExsModule(moduleId);
+                    return Ok(users);
+                }
+                return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest,"Vyskytla se chyba v dotazu."));
+            }
+            catch(Exception ex) 
+            {
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+            }
+        }
+        [HttpGet]
+        [PermissionAuthorize(permition, EAccess.ReadOnly)]
+        [Route("Count")]
+        public async Task<IActionResult> GetCount([FromBody] LazyList lazyValues, [FromQuery] int licenseNumber)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpGet("{id}")]
+        [PermissionAuthorize(permition, EAccess.ReadOnly)]
+        public async Task<IActionResult> GetById(int id)
+        {
+            try
+            {
+                var user = await _userService.GetUserById(id);
+                if (user is not null)
+                    return Ok(user);
+                return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest, $"Uživatel ID: {id} není v databázi."));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal Server Error :{ex.Message}");
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
             }
         }
-        [HttpPost]
+        [HttpPut]
         [PermissionAuthorize(permition, EAccess.FullAccess)]
-        [Route("Update")]
         public async Task<IActionResult> Update([FromBody]User updateUser) 
         {
             if (updateUser is null)
             {
-                return BadRequest("Invalid data");
+                return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest, "Vyskytla se chyba v dotazu."));
             }
             try
             {
-                int rowsAffected = await _userService.Update(updateUser);
-                if (rowsAffected > 0)
-                    return Ok("Update successful");
-                else
-                    return BadRequest("Update failed");
+                var updatedUser = await _userService.Update(updateUser);
+                if (updatedUser is not null)
+                    return Ok(updatedUser);
+
+                return NotFound(new ErrorResponse(HttpStatusCode.NotFound, "Nepovedlo se uložit záznam."));
+
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal Server Error :{ex.Message}");
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
             }
         }
-        // POST api/<ItemsController>
         [HttpPost]
         [PermissionAuthorize(permition, EAccess.FullAccess)]
-        [Route("Insert")]
         public async Task<IActionResult> Insert([FromBody] User insertUser)
         {
             if (insertUser is null)
             {
-                return BadRequest("Invalid data");
+                return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest, "Vyskytla se chyba v dotazu."));
             }
             try
             {
-                int? rowsAffected = await _userService.Insert(insertUser);
-                if (rowsAffected > 0)
-                    return Ok("Insert successful");
-                else
-                    return BadRequest("Insert failed");
+                var insertedUser = await _userService.Insert(insertUser);
+                if (insertedUser is not null)
+                    return Ok(insertedUser);
+                
+                return NotFound(new ErrorResponse(HttpStatusCode.NotFound,"Nepovedlo se vložit záznam."));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal Server Error :{ex.Message}");
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
             }
         }
-        // DELETE api/<ItemsController>/5
-        //[PermissionAuthorize(permition, EAccess.FullAccess)]
-        //[HttpDelete("{id}")]
-        //public async Task<bool> Delete(int id)
-        //{
-        //    return await _userService.Delete(id) > 0; 
-        //}
     }
 }

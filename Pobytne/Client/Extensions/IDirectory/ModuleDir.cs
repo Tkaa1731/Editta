@@ -16,11 +16,11 @@ namespace Pobytne.Client.Extensions.IDirectory
         public int Id => Module.Id;
         public IconBase Icon => BootstrapIcon.FolderPlus;
         public List<IListItem> ItemsList { get; set; } = [];
-        public List<IDirectory> SubDirectories => [];
+        public List<IDirectory> SubDirectories => []; //NO subdir
         public async Task Refresh() => await LoadData();
         private async Task LoadData()
         {
-            var response = await _service.GetAllAsync<Permition>($"PermitionList?idModule={Module.Id}", -1);
+            var response = await _service.GetAllAsync<Permition>($"?moduleId={Module.Id}", -1);
             List<Permition> permitions = [];
 
             if (response is null)
@@ -47,6 +47,25 @@ namespace Pobytne.Client.Extensions.IDirectory
         public Task OnExpanded()
         {
             throw new NotImplementedException();
+        }
+
+        public void Insert(IListItem item)
+        {
+            ItemsList.Add(item);
+        }
+
+        public void Update(IListItem item)
+        {
+            var index = ItemsList.FindIndex(i => i.Id == item.Id);
+            if (index != -1)
+            {
+                ItemsList[index] = item;
+            }
+        }
+
+        public void Delete(IListItem item)
+        {
+            ItemsList.Remove(item);
         }
     }
 }

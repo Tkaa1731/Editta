@@ -5,9 +5,8 @@
             TItem="InteractionRecordItem"
             DataProvider="LoadDataItems"
             ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
-           
             TableContainerCssClass="mh-100 overflow-auto"
-            HeaderRowCssClass="sticky-top top-0"
+            HeaderRowCssClass="sticky-top"
             SelectedDataItem="selectedItem"
             SelectedDataItemChanged="HandleSelectedItemChanged">
         <Columns>
@@ -25,7 +24,7 @@
                     }
                     else
                     {
-                        <div>@item.Price</div>
+                    <div>@item.Price.ToString("C", new CultureInfo("cs-CZ"))</div>
                     }
                 </ItemTemplate>
             </HxGridColumn>
@@ -90,7 +89,7 @@
         </Columns>
     </HxGrid>
 <style>
-    div.custom-grid-overflow    >
+    div.custom-grid-overflow >
     div.hx-progress-overlay{
         height:100%;
     }
