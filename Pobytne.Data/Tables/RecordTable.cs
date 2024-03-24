@@ -96,15 +96,28 @@ namespace Pobytne.Data.Tables
 
             return await cnn.QueryFirstAsync<Record>(sql,conditions);
         }
-        
+
         // ------------------ InsUp ---------------------
 
-        public async Task<int> Update(Record record)
+        public async Task<int> UpdateStock(int recordId, int stock, IDbTransaction tran)
         {
-            using IDbConnection cnn = Database.CreateConnection();
-            return await cnn.UpdateAsync(record);   
-        }
-        public async Task<int?> Insert(Record record)
+            Record record = await tran.Connection.GetAsync<Record>(recordId, transaction: tran)
+                ?? throw new Exception("Chyba při snaze aktualizovat zůstatek neexistujícího záznamu.");
+            record.Id = recordId;
+            //Kontrola na Zustatek >= 0
+            int newStock;
+            if ((newStock = record.Stock + stock) < 0)
+				throw new Exception("Chyba při snaze aktualizovat zůstatek na zápornou hodnotu.");
+
+            record.Stock = newStock;
+            return await tran.Connection.UpdateAsync(record,transaction:tran);
+		}
+		public async Task<int> Update(Record record)
+		{
+			using IDbConnection cnn = Database.CreateConnection();
+			return await cnn.UpdateAsync(record);
+		}
+		public async Task<int?> Insert(Record record)
         {
 
 			using IDbConnection cnn = Database.CreateConnection();

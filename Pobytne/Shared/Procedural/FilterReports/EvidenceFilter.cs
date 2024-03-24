@@ -2,7 +2,7 @@
 
 namespace Pobytne.Shared.Procedural.FilterReports
 {
-	public class EvidenceFilter : IFilterReport
+	public class EvidenceFilter() : LazyList(typeof(Evidence)), IFilterReport
 	{
 		public required int? ModuleId { get; set; }
         public required int? ContractType { get; set; }

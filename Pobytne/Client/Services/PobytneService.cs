@@ -74,8 +74,9 @@ namespace Pobytne.Client.Services
             if (filter is not null)
             {
                 string filterJSON = JsonConvert.SerializeObject(filter);
-                requestUri += $"?filterJSON={filterJSON}";
+                requestUri += $"filterJSON={filterJSON}";
             }
+
             var request = $"/{GetControler(typeof(T))}/{requestUri}";
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, request);
 
@@ -98,7 +99,7 @@ namespace Pobytne.Client.Services
             if (filter is not null)
             {
                 string filterJSON = JsonConvert.SerializeObject(filter);
-                requestUri += $"?filterJSON={filterJSON}";
+                requestUri += $"filterJSON={filterJSON}";
             }
             var request = $"/{GetControler(typeof(T))}/Count{requestUri}";
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, request);

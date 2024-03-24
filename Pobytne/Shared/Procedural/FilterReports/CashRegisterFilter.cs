@@ -2,7 +2,7 @@
 
 namespace Pobytne.Shared.Procedural.FilterReports
 {
-	public class CashRegisterFilter : IFilterReport
+	public class CashRegisterFilter() : LazyList(typeof(CashRegister)), IFilterReport
 	{
 		public int PaymentId { get; set; }// not null
 		public int? ModuleId { get; set; }// not null

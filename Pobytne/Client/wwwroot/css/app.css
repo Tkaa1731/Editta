@@ -130,18 +130,12 @@ a.no-link {
     box-shadow: 0px 0px 35px 0px rgba(154, 161, 171, 0.15)!important;
     border:0;
 }
-
-.btn.btn-danger {
-    color: #fff;
-    background-color: #ea7c90 !important;
-    border-color: none;
-}
 .btn.btn-success {
     color: #fff;
     background-color: #50a732 !important;
     border-color: #52AD34 !important;
 }
-.btn.btn-primary {
+.btn.btn-primary, .bg-primary {
     color: #fff;
     background-color: #3C74F6 !important;
     border-color: #2966F5 !important;

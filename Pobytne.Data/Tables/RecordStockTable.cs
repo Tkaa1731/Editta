@@ -27,10 +27,9 @@ namespace Pobytne.Data.Tables
 
             return await cnn.QueryFirstAsync<RecordStock>(sql, conditions);
         }
-        public async Task<int?> Insert(RecordStock stock)
+        public async Task<int?> Insert(RecordStock stock, IDbTransaction tran)
         {
-            using IDbConnection cnn = Database.CreateConnection();
-            return await cnn.InsertAsync(stock);
+            return await tran.Connection.InsertAsync(stock,transaction:tran);
         }
     }
 }

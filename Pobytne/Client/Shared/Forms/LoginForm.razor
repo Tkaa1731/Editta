@@ -12,7 +12,7 @@
                 <div class="card floating-card">
                     <div class="card-body p-5 text-center">
 
-                        <h3 class="mb-5">Pobytné přihlášení</h3>
+                        <h3 class="mb-5">Editta přihlášení</h3>
                         <EditForm Model="@logRequest" OnValidSubmit=Authenticate>
                             <DataAnnotationsValidator />
 
@@ -50,7 +50,7 @@
             moduleWorkspace.UserId = user.User.Id;
             moduleWorkspace.LicenseNumber = user.User.LicenseNumber;
             moduleWorkspace.ModulesDic = user.User.AccessPermition.ToDictionary(p => p.ModuleId, p => p.ModuleName);
-            // navManager.NavigateTo("/", true);
+            navManager.NavigateTo("/", false);
         }
         else
         {

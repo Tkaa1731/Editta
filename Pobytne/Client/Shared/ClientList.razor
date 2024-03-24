@@ -2,24 +2,46 @@
 @inject IHxMessengerService Messenger
 @inject IHxMessageBoxService MessageBox
 
-<ListCustom 
-	ListTitle="Počet klientů" 
-	ListItems="AllClients" 
-	selectedItemChanged="OnItemSelect" 
-	EventNewItem="OnNewItem" 
-	selectedItem="Value"
-	PageSize="PageSize"
-	Editable="Editable">
+<HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card">
+        <TitleTemplate>
+           Počet klientů <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@listCount</HxBadge>
+        </TitleTemplate>
+        <SearchTemplate>
+        <HxCheckbox @bind-Value="lazyList.Active" @bind-Value:after="gridComponent.RefreshDataAsync" Text="Zobrazit aktivní"/>
+        <HxInputText Placeholder="Hledat" Type="InputType.Search" @bind-Value="lazyList.Subfix" @bind-Value:after="gridComponent.RefreshDataAsync"/>
+        </SearchTemplate>
+        <CommandsTemplate>
+            @if(Editable){
+                <HxButton Text="Nová položka" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="OnNewItem"/>
+            }
+        </CommandsTemplate>
+    <DataTemplate>
+        <HxGrid @ref="gridComponent" 
+            TItem="IListItem" 
+            Responsive="true" 
+            DataProvider="LoadDataItems" 
+            SelectedDataItemChanged="OnItemSelect"
+            SelectedDataItem="Value" 
+            ContentNavigationMode="GridContentNavigationMode.Pagination"
+            HeaderRowCssClass="sticky-top"
+            PageSize="PageSize">
+            <Columns>
+                <HxGridColumn HeaderText="Id" ItemTextSelector="@(item => item.Id.ToString())" IsDefaultSortColumn=false/>
+                <HxGridColumn HeaderText="Název" ItemTextSelector="@(item => item.Name)" />
+                <HxGridColumn HeaderText="Popis" ItemTextSelector="@(item => item.Description)"/>
+                <HxGridColumn HeaderText="Poslední úprava" ItemTextSelector="@(item => item.CreationDate.ToString())"/>
 
-	<MenuGridColumn>
-		<HxContextMenuGridColumn TItem="IListItem" Context="item">
-			@if (Editable)
-			{
-				<HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" Tooltip="Smazat" OnClick="async()=>await OnDeleteItem(item)"/>
-			}
-		</HxContextMenuGridColumn>
-	</MenuGridColumn>
-</ListCustom>
+				<HxContextMenuGridColumn TItem="IListItem" Context="item">
+					@if (Editable)
+					{
+						<HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" Tooltip="Smazat" OnClick="async()=>await OnDeleteItem(item)"/>
+					}
+				</HxContextMenuGridColumn>     
+  
+            </Columns>
+        </HxGrid>
+    </DataTemplate>
+</HxListLayout>
 
 <FormModal formItem="itemForm" @ref=formModal OnSuccessRequest="OnSuccessRequestHandler"></FormModal>
 
@@ -33,25 +55,63 @@
 	[Parameter]
 	public EventCallback<IListItem?> ValueChanged { get; set; }
 	[Parameter]
-    public int PageSize { get; set; } = 10;
+	public int PageSize { get; set; } = 10;
+
+	private FormModal formModal = default!;
+	private HxGrid<IListItem> gridComponent = new();
+	private LazyList lazyList = new(typeof(Client));
 
 	private IListItem itemForm = default!;
 
-	private List<IListItem> AllClients = [];
-	private FormModal formModal = default!;
-	protected override async Task OnInitializedAsync()
-	{
-		var response = await _service.GetAllAsync<Client>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
-		List<Client> clients = new();
-		if (response is null)
-			Console.WriteLine($"NO RESPONSE");
-		else if (response is ErrorResponse response1)
-			Console.WriteLine($"{response1.ErrorMessage}");
-		else if (response is List<Client> list)
-			clients = list;
+	private List<Client> list = [];
+	private int listCount = 0;
 
-		if (clients.Count > 0)
-			AllClients = clients.Where(c => c.Id != 0).Select(c => c as IListItem).ToList();
+	private async  Task<GridDataProviderResult<IListItem>> LoadDataItems(GridDataProviderRequest<IListItem> request)
+	{
+		lazyList.StartIndex = request.StartIndex;
+		lazyList.Count = request.Count??int.MaxValue;
+
+		Value = null;
+
+		await OnFilteredCount();
+		await OnLoadMore();
+
+		return new GridDataProviderResult<IListItem>()
+			{
+				Data = list,
+				TotalCount = listCount
+			};
+	}
+	private async Task OnLoadMore()
+	{
+		var response = await _service.GetAllAsync<Client>($"?moduleId={moduleWorkspace.Id}&", moduleWorkspace.Id, lazyList);
+		if (response is List<Client> clients)
+			list = clients;
+		else
+		{
+			list.Clear();
+			var errorMessage = "Nastala neočekávaná chyba.";
+			if (response is ErrorResponse error)
+				errorMessage = error.ErrorMessage;
+			Messenger.AddError(title: "Chyba při smazáni", message: errorMessage);
+		}
+	}
+	private async Task OnFilteredCount()
+	{
+		var response = await _service.GetCountAsync<Client>($"?moduleId={moduleWorkspace.Id}&", moduleWorkspace.Id, lazyList);
+		if (response is int count)
+		{
+			listCount = count;
+			StateHasChanged();
+		}
+		else
+		{
+			listCount = 0;
+			var errorMessage = "Nastala neočekávaná chyba.";
+			if (response is ErrorResponse error)
+				errorMessage = error.ErrorMessage;
+			Messenger.AddError(title: "Chyba při smazáni", message: errorMessage);
+		}
 	}
 	private async Task OnItemSelect(IListItem selection)
 	{
@@ -76,21 +136,24 @@
 	private void OnSuccessRequestHandler((IListItem,EForm) item)
 	{
 		//UPATE LIST
-		switch (item.Item2)
-		{
-			case EForm.Insert:
-				AllClients.Add(item.Item1);
-				break;
-			case EForm.Update:
-				var index = AllClients.FindIndex(i => i.Id == item.Item1.Id);
-				if(index != -1)
-				{
-					AllClients[index] = item.Item1;
-					Value = null;
-				}
-                break;
-        }
-		StateHasChanged();
+		if(item.Item1 is Client c)
+		{			
+			switch (item.Item2)
+			{
+				case EForm.Insert:
+					list.Add(c);
+					break;
+				case EForm.Update:
+					var index = list.FindIndex(i => i.Id == c.Id);
+					if(index != -1)
+					{
+						list[index] = c;
+						Value = null;
+					}
+					break;
+			}
+			StateHasChanged();
+		}
 	}
 	private async Task OnDeleteItem(IListItem deleteItem)
     {
@@ -104,7 +167,7 @@
             Messenger.AddError(title: "Chyba při smazáni", message: error.ErrorMessage );
         else
         {
-            AllClients?.Remove(deleteItem);
+            list.Remove((Client)deleteItem);
             Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně smazán.");
 			await Task.Delay(1500);
 			Messenger.Clear();

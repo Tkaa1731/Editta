@@ -1,5 +1,6 @@
 ﻿@page "/{idModule}/EvidenceReports"
 @inject PobytneService _service
+@inject IHxMessengerService Messenger
 @inject ExcelExportService _excelService
 
 <ModuleNav idModule="@idModule" PageTitle="Souhrny evidence"></ModuleNav>
@@ -9,16 +10,16 @@
 
 		<HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card">
 			<TitleTemplate>
-				Souhrny evidence <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1 fs-6">@reportsList.Count</HxBadge>
+				Počet záznamů evidence <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1 fs-6">@reportsCount</HxBadge>
 			</TitleTemplate>
 			<DataTemplate>
 				<HxGrid @ref="grid" 
 						TItem="Evidence"
 						DataProvider="GetGridData"
 						Responsive="true"
-						ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
-						TableContainerCssClass="scrollable-table-container_2"
+						ContentNavigationMode="GridContentNavigationMode.Pagination"
 						HeaderRowCssClass="sticky-top"
+						PageSize="18"
 						ItemRowHeight="20">
 					<Columns>
 						@if (ShowGroups)
@@ -51,7 +52,7 @@
 		</HxListLayout>
 
 	</div>
-	<div class="col-4 d-flex flex-column overflow-hidden mh-100" style="max-width:500px">
+	<div class="col-4 d-flex flex-column overflow-hidden h-max" style="max-width:500px">
 		<div class="p-3 mb-3 card floating-card">
 			<div class="row">
 				<h5 class="col">Kusy</h5>
@@ -140,16 +141,6 @@
 		<HxButton Text="Potvrdit" OnClick="async()=>{StateHasChanged();await clientsModal.HideAsync();}" Color="ThemeColor.Primary" CssClass="w-100" />
 	</FooterTemplate>
 </HxModal>
-<style>
-	.scrollable-table-container_2 {
-		max-height: 87svh;
-		overflow: auto;
-	}
-		.scrollable-table-container {
-		max-height: 40svh;
-		overflow: auto;
-	}
-</style>
 @code 
 {
 	[EditorRequired]
@@ -162,7 +153,9 @@
 	/// </summary>
 	private bool ShowGroups = false;
 	public HxGrid<Evidence> grid = new();
+
 	private List<Evidence> reportsList = [];
+	private int reportsCount = 0;
 
 	private HxModal clientsModal = new();
 
@@ -199,14 +192,18 @@
 	}
 	private Task<GridDataProviderResult<Evidence>> GetGridData(GridDataProviderRequest<Evidence> request)
 	{
-		if(!ShowGroups)
+		if (!ShowGroups)
+		{
+			reportsCount = reportsList.Count();
+			StateHasChanged();
 			return Task.FromResult(request.ApplyTo(reportsList));
+		}
+
+		IEnumerable<Evidence> grouped;
 		switch (selectedRadio)
 		{
 			case 1:
-				return Task.FromResult(
-					request.ApplyTo(
-						reportsList.GroupBy(r => r.RecordId)
+				grouped = reportsList.GroupBy(r => r.RecordId)
 						.Select(g =>
 							new Evidence()
 								{
@@ -218,13 +215,10 @@
 									AccountA = g.First().AccountA,
 									AccountS = g.First().AccountS
 								}
-						)
-					)
-				);
+						);
+				break;
 			case 2:
-				return Task.FromResult(
-					request.ApplyTo(
-						reportsList.GroupBy(r => r.RecordAttributeId)
+				grouped = reportsList.GroupBy(r => r.RecordAttributeId)
 						.Select(g =>
 							new Evidence()
 								{
@@ -236,13 +230,10 @@
 									AccountA = g.First().AccountA,
 									AccountS = g.First().AccountS
 								}
-						)
-					)
-				);
+						);
+				break;
 			default:
-				return Task.FromResult(
-					request.ApplyTo(
-						reportsList.GroupBy(r => r.ClientId)
+				grouped = reportsList.GroupBy(r => r.ClientId)
 						.Select(g =>
 							new Evidence()
 								{
@@ -252,10 +243,14 @@
 									Adult = g.Sum(e => e.Adult),
 									Child = g.Sum(e => e.Child)
 								}
-						)
-					)
-				);
+						);
+				break;
 		}
+
+		reportsCount = grouped.Count();
+		StateHasChanged();
+
+		return Task.FromResult(request.ApplyTo(grouped));
 	}
 
 	private async Task ApplyFilter(IFilterReport _filter)
@@ -264,16 +259,19 @@
 		{
 			f.ClientId = selectedClient?.Id;
 			// filter prepared
-			var response = await _service.GetFilteredReports<EvidenceFilter,Evidence>(f,moduleWorkspace.Id);
+			var response = await _service.GetAllAsync<Evidence>("?",moduleWorkspace.Id,f);
 
-			if (response is null)
-				Console.WriteLine($"NO RESPONSE");
-			else if (response is ErrorResponse response1)
-				Console.WriteLine($"{response1.ErrorMessage}");
-			else if (response is List<Evidence> list)
+			if (response is List<Evidence> list)
 			{
 				reportsList = list;
 				await grid.RefreshDataAsync();
+			}		
+			else
+			{
+				var errorMessage = "Nastala neočekávaná chyba.";
+				if (response is ErrorResponse error)
+					errorMessage = error.ErrorMessage;
+				Messenger.AddError(title: "Chyba při smazáni", message: errorMessage);
 			}
 		}
 	}

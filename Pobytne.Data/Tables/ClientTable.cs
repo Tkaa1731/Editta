@@ -7,31 +7,30 @@ namespace Pobytne.Data.Tables
 {
 	public class ClientTable
     {
-        public async Task<IEnumerable<Client>> GetAll(object conditions)
+        public async Task<IEnumerable<Client>> GetList(object conditions)
         {
             using (IDbConnection cnn = Database.CreateConnection())
             {
-                string sql = @"SELECT TOP 30 cl.*, cr.JmenoUser AS CreationClientName
+                string sql = @"SELECT cl.*, cr.JmenoUser AS CreationClientName
                                FROM S_Uzivatele cl
                                JOIN S_LoginUser cr ON cl.Kdo = cr.IDLogin
-                               WHERE cl.IDModulu = @ModuleNumber
-                               ORDER BY cl.IDUzivatele DESC;";
-
-                return await cnn.QueryAsync<Client>(sql, conditions);
-            }
-        }
-        public async Task<IEnumerable<Client>> GetAllRange(object conditions)
-        {
-            using (IDbConnection cnn = Database.CreateConnection())
-            {
-                string sql = @"select TOP 30 cl.*, cr.JmenoUser AS CreationClientName
-                               from S_Uzivatele cl
-                               JOIN S_LoginUser cr ON cl.Kdo = cr.IDLogin
-                               WHERE cl.IDModulu = @ModuleId AND cl.JmenoUzivatele LIKE '@Name%' AND cl.Valid != @Valid 
+                               WHERE cl.IDModulu = @ModuleId AND cl.JmenoUzivatele LIKE '%'+@Subfix+'%' AND cl.JePlatny != @Valid 
                                ORDER BY cl.IDUzivatele
                                OFFSET @StartIndex ROWS FETCH NEXT @Count ROWS ONLY;";
 
                 return await cnn.QueryAsync<Client>(sql, conditions);
+            }
+        }
+        public async Task<int> GetCount(object conditions)
+        {
+            using (IDbConnection cnn = Database.CreateConnection())
+            {
+                string sql = @"SELECT COUNT(cl.IDUzivatele)
+                               FROM S_Uzivatele cl
+                               JOIN S_LoginUser cr ON cl.Kdo = cr.IDLogin
+                               WHERE cl.IDModulu = @ModuleId AND cl.JmenoUzivatele LIKE '%'+@Subfix+'%' AND cl.JePlatny != @Valid;";
+
+                return await cnn.ExecuteScalarAsync<int>(sql,conditions);
             }
         }
         public async Task<Client> GetById(int clientId)
@@ -46,13 +45,6 @@ namespace Pobytne.Data.Tables
                 var conditions = new { IDUzivatele = clientId };
 
                 return await cnn.QueryFirstAsync<Client>(sql, conditions);
-            }
-        }
-        public async Task<int> GetCount(object conditions)
-        {
-            using (IDbConnection cnn = Database.CreateConnection())
-            {
-                return await cnn.RecordCountAsync<Client>(conditions);
             }
         }
         //---------------------------- InsUpDel-------------------------------

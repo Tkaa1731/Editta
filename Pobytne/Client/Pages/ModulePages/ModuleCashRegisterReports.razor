@@ -1,5 +1,6 @@
 ﻿@page "/{idModule}/CashRegisterReports"
 @inject PobytneService _service
+@inject IHxMessengerService Messenger
 @inject ExcelExportService _csvService
 
 <ModuleNav idModule="@idModule" PageTitle="Souhrny pokladna"></ModuleNav>
@@ -9,7 +10,7 @@
 
 		<HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card">
 			<TitleTemplate>
-				Souhrny pokladna <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1 fs-6">@reportsList.Count</HxBadge>
+				Počet záznamů pokladny <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1 fs-6">@reportsCount</HxBadge>
 			</TitleTemplate>
 			<DataTemplate>
 				<HxGrid @ref="grid" 
@@ -17,9 +18,9 @@
 						DataProvider="GetGridData"
 						Responsive="true"
 						SelectionEnabled="false"
-						ContentNavigationMode="GridContentNavigationMode.InfiniteScroll"
-						TableContainerCssClass="scrollable-table-container_2"
+						ContentNavigationMode="GridContentNavigationMode.Pagination"
 						HeaderRowCssClass="sticky-top"
+						PageSize="18"
 						ItemRowHeight="20"
 						>
 					<Columns>
@@ -47,7 +48,7 @@
 			</DataTemplate>
 		</HxListLayout>
 	</div>
-	<div class="col-4 d-flex flex-column overflow-hidden mh-100	" style="max-width:500px;">
+	<div class="col-4 d-flex flex-column overflow-hidden h-max" style="max-width:500px;">
 		<div class="p-3 mb-3 card floating-card">
 			@* Porovnani k pokladne *@
 			<h2>@reportsList.Sum(r => r.Price) Kč</h2>
@@ -112,16 +113,6 @@
 		<HxButton Text="Potvrdit" OnClick="async()=>await clientsModal.HideAsync()" Color="ThemeColor.Primary" CssClass="w-100" />
 	</FooterTemplate>
 </HxModal>
-<style>
-    .scrollable-table-container {
-		max-height: 40svh;
-		overflow: auto;
-	}
-		.scrollable-table-container_2 {
-		max-height: 87svh;
-		overflow: auto;
-	}
-</style>
 @code {
 	[EditorRequired]
 	[Parameter]
@@ -134,6 +125,7 @@
 	private bool ShowGroups = false;
 	private HxGrid<CashRegister> grid = new();
 	private List<CashRegister> reportsList = [];
+	private int reportsCount = 0;
 
 	private HxModal clientsModal = new();
 	private List<RKeyValue> paymentList = new List<RKeyValue>() { new RKeyValue() { Name = "Načítání plateb...", Id = -1} };
@@ -166,61 +158,66 @@
 		//load payment enum
 		var response = await _service.GetAllAsync<Payment>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
 
-		if (response is null)
-			Console.WriteLine($"NO RESPONSE");
-		else if (response is ErrorResponse response1)
-			Console.WriteLine($"{response1.ErrorMessage}");
-		else if (response is List<Payment> list)
+		if (response is List<Payment> payments && payments.Any())
 		{
-			if (list.Any())
-			{
-				paymentList = list.Select(p => new RKeyValue() { Name = p.Name, Id = p.Id }).ToList();
-				filter.PaymentId = list.First().Id;
-				
-				await ApplyFilter(filter);
-			}
+			paymentList = payments.Select(p => new RKeyValue() { Name = p.Name, Id = p.Id }).ToList();
+			filter.PaymentId = payments.First().Id;
+
+			await ApplyFilter(filter);
+		}
+		else
+		{
+			var errorMessage = "Nastala neočekávaná chyba.";
+			if (response is ErrorResponse error)
+				errorMessage = error.ErrorMessage;
+			Messenger.AddError(title: "Chyba při smazáni", message: errorMessage);
 		}
 
 	}
 	private Task<GridDataProviderResult<CashRegister>> GetGridData(GridDataProviderRequest<CashRegister> request)
 	{
-		if(!ShowGroups)
+		if (!ShowGroups)
+		{
+			reportsCount = reportsList.Count();
+			StateHasChanged();
 			return Task.FromResult(request.ApplyTo(reportsList));
+		}
+
+		IEnumerable<CashRegister> grouped;
 		switch (selectedRadio)
 		{
 			case 1:
-				return Task.FromResult(
-					request.ApplyTo(
-						reportsList.GroupBy(r => r.RecordId)
+				grouped = reportsList.GroupBy(r => r.RecordId)
 						.Select(g =>
 							new CashRegister()
-							{
-								Id = g.Key,
-								RecordName = g.First().RecordName, 
-								Price = g.Sum(r=>r.Price),
-								AccountA = g.First().AccountA,
-								AccountS = g.First().AccountS
-							}
-						)
-					)
-				);
+								{
+									Id = g.Key,
+									RecordName = g.First().RecordName,
+									Price = g.Sum(r => r.Price),
+									AccountA = g.First().AccountA,
+									AccountS = g.First().AccountS
+								}
+						);
+				break;
 			default:
-				return Task.FromResult(
-					request.ApplyTo(
-						reportsList.GroupBy(r => r.RecordAttributeId)
+				grouped = reportsList.GroupBy(r => r.RecordAttributeId)
 						.Select(g =>
 							new CashRegister()
-							{
-								Id = g.Key,
-								RecordName = g.First().RecordAttributeName,
-								Price = g.Sum(r=>r.Price),
-								AccountA = g.First().AccountA,
-								AccountS = g.First().AccountS
-							}
-						)
-					)
-				);
+								{
+									Id = g.Key,
+									RecordName = g.First().RecordAttributeName,
+									Price = g.Sum(r => r.Price),
+									AccountA = g.First().AccountA,
+									AccountS = g.First().AccountS
+								}
+						);
+				break;
 		}
+
+		reportsCount = grouped.Count();
+		StateHasChanged();
+
+		return Task.FromResult(request.ApplyTo(grouped));
 	}
 	private async Task ApplyFilter(IFilterReport _filter)
 	{
@@ -230,16 +227,19 @@
 			f.ClientId = selectedClient?.Id;
 			//Filter prepared
 
-			var response = await _service.GetFilteredReports<CashRegisterFilter,CashRegister>(f,moduleWorkspace.Id);
+			var response = await _service.GetAllAsync<CashRegister>("?",moduleWorkspace.Id,f);
 
-			if (response is null)
-				Console.WriteLine($"NO RESPONSE");
-			else if (response is ErrorResponse response1)
-				Console.WriteLine($"{response1.ErrorMessage}");
-			else if (response is List<CashRegister> list)
+			if (response is List<CashRegister> list)
 			{
 				reportsList = list;
 				await grid.RefreshDataAsync();
+			}
+			else
+			{
+				var errorMessage = "Nastala neočekávaná chyba.";
+				if (response is ErrorResponse error)
+					errorMessage = error.ErrorMessage;
+				Messenger.AddError(title: "Chyba při smazáni", message: errorMessage);
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 ﻿@page "/{idModule}/Records"
 @inject PobytneService _service
-@inject IJSRuntime js
+@inject IHxMessengerService Messenger
 
 <ModuleNav idModule="@idModule" PageTitle="Evidence"></ModuleNav>
 
@@ -17,7 +17,7 @@
             </div>
         }
         //interakce komponenta  
-        <div class="col card p-3 h-max d-flex flex-column justify-content-between border-top border-2 floating-card" style="min-width:fit-content;">
+        <div class="col card p-3 h-max d-flex flex-column justify-content-between border-top border-2 floating-card" style="min-width:30rem;">
             <div  class="overflow-hidden d-flex flex-column" style="flex:1;">
                 <!--Kalendar-->
                     <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="interaction.InteractionDate" InputSize="InputSize.Large" Label="Datum interakce"/>
@@ -30,7 +30,7 @@
                 <hr class="my-3" style="height: 2px;color: #999;">
                 <div>
                     <span><b>Celkem:</b></span>
-                    <p class="ms-2 fw-normal h3">@interaction.Records.Sum( r => r.Price) Kč</p>
+                    <p class="ms-2 fw-normal h3">@interaction.Records.Sum( r => r.Price*r.Quantity) Kč</p>
                 </div>
                 <HxInputTextArea Label="Poznámka" LabelType="LabelType.Floating" MaxLength="200" @bind-Value="interaction.InteractionName" CssClass="my-2" />
             
@@ -133,7 +133,7 @@
         moduleWorkspace.ModuleId = idModule;
         //update moduleWorkspace
 
-        var depth = await _service.GetCountAsync<Record>($"Depth?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
+        var depth = await _service.GetCountAsync<Record>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
         if (ServiceRequest<int>(depth) && depth is int d)
         {
             maxDepth = d+1;
@@ -159,10 +159,10 @@
     {
         if(response is T)
             return true;
-        else if (response is null)
-            Console.WriteLine($"NO RESPONSE");
-        else if (response is ErrorResponse error)
-            Console.WriteLine($"{error.ErrorMessage}");
+        var errorText = "Vyskytla se neočekávaná chyba";
+        if (response is ErrorResponse error)
+            errorText = error.ErrorMessage;
+        Messenger.AddError(title: "Chyba při ukladani", message: errorText );
         return false;
     }
     private async Task OnSelect(RecordTreeView rtv)
@@ -245,18 +245,17 @@
     {
         var response = await _service.InsertAsync<Interaction>(interaction, moduleWorkspace.Id);
 
-        if (response is null)
-            await js.InvokeAsync<string>("alert",$"NO RESPONSE");
-        else if (response is ErrorResponse error)
-            await js.InvokeAsync<string>("alert",$"{error.ErrorMessage}");
-        else
+        if (ServiceRequest<Task>(response))
         {
-            await js.InvokeAsync<string>("alert",$"Successfully inserted");
+            Messenger.AddInformation(title: "Vše v pořádku", message:"Interakce byla úspěšně uložena");           
             //clear
             interaction = new();
             recordPath = new int[maxDepth];
             for (int i = 1; i < maxDepth; i++)
                 records[i].Clear();
+
+            await Task.Delay(1500);
+            Messenger.Clear();
         }
     }
     private async Task PaymentSelectedHandler(int paymentId)
@@ -276,15 +275,7 @@
     private async Task LoadPayments()
     {
         var response = await _service.GetAllAsync<Payment>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
-        List<Payment> payments = new();
-        if (response is null)
-            Console.WriteLine($"NO RESPONSE");
-        else if (response is ErrorResponse response1)
-            Console.WriteLine($"{response1.ErrorMessage}");
-        else if (response is List<Payment> list)
-            payments = list;
-        
-        if (payments.Count > 0)
-            AllPayments = payments.Where(p => p.ValidTo >= DateTime.Now ).ToList();
+        if(ServiceRequest<List<Payment>>(response) && response is List<Payment> list)
+            AllPayments = list.Where(p => p.ValidTo >= DateTime.Now ).ToList();
     }
 }

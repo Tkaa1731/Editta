@@ -74,8 +74,7 @@
         {
             Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně uložen.");
 
-            if(newItem is not RecordStock)
-                await OnSuccessRequest.InvokeAsync((newItem,e));  // Set new values
+            await OnSuccessRequest.InvokeAsync((newItem,e));  // Set new values
 
             await Task.Delay(1500);
             await myModal.HideAsync();
