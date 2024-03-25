@@ -4,43 +4,47 @@
 
 <ModuleNav idModule="@idModule" PageTitle="Evidence"></ModuleNav>
 
-<div class="row">
-    @if(maxDepth > 0)
-    {   
-        @for (int i = 0; i < maxDepth; i++)
-        {
-            <div class="col custom-scrollbar overflow-auto h-max" style="min-width:14rem; "> 
-                @for(int j = 0; j < records[i].Count; j++)
-                {
-                    <RecordComponent Source=@records[i][j] OnClick=OnSelect CssClass="@((recordPath[i]==records[i][j].Record.Id)?"record-active":"")"></RecordComponent>
-                }
-            </div>
-        }
-        //interakce komponenta  
-        <div class="col card p-3 h-max d-flex flex-column justify-content-between border-top border-2 floating-card" style="min-width:30rem;">
-            <div  class="overflow-hidden d-flex flex-column" style="flex:1;">
-                <!--Kalendar-->
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="interaction.InteractionDate" InputSize="InputSize.Large" Label="Datum interakce"/>
-                <!-- Seznam položek -->
-                <div  class="custom-grid-overflow overflow-hidden mt-3">
-                    <InteractionComponent @bind-Records="interaction.Records"></InteractionComponent>
+<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Evidence,EAccess.ReadOnly,idModule)>
+    <Authorized>
+        <div class="row">
+  
+            @for (int i = 0; i < maxDepth; i++)
+            {
+                <div class="col-auto custom-scrollbar overflow-auto h-max" style="min-width:18rem;max-width:30rem;"> 
+                    @for(int j = 0; j < records[i].Count; j++)
+                    {
+                        <RecordComponent Source=@records[i][j] OnClick=OnSelect CssClass="@((recordPath[i]==records[i][j].Record.Id)?"record-active":"")"></RecordComponent>
+                    }
                 </div>
-            </div>
-            <div>
-                <hr class="my-3" style="height: 2px;color: #999;">
+            }
+            <div class="col"/>
+           @*  //interakce komponenta   *@
+            <div class="col-auto card p-3 h-max d-flex flex-column justify-content-between border-top border-2 floating-card" style="min-width:30rem; max-width:30rem;">
+                <div  class="overflow-hidden d-flex flex-column" style="flex:1;">
+                    <!--Kalendar-->
+                        <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="interaction.InteractionDate" InputSize="InputSize.Large" Label="Datum interakce"/>
+                    <!-- Seznam položek -->
+                    <div  class="custom-grid-overflow overflow-hidden mt-3">
+                        <InteractionComponent @bind-Records="interaction.Records"></InteractionComponent>
+                    </div>
+                </div>
                 <div>
-                    <span><b>Celkem:</b></span>
-                    <p class="ms-2 fw-normal h3">@interaction.Records.Sum( r => r.Price*r.Quantity) Kč</p>
+                    <hr class="my-3" style="height: 2px;color: #999;">
+                    <div>
+                        <span><b>Celkem:</b></span>
+                        <p class="ms-2 fw-normal h3">@interaction.Records.Sum( r => r.Price*r.Quantity) Kč</p>
+                    </div>
+                    <HxInputTextArea Label="Poznámka" LabelType="LabelType.Floating" MaxLength="200" @bind-Value="interaction.InteractionName" CssClass="my-2" />
+        
+                    <HxButton CssClass="w-100 my-1" Text="Potvrdit" Color=ThemeColor.Success OnClick="SubmitHandler" Enabled="(interaction.Records.Count>0)"></HxButton>
+                    <HxButton CssClass="w-100" Text="Smazat vse" Color=ThemeColor.Danger Enabled="(interaction.Records.Count>0)" OnClick="()=>{interaction.Records.Clear();interaction.InteractionName = string.Empty;}"></HxButton>
                 </div>
-                <HxInputTextArea Label="Poznámka" LabelType="LabelType.Floating" MaxLength="200" @bind-Value="interaction.InteractionName" CssClass="my-2" />
-            
-                <HxButton CssClass="w-100 my-1" Text="Potvrdit" Color=ThemeColor.Success OnClick="SubmitHandler" Enabled="(interaction.Records.Count>0)"></HxButton>
-                <HxButton CssClass="w-100" Text="Smazat vse" Color=ThemeColor.Danger Enabled="(interaction.Records.Count>0)" OnClick="()=>{interaction.Records.Clear();interaction.InteractionName = string.Empty;}"></HxButton>
             </div>
+        
+        
         </div>
-
-    }
-</div>
+    </Authorized>
+</AuthorizeView>
 
 <HxModal @ref="clientsModal" Title="Vyberte klienta" Centered=true Backdrop="ModalBackdrop.Static" Size="ModalSize.Large">
 	<BodyTemplate>
@@ -141,7 +145,7 @@
             for (int i = 0; i < maxDepth; i++)
                 records[i] = new();
 
-            var root = await _service.GetAllAsync<Record>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
+            var root = await _service.GetAllAsync<Record>("?", moduleWorkspace.Id,new RecordFilter() { ModuleId = moduleWorkspace.Id});
             if (ServiceRequest<List<Record>>(root) && root is List<Record> r)
             {
                 List<RecordTreeView> rootTV = [];
@@ -176,9 +180,10 @@
             if(selectedActive  is not null)
                 records[rtv.Depth + 1] = selectedActive;
 
-            for (int i = rtv.Depth + 2; i < maxDepth; i++)
+            for (int i = rtv.Depth + 1; i < maxDepth; i++)
             {
-                records[i].Clear();
+                if(i > rtv.Depth + 1)
+                    records[i].Clear();
                 recordPath[i] = -1;
             }
         }

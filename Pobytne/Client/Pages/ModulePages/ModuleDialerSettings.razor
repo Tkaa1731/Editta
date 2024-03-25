@@ -3,95 +3,103 @@
 @inject IHxMessengerService Messenger
 @inject IHxMessageBoxService MessageBox
 
-<ModuleNav idModule="@idModule" PageTitle="Číselník"></ModuleNav>
+<ModuleNav idModule="@idModule" PageTitle="Číselníky"></ModuleNav>
 
 
 	<HxTabPanel NavVariant="NavVariant.Pills" InitialActiveTabId="@dialerName" CssClass="card floating-card w-25 ms-4 mt-4 p-4 position-fixed" RenderMode="TabPanelRenderMode.ActiveTabOnly">
 		<HxTab Title="Číselník typu plateb" TitleCssClass="mb-3" Id="PaymentDialer">
 			<Content>
-				<div class="d-flex">
+				<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.PaymentType,EAccess.ReadOnly,idModule)>
+					<Authorized>
+						<div class="d-flex">
 
-					<div class="col">
-						<div class="my-4" style="height:25vh;"/>
-						<div class="card floating-card p-3 me-4 ">
-							<PaymentForm formType="paymentFormType" payment="paymentForm" Enabled=@(paymentForm.ModuleId > 0)  OnValidSubmit="(args) => Request(args.Item1,args.Item2)"/>
-						</div>
-					</div>
+							<div class="col">
+								<div class="my-4" style="height:25vh;"/>
+								<div class="card floating-card p-3 me-4 ">
+									<PaymentForm formType="paymentFormType" payment="paymentForm" Enabled=@(paymentForm.ModuleId > 0)  OnValidSubmit="(args) => Request(args.Item1,args.Item2)"/>
+								</div>
+							</div>
 				
-					<HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card col-8">
-						<TitleTemplate>
-							Počet záznamů<HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@paymentList.Count</HxBadge>
-						</TitleTemplate>
-						<CommandsTemplate>
-							<HxButton Text="Nová položka" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="()=>{paymentForm = new(){ModuleId = moduleWorkspace.Id}; paymentFormType = EForm.Insert;}" />
-						</CommandsTemplate>
-						<DataTemplate>
-							<HxGrid @ref=paymentGrid
-								TItem="Payment" 
-								DataProvider="async(request)=>{if(!paymentList.Any()){paymentList = await LoadData<Payment>(); StateHasChanged();} return request.ApplyTo(paymentList);}" 
-								Responsive="true" 
-								SelectedDataItemChanged="(item)=>{paymentForm = (Payment)item.Clone(); paymentFormType = EForm.Update;}" 
-								ContentNavigationMode="GridContentNavigationMode.Pagination"
-								HeaderRowCssClass="sticky-top"
-								PageSize="15">
-								<Columns>
-									<HxGridColumn HeaderText="Id" ItemTextSelector="payment => payment.Id.ToString()" />
-									<HxGridColumn HeaderText="Název dokladu" ItemTextSelector="payment => payment.Name" />
-									<HxGridColumn HeaderText="Typ platby" ItemTextSelector="payment => payment.Type.ToString()" />
-									<HxGridColumn HeaderText="Prefix dokladu" ItemTextSelector="payment => payment.InvoicePrefix" />
-									<HxGridColumn HeaderText="Číslo dokladu" ItemTextSelector="payment => payment.InvoiceNumber.ToString()" />
+							<HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card col-8">
+								<TitleTemplate>
+									Počet záznamů<HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@paymentList.Count</HxBadge>
+								</TitleTemplate>
+								<CommandsTemplate>
+									<HxButton Text="Nová položka" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="()=>{paymentForm = new(){ModuleId = moduleWorkspace.Id}; paymentFormType = EForm.Insert;}" />
+								</CommandsTemplate>
+								<DataTemplate>
+									<HxGrid @ref=paymentGrid
+										TItem="Payment" 
+										DataProvider="async(request)=>{if(!paymentList.Any()){paymentList = await LoadData<Payment>(); StateHasChanged();} return request.ApplyTo(paymentList);}" 
+										Responsive="true" 
+										SelectedDataItemChanged="(item)=>{paymentForm = (Payment)item.Clone(); paymentFormType = EForm.Update;}" 
+										ContentNavigationMode="GridContentNavigationMode.Pagination"
+										HeaderRowCssClass="sticky-top"
+										PageSize="15">
+										<Columns>
+											<HxGridColumn HeaderText="Id" ItemTextSelector="payment => payment.Id.ToString()" />
+											<HxGridColumn HeaderText="Název dokladu" ItemTextSelector="payment => payment.Name" />
+											<HxGridColumn HeaderText="Typ platby" ItemTextSelector="payment => payment.Type.ToString()" />
+											<HxGridColumn HeaderText="Prefix dokladu" ItemTextSelector="payment => payment.InvoicePrefix" />
+											<HxGridColumn HeaderText="Číslo dokladu" ItemTextSelector="payment => payment.InvoiceNumber.ToString()" />
 
-									<HxContextMenuGridColumn Context="payment">
-										<HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" OnClick="async ()=> await DeleteItemClicked(payment)" />
-									</HxContextMenuGridColumn>      
-								</Columns>
-							</HxGrid>
-						</DataTemplate>
-					</HxListLayout>
-				</div>
+											<HxContextMenuGridColumn Context="payment">
+												<HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" OnClick="async ()=> await DeleteItemClicked(payment)" />
+											</HxContextMenuGridColumn>      
+										</Columns>
+									</HxGrid>
+								</DataTemplate>
+							</HxListLayout>
+						</div>
+					</Authorized>
+				</AuthorizeView>
 			</Content>
 		</HxTab>
 		<HxTab Title="Číselník vlastnosti záznamů" Id="ConstantDialer">
 			<Content>
-				<div class="d-flex">
-					<div class="col">
-							<div class="my-4" style="height:25vh;" />
-							<div class="card floating-card p-3 me-4">
-								<RecordAttributeForm formType="attributeFormType"  recAttribute="attributeForm" Enabled=@(attributeForm.ModuleId > 0) OnValidSubmit="(args) => Request(args.Item1,args.Item2)" />
+				<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.RecordAttribute,EAccess.ReadOnly,idModule)>
+				    <Authorized>
+						<div class="d-flex">
+							<div class="col">
+									<div class="my-4" style="height:25vh;" />
+									<div class="card floating-card p-3 me-4">
+										<RecordAttributeForm formType="attributeFormType"  recAttribute="attributeForm" Enabled=@(attributeForm.ModuleId > 0) OnValidSubmit="(args) => Request(args.Item1,args.Item2)" />
+									</div>
 							</div>
-					</div>
- 					<HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card col-8">
-						<TitleTemplate>
-							Počet záznamů<HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@attributeList.Count</HxBadge>
-						</TitleTemplate>
-						<CommandsTemplate>
-							<HxButton Text="Nová položka" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="()=>{attributeForm = new(){ModuleId = moduleWorkspace.Id}; attributeFormType = EForm.Insert;}" />
-						</CommandsTemplate>
-						<DataTemplate>
-							<HxGrid @ref=attributeGrid
-								TItem="RecordAttribute" 
-								DataProvider="async(request)=>{if(!attributeList.Any()){attributeList = await LoadData<RecordAttribute>(); StateHasChanged();} return request.ApplyTo(attributeList);}" 
-								Responsive="true" 
-								SelectedDataItemChanged="(item)=>{attributeForm = (RecordAttribute)item.Clone(); attributeFormType = EForm.Update;}" 
-								ContentNavigationMode="GridContentNavigationMode.Pagination"
-								HeaderRowCssClass="sticky-top"
-								PageSize="15">
-								<Columns>
-									<HxGridColumn HeaderText="Id" ItemTextSelector="attribute => attribute.Id.ToString()" />
-									<HxGridColumn HeaderText="Název vlastnosti" ItemTextSelector="attribute => attribute.Name" />
-									<HxGridColumn HeaderText="Typ záznamu" ItemTextSelector="attribute => attribute.Type.ToString()" />
-									<HxGridColumn HeaderText="ÚčetA" ItemTextSelector="attribute => attribute.AccountA" />
-									<HxGridColumn HeaderText="ÚčetS" ItemTextSelector="attribute => attribute.AccountS" />
+ 							<HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card col-8">
+								<TitleTemplate>
+									Počet záznamů<HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@attributeList.Count</HxBadge>
+								</TitleTemplate>
+								<CommandsTemplate>
+									<HxButton Text="Nová položka" Color="ThemeColor.Primary" Icon="BootstrapIcon.PlusLg" OnClick="()=>{attributeForm = new(){ModuleId = moduleWorkspace.Id}; attributeFormType = EForm.Insert;}" />
+								</CommandsTemplate>
+								<DataTemplate>
+									<HxGrid @ref=attributeGrid
+										TItem="RecordAttribute" 
+										DataProvider="async(request)=>{if(!attributeList.Any()){attributeList = await LoadData<RecordAttribute>(); StateHasChanged();} return request.ApplyTo(attributeList);}" 
+										Responsive="true" 
+										SelectedDataItemChanged="(item)=>{attributeForm = (RecordAttribute)item.Clone(); attributeFormType = EForm.Update;}" 
+										ContentNavigationMode="GridContentNavigationMode.Pagination"
+										HeaderRowCssClass="sticky-top"
+										PageSize="15">
+										<Columns>
+											<HxGridColumn HeaderText="Id" ItemTextSelector="attribute => attribute.Id.ToString()" />
+											<HxGridColumn HeaderText="Název vlastnosti" ItemTextSelector="attribute => attribute.Name" />
+											<HxGridColumn HeaderText="Typ záznamu" ItemTextSelector="attribute => attribute.Type.ToString()" />
+											<HxGridColumn HeaderText="ÚčetA" ItemTextSelector="attribute => attribute.AccountA" />
+											<HxGridColumn HeaderText="ÚčetS" ItemTextSelector="attribute => attribute.AccountS" />
 
-									<HxContextMenuGridColumn Context="attribute">
-										<HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" OnClick="async ()=> await DeleteItemClicked(attribute)" />
-									</HxContextMenuGridColumn>   
-								</Columns>
-							</HxGrid>
-						</DataTemplate>
-					</HxListLayout>
+											<HxContextMenuGridColumn Context="attribute">
+												<HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" OnClick="async ()=> await DeleteItemClicked(attribute)" />
+											</HxContextMenuGridColumn>   
+										</Columns>
+									</HxGrid>
+								</DataTemplate>
+							</HxListLayout>
 
-				</div>
+						</div>
+					</Authorized>
+				</AuthorizeView>
 			</Content>
 		</HxTab>
 	</HxTabPanel>

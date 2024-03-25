@@ -1,7 +1,7 @@
 ﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: "Nunito", sans-serif;
 }
 body {
     background-color: #f9fafd !important;
@@ -148,4 +148,25 @@ div.mh-max{
 }
 div.h-max {
     height: calc(100vh - 6.5rem);
+}
+h2.headline {
+    color: #A2AAB9;
+    text-align: center;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    margin-bottom: 4rem;
+    font-family: "Nunito", sans-serif;
+}
+.h5.headline {
+    color: #A2AAB9;
+    font-weight: 600;
+    /*text-transform: uppercase;*/
+    letter-spacing: .02em;
+    font-family: "Nunito", sans-serif;
+}
+.disabled {
+    background: #e7e9ed !important;
+    color: #8c8d8d !important;
+    cursor:default !important;
 }

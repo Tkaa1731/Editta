@@ -17,8 +17,7 @@
 		public long LicenseNumber { get; set; }
 		public string LicenseName { get; set; } = string.Empty;
 		public int UserId { get; set; }
+		public string UserName { get; set; } = string.Empty;
 		public Dictionary<int, string> ModulesDic = [];
-		private readonly Guid guid;
-		public ModuleWorkplace() => guid = Guid.NewGuid();
 	}
 }

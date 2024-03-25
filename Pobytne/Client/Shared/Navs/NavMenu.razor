@@ -1,9 +1,9 @@
 ﻿
 <div @onmouseenter="() => Collapsed = false" @onmouseleave="() => Collapsed = true" class="h-100">
-    <HxSidebar @bind-Collapsed="Collapsed" CssClass="h-100">
+    <HxSidebar @bind-Collapsed="Collapsed" CssClass="h-100 collapse-transition">
 
         <HeaderTemplate>
-            <HxSidebarBrand BrandName="EDITTA">
+            <HxSidebarBrand BrandName="DITTA">
                 <LogoTemplate>
                     <img src="/EDITTAs.png" width="40" height="40" />
                 </LogoTemplate>
@@ -11,7 +11,13 @@
         </HeaderTemplate>
 
         <ItemsTemplate>
-            <HxSidebarItem Text="Nástěnka" Href="/" Icon="BootstrapIcon.HouseDoor"/>
+
+            <HxSidebarItem Text="@(moduleWorkspace.LicenseName.Length>20?moduleWorkspace.LicenseName.Substring(0,20)+"..":moduleWorkspace.LicenseName)" Href="#" Icon="BootstrapIcon.HouseDoor" >
+                @foreach (var module in moduleWorkspace.ModulesDic)
+                {
+                    <HxSidebarItem Text="@module.Value" Href=@($"/{module.Key}") Icon="BootstrapIcon.Dash"/>
+                }
+            </HxSidebarItem>
             <HxSidebarItem Text="Administrace" Href="/EditLicenses" Icon="BootstrapIcon.Gear" />
             <HxSidebarItem Text="Můj účet" Href="/Account" Icon="BootstrapIcon.Person"/>
         </ItemsTemplate>
@@ -38,6 +44,8 @@
 </style>
 
 @code {
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
     [Parameter]
     [EditorRequired]
     public EventCallback OnLogout { get; set; }
