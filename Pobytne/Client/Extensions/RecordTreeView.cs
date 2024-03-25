@@ -1,6 +1,7 @@
 ﻿using Pobytne.Client.Services;
 using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Procedural.Filters;
 
 namespace Pobytne.Client.Extensions
 {
@@ -29,7 +30,7 @@ namespace Pobytne.Client.Extensions
 		}
 		public async Task LoadData()
 		{
-			var response = await _service.GetAllAsync<Record>($"?parentId={Record.Id}", Record.ModuleId);
+			var response = await _service.GetAllAsync<Record>("?", Record.ModuleId,new RecordFilter() { ParentId = Record.Id });
 
 			if (response is null)
 				Console.WriteLine($"NO RESPONSE");

@@ -21,6 +21,8 @@ namespace Pobytne.Shared.Procedural.DTO
         public string Password { get; set; } = string.Empty;
         public bool PasswordIsInicial { get; set; } = false;
         public int LicenseNumber { get; set; }
+        [Editable(false)]
+        public string LicenseName{ get; set; } = string.Empty;
         [EmailAddress(ErrorMessage ="Vyplňte korektní email")]
 		[MaxLength(50)]
         public string Email { get; set; } = string.Empty;

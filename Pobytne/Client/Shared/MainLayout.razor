@@ -39,18 +39,18 @@
 </div>
 
 @code {
-        [CascadingParameter]
-        private Task<AuthenticationState> authenticationState { get; set; } = default!;
-        [CascadingParameter]
-        private ModuleWorkplace moduleWorkspace { get; set; } = default!;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; } = default!;
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
 
-        private async Task Logout()
-        {
-            await service.Logout();
-        }
-        private void RefreshFailureHandler() {
-            navManager.Refresh();
-        }
+    private async Task Logout()
+    {
+        await service.Logout();
+    }
+    private void RefreshFailureHandler() {
+        navManager.Refresh();
+    }
     protected override async Task OnInitializedAsync()
     {
         AuthenticationService.OnTokenRefreshFailure = EventCallback.Factory.Create(this, RefreshFailureHandler);
@@ -62,7 +62,9 @@
             if (user is not null)
             {
                 moduleWorkspace.UserId = user.User.Id;
+                moduleWorkspace.UserName = user.User.UserName;
                 moduleWorkspace.LicenseNumber = user.User.LicenseNumber;
+                moduleWorkspace.LicenseName = user.User.LicenseName;
                 moduleWorkspace.ModulesDic = user.User.AccessPermition.ToDictionary(p => p.ModuleId, p => p.ModuleName);
             }
         }

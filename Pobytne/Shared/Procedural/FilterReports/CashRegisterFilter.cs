@@ -6,8 +6,8 @@ namespace Pobytne.Shared.Procedural.FilterReports
 	{
 		public int PaymentId { get; set; }// not null
 		public int? ModuleId { get; set; }// not null
-		public required DateTime From { get; set; }
-		public required DateTime To { get; set; }
+		public DateTime From { get; set; } = DateTime.Today;
+		public DateTime To { get; set; } = DateTime.Today.AddDays(1);
 		public int? ClientId { get; set; }
 		public List<int> RecordsId { get; set; } = [];
     }

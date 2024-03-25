@@ -76,15 +76,15 @@
 		</a>
 	</div>
 </div>
-<div class="card floating-card d-flex flex-row justify-content-between custom-bar">
-	<div class="p-3">
+<div class="card floating-card d-flex flex-row justify-content-between custom-bar text-secondary">
+	<div class="mt-3 ms-5 h5 headline">
 		@PageTitle
 	</div>
 	@if (moduleWorkspace.ModulesDic.ContainsKey(IdModule))
 	{
 		<div class="text-capitalize p-3">
 			@moduleWorkspace.Name
-			<span class="ms-3">@moduleWorkspace.LicenseNumber</span>
+			<span class="ms-3 ps-3 me-5 border-1 border-start "><i class="bi bi-person me-2"></i>@moduleWorkspace.UserName</span>
 		</div>
 	}
 </div>

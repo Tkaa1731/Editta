@@ -1,20 +1,127 @@
 ﻿@page "/{idModule}/SeasonTicket"
 @inject PobytneService service
+@inject IHxMessengerService Messenger
 
+<ModuleNav idModule="@idModule" PageTitle="Permanentky"></ModuleNav>
 
-<ModuleNav idModule="@idModule" PageTitle="Pokladna"></ModuleNav>
+<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.SeasonTicket,EAccess.ReadOnly,idModule)>
+    <Authorized>
+        <div class="row">
+            <div class="col-auto" style="min-width:25rem;">
+                <div class="card floating-card px-3 pb-3 h-max overflow-auto">
+                    <div class="w-100 p-3 text-secondary border-bottom border-2 sticky-top bg-white h6 d-flex justify-content-between">Název<span>Počet vstupů</span></div>
+                    <HxListGroup Numbered="true" Flush="true">
+                        @for(int i = 0; i < seasonTickets.Count; i++)
+                        {
+                            int index = i;                            
+                            <HxListGroupItem OnClick="async()=> await OnselectedItemChanged(index)" Active="@(selected == index)" CssClass="d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto px-1">
+                                    <div class="fw-bold">@seasonTickets[index].Name</div>
+                                    @seasonTickets[index].Description
+                                </div>
+                                <HxBadge Color="ThemeColor.Primary" Variant="BadgeVariant.RoundedPill">@seasonTickets[index].GroupQuantity</HxBadge>
+                            </HxListGroupItem>
+                        }
+                    </HxListGroup>
+                </div>
 
-
+            </div>
+            <div class="col">
+                <div class="card floating-card p-3">
+                    <HxGrid TItem="SeasonTicket" @ref=grid DataProvider="(request)=>Task.FromResult(request.ApplyTo(clients))" PageSize="15" Responsive="true" SelectedDataItemChanged="(item)=> selectedClient = item">
+                        <Columns>
+                            <HxGridColumn HeaderText="Id" ItemTextSelector="i =>i.Id.ToString()" />
+                            <HxGridColumn HeaderText="Uzivatel" ItemTextSelector="i => i.ClientName" />
+                            <HxGridColumn HeaderText="Platna" ItemTextSelector="@(i => i.Valid?"Ano":"Ne")" />
+                            <HxGridColumn HeaderText="Cena" ItemTextSelector="i => i.Price.ToString()" />
+                            <HxGridColumn HeaderText="Množství" ItemTextSelector="i => i.Quantity.ToString()" />
+                            <HxGridColumn HeaderText="PlatiOd" ItemTextSelector="i => i.ValidFrom.ToShortDateString()" />
+                            <HxGridColumn HeaderText="PlatiDo" ItemTextSelector="i => i.ValidTo.ToShortDateString()" />                            
+                            <HxGridColumn HeaderText="Pořídil" ItemTextSelector="i => i.CreationUserName" />
+                            <HxGridColumn HeaderText="Pořízeno" ItemTextSelector="i => i.CreationDate.ToShortDateString()" />
+                        </Columns>
+                    </HxGrid>
+                </div>
+            </div>
+            <div class="col-4">
+                @if(selectedClient is not null)
+                {
+                    <div class="card floating-card px-3 pb-3 h-max overflow-auto">
+                        <div class="w-100 p-3 text-secondary border-bottom border-2 sticky-top bg-white h6 d-flex justify-content-between">Historie vstupů</div>
+                        <HxListGroup Numbered="false" Flush="true">
+                            @for (int i = 0; i < selectedClient.TicketEvidences.Count; i++)
+                            {
+                                int index = i;
+                                <HxListGroupItem OnClick="async()=> await OnselectedItemChanged(index)" Active="@(selected == index)" CssClass="d-flex align-items-start">
+                                    <div class="ms-2 me-auto px-1">
+                                        @selectedClient.TicketEvidences[index].Id
+                                        <div class="fw-bold">@selectedClient.TicketEvidences[index].InteractionDate</div>
+                                        @selectedClient.TicketEvidences[index].CreationUserName
+                                    </div>
+                                </HxListGroupItem>
+                            }
+                        </HxListGroup>
+                    </div>
+                }
+            </div>
+        </div>
+    </Authorized>
+</AuthorizeView>
+<style>
+    .list-group-item.active.list-group-item-action {
+        background: #d7dee1 !important;
+        border-color: #c5c5c5 !important;
+        color: black;
+    }
+</style>
 @code {
     [EditorRequired]
     [Parameter]
     public string idModule { get; set; } = "-1";
 
+    private HxGrid<SeasonTicket> grid = default!;
+
+    private List<Record> seasonTickets = [];
+    private List<SeasonTicket> clients = [];
+    private SeasonTicket? selectedClient;
+
     [CascadingParameter]
     public ModuleWorkplace moduleWorkspace { get; set; } = default!;
-
+    private int selected = -1;
     protected async override Task OnInitializedAsync()
     {
         moduleWorkspace.ModuleId = idModule;
+
+        var response = await service.GetAllAsync<Record>("?", moduleWorkspace.Id,new RecordFilter() { ModuleId = moduleWorkspace.Id, ValidTo = DateTime.Today.ToUniversalTime(), IsSeasonTicket = true });
+
+        if (response is null || response is ErrorResponse)
+        {
+            var errorText = "Vyskytla se neočekávaná chyba";
+            if (response is ErrorResponse error)
+                errorText = error.ErrorMessage;
+            Messenger.AddError(title: "Chyba při načítání", message: errorText);
+        }
+        else if (response is List<Record> list)
+            seasonTickets.AddRange(list);
+    }
+    private async Task OnselectedItemChanged(int item)
+    {
+        selected = item;
+
+        var response = await service.GetAllAsync<SeasonTicket>($"?recordId={seasonTickets[item].Id}", moduleWorkspace.Id);
+
+        if (response is null || response is ErrorResponse)
+        {
+            var errorText = "Vyskytla se neočekávaná chyba";
+            if (response is ErrorResponse error)
+                errorText = error.ErrorMessage;
+            Messenger.AddError(title: "Chyba při načítání", message: errorText);
+        }
+        else if (response is List<SeasonTicket> list)
+        {
+            clients = list;
+            selectedClient = null ;
+            await grid.RefreshDataAsync();
+        }
     }
 }

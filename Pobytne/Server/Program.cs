@@ -62,6 +62,7 @@ namespace Pobytne
             builder.Services.AddScoped<RecordAttributeService>();
             builder.Services.AddScoped<InteractionService>();
             builder.Services.AddScoped<PaymentService>();
+            builder.Services.AddScoped<SeasonTicketService>();
             builder.Services.AddScoped<AuthService>();
 
 
@@ -76,6 +77,7 @@ namespace Pobytne
             builder.Services.AddScoped<InteractionTable>();
             builder.Services.AddScoped<EvidenceTable>();
             builder.Services.AddScoped<CashRegisterTable>();
+            builder.Services.AddScoped<SeasonTicketTable>();
             builder.Services.AddScoped<PaymentTable>();
 
 

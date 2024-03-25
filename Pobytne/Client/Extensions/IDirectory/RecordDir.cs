@@ -3,6 +3,7 @@ using Havit.Blazor.Components.Web.Bootstrap;
 using Pobytne.Client.Services;
 using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Procedural.Filters;
 using Pobytne.Shared.Struct;
 
 namespace Pobytne.Client.Extensions.IDirectory
@@ -55,10 +56,10 @@ namespace Pobytne.Client.Extensions.IDirectory
         {
             object? response;
             if (Record.Id <= 0)// root
-                response = await _service.GetAllAsync<Record>($"?moduleId={Record.ModuleId}", Record.ModuleId);
+                response = await _service.GetAllAsync<Record>("?", Record.ModuleId, new RecordFilter() { ModuleId = Record.ModuleId });
 
             else
-                response = await _service.GetAllAsync<Record>($"?parentId={Record.Id}", Record.ModuleId);
+                response = await _service.GetAllAsync<Record>("?", Record.ModuleId, new RecordFilter() { ParentId = Record.Id });
 
             if (response is null)
                 Console.WriteLine($"NO RESPONSE");

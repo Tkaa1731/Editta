@@ -11,10 +11,11 @@ namespace Pobytne.Data.Tables
         {
             using (IDbConnection cnn = Database.CreateConnection())
             {
-                string sql = @"SELECT o.* ,m.Nazev AS ModuleName, u.* 
+                string sql = @"SELECT o.* ,m.ZkracenyNazev AS ModuleName, u.* ,l.NazevOrganizace AS LicenseName
                                FROM S_LoginUser u
                                LEFT JOIN S_Opravneni o ON u.IDLogin = o.IDLogin
                                LEFT JOIN S_Moduly m ON o.IDModulu = m.IDModulu
+                               JOIN S_Licence l ON l.CisloLicence = u.CisloLicence
                                WHERE u.LoginUser = @LoginUser;";
                 var conditions = new { LoginUser = loginUser };
 

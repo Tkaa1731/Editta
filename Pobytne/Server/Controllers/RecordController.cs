@@ -1,9 +1,12 @@
 ﻿using AuthRequirementsData.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Pobytne.Server.Service;
 using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Procedural.FilterReports;
+using Pobytne.Shared.Procedural.Filters;
 using Pobytne.Shared.Struct;
 using System.Net;
 
@@ -19,18 +22,27 @@ namespace Pobytne.Server.Controllers
 
         [HttpGet]
         [PermissionAuthorize(permition, EAccess.ReadOnly)]
-        public async Task<IActionResult> Get([FromQuery]int moduleId = -1, [FromQuery] int parentId = -1, [FromQuery] string filterJSON = "")
+        public async Task<IActionResult> Get([FromQuery] string filterJSON)
         {
             try
             {
-                if (moduleId > 0)
+                var filter = JsonConvert.DeserializeObject<RecordFilter>(filterJSON);
+                if (filter is null)
+                    return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest, "Vyskytla se chyba v dotazu."));
+
+                if (filter.ParentId > 0)
                 {
-                    var records = await _service.GetRoot(moduleId); 
+                    var records = await _service.GetBranch(filter.ParentId);
                     return Ok(records);
                 }
-                if (parentId > 0)
+                if (filter.IsSeasonTicket)
                 {
-                    var records = await _service.GetBranch(parentId);
+                    var ticket = await _service.GetSeasonTickets(filter.ModuleId,filter.ValidTo);
+                    return Ok(ticket);
+                }
+                if(filter.ModuleId > 0)
+                {
+                    var records = await _service.GetRoot(filter.ModuleId); 
                     return Ok(records);
                 }
 

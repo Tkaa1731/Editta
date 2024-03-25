@@ -11,9 +11,8 @@ namespace Pobytne.Data.Tables
     {
 		public async Task<IEnumerable<Record>> GetSubRecords(object conditions)
 		{
-			using (IDbConnection cnn = Database.CreateConnection())
-			{
-				string sql = @"SELECT z.*, sz.*, u.JmenoUser AS CreationUserName, zv.Nazev AS RecordAttributeName
+            using IDbConnection cnn = Database.CreateConnection();
+            string sql = @"SELECT z.*, sz.*, u.JmenoUser AS CreationUserName, zv.Nazev AS RecordAttributeName
                                 FROM S_Zaznamy z
                                 JOIN S_StrukturaZaznamu sz ON z.IDZaznamu = sz.IDZaznamu
 								LEFT JOIN S_ZaznamyVlastnosti zv ON z.IDZaznamuVlastnosti = zv.IDZaznamuVlastnosti
@@ -21,10 +20,19 @@ namespace Pobytne.Data.Tables
                                 WHERE sz.IDParent IN @IDParent
                                 ORDER BY z.Poradi;";
 
-				return await cnn.QueryAsync<Record>(sql, conditions);
-			}
-		}
-		public async Task<IEnumerable<Record>> GetRoot(object conditions)
+            return await cnn.QueryAsync<Record>(sql, conditions);
+        }
+        public async Task<IEnumerable<Record>> GetSeasonTicketRecords(object conditions)
+        {
+            using IDbConnection cnn = Database.CreateConnection();
+            string sql = @"SELECT *
+                                FROM S_Zaznamy z
+                                WHERE z.IDModulu = @ModuleId AND z.JePermanentka = 1 AND z.PlatiDo > @ValidTo
+                                ORDER BY z.Poradi;";
+
+            return await cnn.QueryAsync<Record>(sql, conditions);
+        }
+        public async Task<IEnumerable<Record>> GetRoot(object conditions)
         {
             using (IDbConnection cnn = Database.CreateConnection())
             {

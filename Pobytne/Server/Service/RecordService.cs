@@ -1,4 +1,5 @@
-﻿using Pobytne.Data;
+﻿using Pobytne.Client.Pages.ModulePages;
+using Pobytne.Data;
 using Pobytne.Data.Tables;
 using Pobytne.Shared.Procedural;
 using Pobytne.Shared.Struct;
@@ -36,6 +37,10 @@ namespace Pobytne.Server.Service
             }
             return result;
 		}
+        public async Task<IEnumerable<Record>> GetSeasonTickets(int moduleId, DateTime validTo)
+        {
+            return await _recordTable.GetSeasonTicketRecords(new {ModuleId = moduleId, ValidTo =  validTo});
+        }
         public async Task<int> GetMaxDepth(int moduleId)
         {
             return await _recordTable.GetMaxDepth(new { ModuleID = moduleId });

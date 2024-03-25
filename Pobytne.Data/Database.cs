@@ -21,6 +21,8 @@ namespace Pobytne.Data
 				configure.AddMap(new PaymentMapper());
                 configure.AddMap(new CashRegisterMapper());
                 configure.AddMap(new EvidenceMapper());
+                configure.AddMap(new SeasonTicketMapper());
+                configure.AddMap(new SeasonTicketEvidenceMapper());
 
 			});
         }

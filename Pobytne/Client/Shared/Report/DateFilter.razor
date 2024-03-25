@@ -57,17 +57,18 @@
 	private async Task RadioChanged(string value)
 	{
 		selectedOption = value;
-		var date = DateTime.Now;
+		var date = DateTime.Today.ToUniversalTime().AddHours(1);
 
 		switch (value)
 		{
 			case "today":
-				Filter.From = new DateTime(date.Year, date.Month, date.Day);
-				Filter.To = Filter.From.AddHours(24);
+				Filter.From = date;
+				Filter.To = date.AddDays(1);
 				break;
 			case "week":
-				var dayOfWeek = ((int)date.DayOfWeek)-1;
-				Filter.From = date.AddDays(-dayOfWeek);
+				var dayOfWeek = ((int)date.DayOfWeek);
+				int offset = dayOfWeek == 0 ? 7 : dayOfWeek - 1;
+				Filter.From = date.AddDays(-offset);
 				Filter.To = Filter.From.AddDays(7);
 				break;
 			case "month":
@@ -81,8 +82,8 @@
 			case "date":
 				if(dateTimeRange.StartDate is not null && dateTimeRange.EndDate is not null)
 				{
-					Filter.From = dateTimeRange.StartDate.Value;
-					Filter.To = dateTimeRange.EndDate.Value;
+					Filter.From = dateTimeRange.StartDate.Value.ToUniversalTime().AddHours(1);
+					Filter.To = dateTimeRange.EndDate.Value.ToUniversalTime().AddHours(1);
 				}
 				break;
 		}

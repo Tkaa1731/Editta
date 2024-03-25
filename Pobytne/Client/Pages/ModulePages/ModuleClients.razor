@@ -2,9 +2,12 @@
 @inject PobytneService _service
 
 <ModuleNav idModule="@idModule" PageTitle="Evidence klientů"></ModuleNav>
-<div class="container-fluid mh-100">
-    <ClientList PageSize="15"/>
-</div>
+
+<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Client,EAccess.ReadOnly,idModule)>
+    <Authorized>
+        <ClientList PageSize="15"/>
+    </Authorized>
+</AuthorizeView>
 @code {
     [CascadingParameter]
     private ModuleWorkplace moduleWorkspace { get; set; } = default!;

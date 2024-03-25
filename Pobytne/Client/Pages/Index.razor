@@ -3,22 +3,23 @@
 <PageTitle>Home</PageTitle>
 
     <div class="container mt-5">
-        <div class="d-flex flex-row flex-wrap">
-            @if (moduleWorkspace is not null)
-            {
+        @if (moduleWorkspace is not null)
+        {
+            <h2 class="headline"> Dostupné moduly</h2>
+            <div class="d-flex flex-row flex-wrap">
 
-                @foreach (var module in moduleWorkspace.ModulesDic)
-                {
-                        <a href="/@module.Key/" class="no-link">
-                            <div class="card floating-card m-2" style="height:10rem; width:18rem;">
-                            <div class="card-body p-5 text-center">
-                                    <h4 class="card-title">@module.Value</h4>
+                    @foreach (var module in moduleWorkspace.ModulesDic)
+                    {
+                            <a href="/@module.Key/" class="no-link">
+                                <div class="card floating-card m-2" style="width:20rem;">
+                                <div class="card-body p-5 text-center">
+                                        <h3 class="card-title py-2">@module.Value</h3>
+                                    </div>
                                 </div>
-                            </div>
-                        </a>
-                }
-            }
-        </div>
+                            </a>
+                    }
+            </div>
+        }
     </div>
 
 

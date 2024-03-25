@@ -48,7 +48,10 @@
         if (logResponse is UserAccount user)
         {
             moduleWorkspace.UserId = user.User.Id;
+            moduleWorkspace.UserName = user.User.UserName;
+
             moduleWorkspace.LicenseNumber = user.User.LicenseNumber;
+            moduleWorkspace.LicenseName = user.User.LicenseName;
             moduleWorkspace.ModulesDic = user.User.AccessPermition.ToDictionary(p => p.ModuleId, p => p.ModuleName);
             navManager.NavigateTo("/", false);
         }

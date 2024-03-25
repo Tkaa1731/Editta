@@ -2,68 +2,135 @@
 @inject ILocalStorageService localStorage
 @inject PobytneService service
 
+
+
+
 <div class="container mt-5">
+    <h2 class="headline"> Dostupné akce</h2>
     <div class="row">
         <div class="col">
-            <a href="@idModule/Records" class="no-link">
-                <div class="card floating-card">
-                    <div class="card-body p-5 text-center">
-                        <HxIcon Icon="@BootstrapIcon.Book" />
-                        <h5 class="card-title">Evidence</h5>
+            <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Evidence,EAccess.ReadOnly,idModule)>
+                <Authorized>
+                    <a href="@idModule/Records" class="no-link">
+                        <div class="card floating-card">
+                            <div class="card-body p-5 text-center">
+                                <HxIcon Icon="@BootstrapIcon.Book" />
+                                <h5 class="card-title">Evidence</h5>
+                            </div>
+                        </div>
+                    </a>
+                </Authorized>
+                <NotAuthorized>
+                    <div class="card floating-card disabled">
+                        <div class="card-body p-5 text-center">
+                            <HxIcon Icon="@BootstrapIcon.Book" />
+                            <h5 class="card-title">Evidence</h5>
+                        </div>
                     </div>
-                </div>
-            </a>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
         <div class="col">
-            <a href="@idModule/Clients" class="no-link">
-                <div class="card floating-card">
-                    <div class="card-body p-5 text-center">
-                        <HxIcon Icon="@BootstrapIcon.People" />
-                        <h5 class="card-title">Klienti</h5>
+            <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Client,EAccess.ReadOnly,idModule)>
+                <Authorized>
+                <a href="@idModule/Clients" class="no-link">
+                    <div class="card floating-card">
+                        <div class="card-body p-5 text-center">
+                            <HxIcon Icon="@BootstrapIcon.People" />
+                            <h5 class="card-title">Klienti</h5>
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
+         
+                </Authorized>
+                <NotAuthorized>
+                    <div class="card floating-card disabled">
+                        <div class="card-body p-5 text-center">
+                            <HxIcon Icon="@BootstrapIcon.People" />
+                            <h5 class="card-title">Klienti</h5>
+                        </div>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
         <div class="col">
-            <a href="@idModule/SeasonTicket" class="no-link">
-                <div class="card floating-card">
-                    <div class="card-body p-5 text-center">
-                        <HxIcon  Icon="@BootstrapIcon.Clipboard2Check" />
-                        <h5 class="card-title">Permanentky</h5>
+            <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.SeasonTicket,EAccess.ReadOnly,idModule)>
+                <Authorized>
+                <a href="@idModule/SeasonTicket" class="no-link">
+                    <div class="card floating-card">
+                        <div class="card-body p-5 text-center">
+                            <HxIcon  Icon="@BootstrapIcon.Clipboard2Check" />
+                            <h5 class="card-title">Permanentky</h5>
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
+                </Authorized>
+                <NotAuthorized>
+                    <div class="card floating-card disabled">
+                        <div class="card-body p-5 text-center">
+                            <HxIcon Icon="@BootstrapIcon.Clipboard2Check" />
+                            <h5 class="card-title">Permanentky</h5>
+                        </div>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
     <div class="w-100 mt-3"/>
         <div class="col">
-            <a href="@idModule/RecordSettings" class="no-link">
-                <div class="card floating-card">
-                    <div class="card-body p-5 text-center">
-                        <HxIcon Icon="@BootstrapIcon.Gear" />
-                        <h5 class="card-title">Evidence položek</h5>
+            <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Record,EAccess.ReadOnly,idModule)>
+                <Authorized>
+
+                <a href="@idModule/RecordSettings" class="no-link">
+                    <div class="card floating-card">
+                        <div class="card-body p-5 text-center">
+                            <HxIcon Icon="@BootstrapIcon.Gear" />
+                            <h5 class="card-title">Evidence položek</h5>
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
+                </Authorized>
+                <NotAuthorized>
+                    <div class="card floating-card disabled">
+                        <div class="card-body p-5 text-center">
+                            <HxIcon Icon="@BootstrapIcon.Gear" />
+                            <h5 class="card-title">Evidence položek</h5>
+                        </div>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
         <div class="col">
-            <a href="@idModule/DialerSettings/ConstantDialer" class="no-link">
-                <div class="card floating-card">
-                    <div class="card-body p-5 text-center">
-                        <HxIcon Icon="@BootstrapIcon.CalculatorFill" />
-                        <h5 class="card-title">Číselníky</h5>
-                    </div>
-                </div>
+             <a href="@idModule/DialerSettings/ConstantDialer" class="no-link">
+                 <div class="card floating-card">
+                     <div class="card-body p-5 text-center">
+                         <HxIcon Icon="@BootstrapIcon.CalculatorFill" />
+                         <h5 class="card-title">Číselníky</h5>
+                     </div>
+                 </div>
             </a>
+            
         </div>
         <div class="col">
-            <a href="@idModule/CashRegisterReports" class="no-link">
-                <div class="card floating-card">
-                    <div class="card-body p-5 text-center">
-                        <HxIcon Icon="@BootstrapIcon.Wallet" />
-                        <h5 class="card-title">Souhrny</h5>
+            <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.EvidenceSummary,EAccess.ReadOnly,idModule)>
+                <Authorized>
+                <a href="@idModule/CashRegisterReports" class="no-link">
+                    <div class="card floating-card">
+                        <div class="card-body p-5 text-center">
+                            <HxIcon Icon="@BootstrapIcon.Wallet" />
+                            <h5 class="card-title">Souhrny</h5>
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
+                </Authorized>
+                <NotAuthorized>
+                    <div class="card floating-card disabled">
+                        <div class="card-body p-5 text-center">
+                            <HxIcon Icon="@BootstrapIcon.Wallet" />
+                            <h5 class="card-title">Souhrny</h5>
+                        </div>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
     </div>
 </div>
