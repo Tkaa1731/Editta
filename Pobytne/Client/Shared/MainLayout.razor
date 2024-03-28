@@ -31,7 +31,7 @@
             <main>
                 <HxMessenger Position="ToastContainerPosition.TopCenter" />
                 <CascadingValue Value="moduleWorkspace">
-                        <LoginForm/>
+                        @Body
                 </CascadingValue>
             </main>
         </NotAuthorized>
@@ -47,9 +47,11 @@
     private async Task Logout()
     {
         await service.Logout();
+        navManager.NavigateTo("/Login");
+
     }
     private void RefreshFailureHandler() {
-        navManager.Refresh();
+        navManager.NavigateTo("/Login");
     }
     protected override async Task OnInitializedAsync()
     {

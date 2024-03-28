@@ -1,5 +1,5 @@
 ﻿@page "/EditLicenses"
-@* @attribute [Authorize(Policy = "PermitionPolicy", AuthenticationSchemes = "a")] Policy="PermitionPolicy" Resource=(EPermition.Aplication,EAccess.ReadOnly,String.Empty)*@
+@attribute [Authorize]
 @inject PobytneService service
 @inject IHxMessengerService Messenger
 @inject IHxMessageBoxService MessageBox

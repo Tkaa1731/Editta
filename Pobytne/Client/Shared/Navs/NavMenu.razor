@@ -18,7 +18,11 @@
                     <HxSidebarItem Text="@module.Value" Href=@($"/{module.Key}") Icon="BootstrapIcon.Dash"/>
                 }
             </HxSidebarItem>
-            <HxSidebarItem Text="Administrace" Href="/EditLicenses" Icon="BootstrapIcon.Gear" />
+            <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Aplication,EAccess.ReadOnly,moduleWorkspace.ModuleId)>
+                <Authorized>
+                    <HxSidebarItem Text="Administrace" Href="/EditLicenses" Icon="BootstrapIcon.Gear" />
+                </Authorized>
+            </AuthorizeView>
             <HxSidebarItem Text="Můj účet" Href="/Account" Icon="BootstrapIcon.Person"/>
         </ItemsTemplate>
 

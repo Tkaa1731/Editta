@@ -1,4 +1,5 @@
 ﻿@page "/{idModule}/DialerSettings/{dialerName}"
+@attribute [Authorize]
 @inject PobytneService _service
 @inject IHxMessengerService Messenger
 @inject IHxMessageBoxService MessageBox

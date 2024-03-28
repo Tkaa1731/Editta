@@ -1,4 +1,5 @@
 ﻿@page "/{idModule}/CashRegisterReports"
+@attribute [Authorize]
 @inject PobytneService _service
 @inject IHxMessengerService Messenger
 @inject ExcelExportService _csvService

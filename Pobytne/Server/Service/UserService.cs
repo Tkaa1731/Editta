@@ -3,6 +3,7 @@ using Pobytne.Data;
 using Pobytne.Data.Tables;
 using Pobytne.Shared.Authentication;
 using Pobytne.Shared.Procedural.DTO;
+using System.Security.Cryptography;
 
 namespace Pobytne.Server.Service
 {
@@ -35,13 +36,28 @@ namespace Pobytne.Server.Service
         {
             return await _userTable.GetById(id);
 		}
-		public async Task<User?> Update(User updateUser)
+        public async Task<User?> GetUserByEmail(string email)
+        {
+            return await _userTable.GetByEmail(email);
+        }
+        public async Task<User?> Update(User updateUser)
         {
             //SET Server time
             updateUser.CreationDate = DateTime.Now;
 
             var rows =  await _userTable.Update(updateUser);
             if(rows > 0)
+                return await GetUserById(updateUser.Id);
+            return null;
+        }
+        public async Task<User?> UpdateRandomPassword(User updateUser)
+        {
+            //SET Server time
+            updateUser.CreationDate = DateTime.Now;
+
+            updateUser.Password = GeneratePassword();
+            var rows = await _userTable.Update(updateUser);
+            if (rows > 0)
                 return await GetUserById(updateUser.Id);
             return null;
         }
@@ -58,7 +74,10 @@ namespace Pobytne.Server.Service
         }
         private string GeneratePassword()
         {
-            return "heslo";
+            byte[] randomNumber = new byte[8];
+            using RandomNumberGenerator rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
         }
-    }// TODO: vyresit heslo
+    }
 }

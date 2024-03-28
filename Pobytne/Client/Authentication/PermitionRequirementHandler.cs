@@ -13,7 +13,7 @@ namespace Pobytne.Client.Authentication
             {
                 Claim? permitions;
                 if (Resource.Value.Item3 == "-1")
-                    permitions = context.User.Claims.First();
+                    permitions = context.User.Claims.FirstOrDefault(c => int.TryParse(c.Type,out _));
                 else
                     permitions = context.User.Claims.FirstOrDefault(c => c.Type == Resource.Value.Item3);//podle modulu
 
