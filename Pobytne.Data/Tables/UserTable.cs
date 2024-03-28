@@ -44,6 +44,18 @@ namespace Pobytne.Data.Tables
                 return await cnn.QueryFirstAsync<User>(sql, conditions);
             }
         }
+        public async Task<User> GetByEmail(string email)
+        {
+            using IDbConnection cnn = Database.CreateConnection();
+
+            string sql = @"select *
+                            from S_LoginUser u
+                            where u.Email = @Email;";
+
+            var conditions = new { Email = email};
+
+            return await cnn.QueryFirstAsync<User>(sql, conditions);
+        }
         public async Task<IEnumerable<User>> GetByLicense(int license)
         {
             using (IDbConnection cnn = Database.CreateConnection())

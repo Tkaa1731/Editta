@@ -1,4 +1,5 @@
 ﻿@page "/{idModule}/RecordSettings"
+@attribute [Authorize]
 @inject PobytneService service
 @inject IHxMessengerService Messenger
 @inject IHxMessageBoxService MessageBox
@@ -28,7 +29,7 @@
                     EventNewItem="OnNewItem">
 
                     <MenuGridColumn>
-		                <HxContextMenuGridColumn TItem="IListItem" Context="item">
+		                <HxContextMenuGridColumn TItem="IListItem" Context="item" ItemCssClass="w-auto">
 
 			                <HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" Tooltip="Smazat" CssClass="px-3" OnClick="async()=> await OnDeleteItem(item)"/>
                             @if(item is Record r && r.IsBalanceCheck)

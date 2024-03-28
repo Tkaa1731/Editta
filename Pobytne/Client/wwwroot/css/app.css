@@ -149,24 +149,48 @@ div.mh-max{
 div.h-max {
     height: calc(100vh - 6.5rem);
 }
-h2.headline {
-    color: #A2AAB9;
-    text-align: center;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .02em;
-    margin-bottom: 4rem;
-    font-family: "Nunito", sans-serif;
+.headline {
+    color: #A2AAB9 !important;
+    font-family: "Nunito", sans-serif !important;
+    letter-spacing: .02em !important;
 }
-.h5.headline {
-    color: #A2AAB9;
-    font-weight: 600;
-    /*text-transform: uppercase;*/
-    letter-spacing: .02em;
-    font-family: "Nunito", sans-serif;
+h2.headline {
+    text-align: center !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
 }
 .disabled {
     background: #e7e9ed !important;
     color: #8c8d8d !important;
     cursor:default !important;
+}
+.record-container {
+    min-width: 18rem!important;
+    max-width: 30rem!important;
+    cursor: pointer!important;
+}
+
+.record-container:hover {
+    background: #e3e6ef;
+}
+ 
+.record-container.active.bt-orange {
+    border-top: none;
+    background: #FFDB99;
+}
+
+.bt-red {
+    border-top: 2px solid #9EBAFB !important;
+}
+
+.bt-green {
+    border-top: 2px solid #75d2a9 !important;
+}
+
+.bt-purple {
+    border-top: 2px solid #b576d5 !important;
+}
+
+.bt-orange {
+    border-top: 2px solid orange !important;
 }

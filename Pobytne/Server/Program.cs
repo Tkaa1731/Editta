@@ -64,6 +64,7 @@ namespace Pobytne
             builder.Services.AddScoped<PaymentService>();
             builder.Services.AddScoped<SeasonTicketService>();
             builder.Services.AddScoped<AuthService>();
+            builder.Services.AddScoped<MailService>();
 
 
             builder.Services.AddScoped<LicenseTable>();

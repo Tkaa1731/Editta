@@ -57,7 +57,7 @@
 	private async Task RadioChanged(string value)
 	{
 		selectedOption = value;
-		var date = DateTime.Today.ToUniversalTime().AddHours(1);
+		var date = DateTime.Today;
 
 		switch (value)
 		{

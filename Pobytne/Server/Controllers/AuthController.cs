@@ -20,10 +20,8 @@ namespace Pobytne.Server.Controllers
 		{
 			try
 			{
-				var user = await _authService.Login(request);
-				if(user is not null)		
-					return Ok(user);
-				return NotFound(new ErrorResponse(HttpStatusCode.NotFound, "Nastala chyba při přihlašování"));
+				var user = await _authService.Login(request);		
+				return Ok(user);
 			}
 			catch (Exception ex)
 			{
@@ -35,17 +33,47 @@ namespace Pobytne.Server.Controllers
 		[Route("Refresh")]
 		public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
 		{
-			var user = await _authService.Refresh(request);
-			if (user is null)
-				return Unauthorized();
-			return Ok(user);
+            try
+            {
+                var user = await _authService.Refresh(request);
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+            }
+
 		}
+        [HttpPost]
+		[AllowAnonymous]
+		[Route("ResetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] PasswordRequest request)
+        {
+			try
+			{
+				await _authService.RefreshPassword(request);
+				return Ok();
+			}
+			catch(Exception ex) 
+			{
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+            }
+
+        }
         [HttpDelete]
         [Route("Revoke")]
         public IActionResult Revoke(int id)
         {
-            _authService.RemoveRefreshToken(id);
-			return NoContent();
+			try
+			{
+				_authService.RemoveRefreshToken(id);
+				return NoContent();
+			}
+			catch(Exception ex)
+			{
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+
+            }
         }
     }
 }

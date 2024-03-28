@@ -1,4 +1,5 @@
 ﻿@page "/{idModule}/"
+@attribute [Authorize]
 @inject ILocalStorageService localStorage
 @inject PobytneService service
 
@@ -7,6 +8,7 @@
 
 <div class="container mt-5">
     <h2 class="headline"> Dostupné akce</h2>
+    <h4 class="headline text-center mb-3">@moduleWorkspace.Name</h4>
     <div class="row">
         <div class="col">
             <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Evidence,EAccess.ReadOnly,idModule)>
@@ -138,32 +140,14 @@
     [EditorRequired]
     [Parameter]
     public string idModule { get; set; } = "-1";
-
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; } = default!;
     [CascadingParameter]
     public ModuleWorkplace moduleWorkspace { get; set; } = default!;
 
 
-    private Permition modulePermition = new Permition();
-
-    protected async override Task OnInitializedAsync()
+    protected override void OnParametersSet()
     {
-        var authState = await authenticationState;
-        if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
-        {
-            var user = await localStorage.ReadEncryptedItem<UserAccount>(LocalStorageService.USER_SESSION);
-            if (user is not null)
-            {
-                var p = user.User.AccessPermition?.FirstOrDefault(m => m.Id.ToString() == idModule);
-                if (p is not null)
-                    modulePermition = p;
-            }
-
-        }
-
         moduleWorkspace.ModuleId = idModule;
-
-        return;
+        base.OnParametersSet();
     }
+
 }

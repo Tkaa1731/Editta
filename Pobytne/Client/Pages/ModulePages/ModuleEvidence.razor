@@ -1,4 +1,5 @@
 ﻿@page "/{idModule}/Records"
+@attribute [Authorize]
 @inject PobytneService _service
 @inject IHxMessengerService Messenger
 
@@ -10,10 +11,10 @@
   
             @for (int i = 0; i < maxDepth; i++)
             {
-                <div class="col-auto custom-scrollbar overflow-auto h-max" style="min-width:18rem;max-width:30rem;"> 
+                <div class="col-auto custom-scrollbar overflow-auto h-max"> 
                     @for(int j = 0; j < records[i].Count; j++)
                     {
-                        <RecordComponent Source=@records[i][j] OnClick=OnSelect CssClass="@((recordPath[i]==records[i][j].Record.Id)?"record-active":"")"></RecordComponent>
+                        <RecordComponent Source=@records[i][j] OnClick=OnSelect CssClass="@((recordPath[i]==records[i][j].Record.Id)?"active":"")"></RecordComponent>
                     }
                 </div>
             }
@@ -72,37 +73,6 @@
         </div>
 	</BodyTemplate>
 </HxModal>
-<style>
-    .record-container:hover{
-        background: #e3e6ef;
-    }
-    .bt-red{
-        border-top:2px solid #9EBAFB !important;
-    }
-    .bt-green{
-        border-top:2px solid #75d2a9 !important;
-    }
-    .bt-purple{
-        border-top:2px solid #747ced !important;
-    }
-    .bt-orange{
-        border-top:2px solid orange !important;
-    }
-    .record-active.bt-orange{
-        border-top:none;
-        background: #FFDB99;
-    }
-    .center{
-        text-align:center;
-    }
-    .p-0{
-        padding:0;
-    }
-@*     .scrollable-table-container {
-		max-height: 40svh;
-		overflow: auto;
-	} *@
-</style>
 
 @code {
     [EditorRequired]

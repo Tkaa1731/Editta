@@ -1,13 +1,16 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Pobytne.Client.Pages;
 using Pobytne.Shared.Authentication;
 using Pobytne.Shared.Extensions;
+using Pobytne.Shared.Procedural.DTO;
 using Pobytne.Shared.Struct;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
+using System.Web;
 
 namespace Pobytne.Client.Services
 {
@@ -61,20 +64,59 @@ namespace Pobytne.Client.Services
 
             var responseStatusCode = response.StatusCode;
             var responseBody = await response.Content.ReadAsStringAsync();
-            object? result = new();
-            if (responseStatusCode == HttpStatusCode.OK)
-                result = JsonConvert.DeserializeObject<UserAccount>(responseBody);
-            else if (responseStatusCode == HttpStatusCode.Unauthorized)
-                result = JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
-            return result;
-        }
 
+            if (responseStatusCode == HttpStatusCode.OK)
+                return Task.CompletedTask;
+            if (responseStatusCode == HttpStatusCode.Conflict)
+                return JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
+
+            return new ErrorResponse(HttpStatusCode.InternalServerError,responseBody);
+        }
+        //Allow UnAuthorized
+        public async Task<object?> UpdatePasswordAsync(PasswordRequest obj)
+        {
+            var response = await _httpClient.PostAsJsonAsync($"/Auth/ResetPassword", obj);
+
+            var responseStatusCode = response.StatusCode;
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            if (responseStatusCode == HttpStatusCode.OK)
+                return Task.CompletedTask;
+            else if (responseStatusCode == HttpStatusCode.Conflict)
+                return JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
+
+            return new ErrorResponse(HttpStatusCode.InternalServerError,responseBody);
+        }
+        public async Task<object?> ResetPaswordAsync(User? user = null, string email = "")
+        {
+            HttpResponseMessage response;
+            if(user is not null)
+            {
+                await UpdateHeader();
+                response = await _httpClient.PostAsJsonAsync($"/Password/", user);
+            }
+            else if (!email.IsNullOrEmpty())
+                response = await _httpClient.PostAsJsonAsync($"/Password/Anonym", email);
+            else
+                return new ErrorResponse(HttpStatusCode.BadRequest,"Byl zadan nevalidni pozadavek");
+
+            var responseStatusCode = response.StatusCode;
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            if (responseStatusCode == HttpStatusCode.OK)
+                return Task.CompletedTask;
+            else if (responseStatusCode == HttpStatusCode.Conflict)
+                return JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
+
+            return new ErrorResponse(HttpStatusCode.InternalServerError, responseBody);
+
+        }
         public async Task<object?> GetAllAsync<T>(string requestUri, int ModuleId, LazyList? filter = null)
         {
             if (filter is not null)
             {
                 string filterJSON = JsonConvert.SerializeObject(filter);
-                requestUri += $"filterJSON={filterJSON}";
+                requestUri += $"filterJSON={HttpUtility.UrlEncode(filterJSON)}";
             }
 
             var request = $"/{GetControler(typeof(T))}/{requestUri}";
@@ -99,7 +141,7 @@ namespace Pobytne.Client.Services
             if (filter is not null)
             {
                 string filterJSON = JsonConvert.SerializeObject(filter);
-                requestUri += $"filterJSON={filterJSON}";
+                requestUri += $"filterJSON={HttpUtility.UrlEncode(filterJSON)}";
             }
             var request = $"/{GetControler(typeof(T))}/Count{requestUri}";
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, request);
