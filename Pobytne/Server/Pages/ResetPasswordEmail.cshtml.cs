@@ -10,7 +10,7 @@ namespace Pobytne.Server.Pages
         public string JWT {  get; } = jwt;
         public string Uri { get; set; } = "";
         public string Headline { get; set; } = "";
-        public string JwtUri => Uri + "/Password/Reset/" + JWT;
+        public string JwtUri => "https://" + Uri + "/Password/Reset/" + JWT;
         public void OnGet()
         {
         }

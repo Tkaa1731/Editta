@@ -140,6 +140,12 @@ a.no-link {
     background-color: #3C74F6 !important;
     border-color: #2966F5 !important;
 }
+.page-item.active .page-link {
+    background-color: #3C74F6 !important;
+}
+.dropdown-item.active, .dropdown-item:active {
+    background-color: #3C74F6 !important;
+}
 .bg-orange {
     background-color: #f5c75d !important;
 }
@@ -159,7 +165,7 @@ h2.headline {
     font-weight: 700 !important;
     text-transform: uppercase !important;
 }
-.disabled {
+div.disabled {
     background: #e7e9ed !important;
     color: #8c8d8d !important;
     cursor:default !important;
@@ -193,4 +199,9 @@ h2.headline {
 
 .bt-orange {
     border-top: 2px solid orange !important;
+}
+.list-group-item.active.list-group-item-action {
+    background: #e5e5e5 !important;
+    border-color: #c5c5c5 !important;
+    color: black;
 }

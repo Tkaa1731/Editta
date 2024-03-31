@@ -1,49 +1,48 @@
 ﻿@page "/EditLicenses"
 @attribute [Authorize]
 @inject PobytneService service
+@inject IAuthorizationService authService
 @inject IHxMessengerService Messenger
 @inject IHxMessageBoxService MessageBox
 
-<PageTitle>EditLicense</PageTitle>
-<AuthorizeView>
-    <Authorized>
+<PageTitle>Správa licencí</PageTitle>
 
-    <div class="row h-100">
-        <div class="col-lg-3 mh-100 overflow-hidden">
-            <HxTreeView TItem="IDirectory"
-                        SelectedItemChanged="OnSelect"
-                        Items="@fileSystem"
-                        CssClass="p-3 card floating-card h-auto"
-                        ItemTitleSelector="@(p => p.Name)"
-                        ItemIconSelector="@(p => p.Icon)"
-                        ItemInitialExpandedSelector=@(p => p.Name=="Pobytne licence")
-                        ItemChildrenSelector="@(p => p.SubDirectories)" />
-        </div>
-        <div class="col-lg-9 mh-100 overflow-hidden">
-            <ListCustom 
-                ListTitle="@listTitle" 
-                ListItems=@listOfItems 
-                selectedItem=selectedItem 
-                selectedItemChanged=OnItemSelect 
-                EventNewItem="OnNewItem">
-
-                <MenuGridColumn>
-                    @if(selectedDirectory is not UserDir){
-		                <HxContextMenuGridColumn TItem="IListItem" Context="item">
-			                <HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" Tooltip="Smazat" OnClick="async()=>await DeleteItemClicked(item)"/>
-		                </HxContextMenuGridColumn>
-                    }
-	            </MenuGridColumn>
-
-            </ListCustom>
-        </div>
+<div class="row">
+    <div class="col-3 h-max" style="max-width:35rem;">
+        <HxTreeView TItem="IDirectory"
+                    SelectedItemChanged="OnSelect"
+                    Items="@fileSystem"
+                    CssClass="p-3 card floating-card h-auto"
+                    ItemTitleSelector="@(p => p.Name)"
+                    ItemIconSelector="@(p => p.Icon)"
+                    ItemInitialExpandedSelector=@(p => p.Name=="Pobytne licence")
+                    ItemChildrenSelector="@(p => p.SubDirectories)" />
     </div>
-		    <FormModal formItem="formItem" @ref=formModal OnSuccessRequest="OnSuccessRequestHandler"></FormModal>
-	    </Authorized>
-	<NotAuthorized>
-		JSTE V NOACCESS MODU PRO  PRISTUP - APLICATION
-	</NotAuthorized>
-</AuthorizeView>
+    <div class="col">
+        <ListCustom 
+            ListTitle="@listTitle" 
+            ListItems=@listOfItems 
+            selectedItem=selectedItem 
+            selectedItemChanged=OnItemSelect 
+            EventNewItem="OnNewItem">
+
+            <MenuGridColumn>
+                <HxContextMenuGridColumn TItem="IListItem" Context="item" ItemCssClass="d-flex justify-content-evenly">
+                    @if(selectedDirectory is not UserDir){
+                        <HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" Tooltip="Smazat" OnClick="async()=>await DeleteItemClicked(item)"/>
+                    }
+                    else
+                    {
+                        <HxButton Icon="@BootstrapIcon.Trash" style="color:#a3a3a3; padding: 0px;" Enabled="false" Color="ThemeColor.Link"/>
+                    }
+                </HxContextMenuGridColumn>
+            </MenuGridColumn>
+
+        </ListCustom>
+    </div>
+</div>
+<FormModal formItem="formItem" @ref=formModal OnSuccessRequest="OnSuccessRequestHandler"></FormModal>
+
 <style>
     .scrollable-table-container {
 		max-height: 80svh;
@@ -53,6 +52,8 @@
 @code {
     [CascadingParameter]
     private ModuleWorkplace moduleWorkspace { get; set; } = default!;
+    [CascadingParameter]
+    private Task<AuthenticationState> authState { get; set; } = default!;
 
     private IDirectory? selectedDirectory;
     private IListItem? selectedItem;
@@ -80,6 +81,7 @@
             }
         }
     }
+    private EPermition deletePermition = EPermition.License;
 
     protected override async Task OnInitializedAsync()
     {
@@ -89,12 +91,23 @@
     }
     private async Task OnSelect(IDirectory e)
     {
-        this.selectedDirectory = e;
-        if (selectedDirectory is not null)
+        selectedDirectory = e;
+
+        await selectedDirectory.OnSelect();
+        listOfItems = selectedDirectory.ItemsList;  
+        switch (e)
         {
-            await selectedDirectory.OnSelect();
-            listOfItems = selectedDirectory.ItemsList;            
+            case ModuleDir m:
+                deletePermition = EPermition.Permition;
+                break;
+            case LicenseDir l:
+                deletePermition = EPermition.Module;
+                break;
+            case Directory d:
+                deletePermition = EPermition.License;
+                break;
         }
+
     }
     private async Task OnItemSelect(IListItem i)
     {
@@ -131,6 +144,13 @@
     }
     private async Task DeleteItemClicked(IListItem deleteItem)
     {
+        var user = (await authState).User;
+        if (!(await authService.AuthorizeAsync(user,(deletePermition,EAccess.FullAccess,moduleWorkspace.ModuleId),"PermitionPolicy")).Succeeded)
+        {
+            Messenger.AddError(title: "Přístup odmítnut", message: "Nemáte dostatečná oprávnění pro smazání záznamu.");
+            return;
+        }
+
         var deleteMessage = await MessageBox.ShowAsync("Smazat položku",$"Opravdu chcete smazat položku: {deleteItem.Name}", MessageBoxButtons.YesNo);
         if (deleteMessage == MessageBoxButtons.No)
             return;
@@ -163,5 +183,4 @@
             Messenger.Clear();
         }
     }
-    //TODO: Opraveneni k editu licenci
 }

@@ -14,8 +14,9 @@ namespace Pobytne.Shared.Procedural
         public required bool IsBalanceCheck {  get; set; }
         public required bool IsClientRequired {  get; set; }
         public required bool IsSeasonTicket {  get; set; }
-		public required ERecordType RecordType { get; set; }
-        public float PriceAmount 
+        public required bool IsSeasonTicketPayment {  get; set; }
+        public required ERecordType RecordType { get; set; }
+        public float PriceAmount
         { 
             get 
             { 

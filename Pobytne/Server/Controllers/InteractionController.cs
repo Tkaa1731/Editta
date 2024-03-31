@@ -27,11 +27,8 @@ namespace Pobytne.Server.Controllers
             }
             try
             {
-                int rowsAffected = await _interactionService.Insert(insertInteraction);
-                if (rowsAffected > 0)
-                    return NoContent();
-
-                return NotFound(new ErrorResponse(HttpStatusCode.NotFound, "Nepovedlo se vložit záznam."));
+                await _interactionService.Insert(insertInteraction);
+                return NoContent();
             }
             catch (Exception ex)
             {

@@ -1,11 +1,14 @@
 ﻿using AuthRequirementsData.Authorization;
+using MailKit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Pobytne.Server.Service;
 using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural.DTO;
 using Pobytne.Shared.Struct;
 using System.Net;
+using MailService = Pobytne.Server.Service.MailService;
 
 
 namespace Pobytne.Server.Controllers
@@ -13,10 +16,12 @@ namespace Pobytne.Server.Controllers
     [Route("User")]
     [ApiController]
     [Authorize]
-    public class UserController(UserService userService) : ControllerBase
+    public class UserController(UserService userService, AuthService authService, MailService mailService) : ControllerBase
     {
         private readonly UserService _userService = userService;
-		private const EPermition permition = EPermition.LoginUser;
+        private readonly MailService _mailService = mailService;
+        private readonly AuthService _authService = authService;
+        private const EPermition permition = EPermition.LoginUser;
 
         [HttpGet]
         [PermissionAuthorize(permition, EAccess.ReadOnly)]
@@ -79,8 +84,31 @@ namespace Pobytne.Server.Controllers
                 if (updatedUser is not null)
                     return Ok(updatedUser);
 
-                return NotFound(new ErrorResponse(HttpStatusCode.NotFound, "Nepovedlo se uložit záznam."));
+                return BadRequest(new ErrorResponse(HttpStatusCode.NotFound, "Nepovedlo se uložit záznam."));
 
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+            }
+        }
+        [HttpPut]
+        [Route("ForgotPasswordEmail")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPasswordEmail([FromBody] User resetUser)
+        {
+            if (resetUser is null)
+            {
+                return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest, "Vyskytla se chyba v dotazu."));
+            }
+            try
+            {
+                var updateUser = await _userService.GetUserByEmail(resetUser.Email);
+
+                var token = _authService.GetPasswordChageToken(updateUser);
+                await _mailService.SendRestorePasswordMail(new(updateUser.Email, updateUser.Name, token) { Headline = "Žádost o změnu hesla" });
+
+                return NoContent();
             }
             catch (Exception ex)
             {
@@ -98,10 +126,13 @@ namespace Pobytne.Server.Controllers
             try
             {
                 var insertedUser = await _userService.Insert(insertUser);
-                if (insertedUser is not null)
-                    return Ok(insertedUser);
-                
-                return NotFound(new ErrorResponse(HttpStatusCode.NotFound,"Nepovedlo se vložit záznam."));
+                if (insertedUser is null)
+                    return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest,"Nepovedlo se vložit záznam."));
+
+                var token = _authService.GetPasswordChageToken(insertedUser);
+                await _mailService.SendRestorePasswordMail(new(insertedUser.Email, insertedUser.Name, token) { Headline = "Byl Vám vytvořen účet" });
+
+                return Ok(insertedUser);
             }
             catch (Exception ex)
             {

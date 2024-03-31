@@ -33,9 +33,18 @@ namespace Pobytne.Data.Tables
                 return await cnn.QueryFirstAsync<Payment>(sql, conditions);
             }
         }
-        //---------------------------- InsUpDel-------------------------------
+		public async Task<int> GetCount(object conditions)
+		{
+			using IDbConnection cnn = Database.CreateConnection();
+			string sql = @"SELECT COUNT(IDTypuPlatby)
+                               FROM S_TypyPlatby
+                               WHERE IDModulu = @ModuleId;";
 
-        public async Task<int?> Insert(Payment payment)
+			return await cnn.ExecuteScalarAsync<int>(sql, conditions);
+		}
+		//---------------------------- InsUpDel-------------------------------
+
+		public async Task<int?> Insert(Payment payment)
         {
             using IDbConnection cnn = Database.CreateConnection();
             return await cnn.InsertAsync(payment);

@@ -4,6 +4,7 @@
 @inject IHxMessengerService Messenger
 @inject ExcelExportService _excelService
 
+<PageTitle>Souhrny evidence</PageTitle>
 <ModuleNav idModule="@idModule" PageTitle="Souhrny evidence"></ModuleNav>
 
 <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.EvidenceSummary,EAccess.ReadOnly,idModule)>
@@ -137,6 +138,9 @@
 			</div>
 		</div>
 	</Authorized>
+	<NotAuthorized>
+		<Error statusCode="HttpStatusCode.Forbidden"/>
+	</NotAuthorized>
 </AuthorizeView>
 
 <HxModal @ref="clientsModal" Centered=true Backdrop="ModalBackdrop.Static" Size="ModalSize.Large">
@@ -278,7 +282,7 @@
 				var errorMessage = "Nastala neočekávaná chyba.";
 				if (response is ErrorResponse error)
 					errorMessage = error.ErrorMessage;
-				Messenger.AddError(title: "Chyba při smazáni", message: errorMessage);
+				Messenger.AddError(title: "Chyba při načítání dat", message: errorMessage);
 			}
 		}
 	}

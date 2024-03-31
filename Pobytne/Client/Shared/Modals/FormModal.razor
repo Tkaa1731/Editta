@@ -30,6 +30,12 @@
             case RecordStock recordStock:
                 <StockForm recordStock="recordStock" formType="formType" OnValidSubmit="Request"/>
                 break;
+            case RecordAttribute recordAttribute:
+                <RecordAttributeForm recAttribute="recordAttribute" formType="formType" OnValidSubmit="Request"/>
+                break;
+            case Payment payment:
+                <PaymentForm payment="payment" formType="formType" OnValidSubmit="Request"/>
+                break;
         }
     </BodyTemplate>
 </HxModal>
@@ -84,7 +90,7 @@
             var errorText = "Vyskytla se neočekávaná chyba";
             if (response is ErrorResponse error)
                 errorText = error.ErrorMessage;
-            Messenger.AddError(title: "Chyba při ukladani", message: errorText );
+            Messenger.AddError(title: "Chyba při ukládání", message: errorText );
         }
     }
     private async Task Request(EForm request)
@@ -118,8 +124,14 @@
                 case RecordStock recordStock:
                     await CompleteReq(request, recordStock);
                     break;
+                case RecordAttribute recordAttribute:
+                    await CompleteReq(request, recordAttribute);
+                    break;
+                case Payment payment:
+                    await CompleteReq(request, payment);
+                    break;
                 default:
-                    Messenger.AddError(title: "Chyba při ukladani", message: "Neexistujici formular");
+                    Messenger.AddError(title: "Chyba při ukládání", message: "Neexistujici formular");
                     break;
             }
         }

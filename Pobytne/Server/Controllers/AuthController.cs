@@ -7,32 +7,32 @@ using System.Net;
 
 namespace Pobytne.Server.Controllers
 {
-	[Route("Auth")]
-	[ApiController]
-	public class AuthController(AuthService authService) : ControllerBase
-	{
-		private readonly AuthService _authService = authService;
+    [Route("Auth")]
+    [ApiController]
+    public class AuthController(AuthService authService) : ControllerBase
+    {
+        private readonly AuthService _authService = authService;
 
         [HttpPost]
-		[AllowAnonymous]
-		[Route("Login")]
-		public async Task<IActionResult> Login([FromBody] LoginRequest request)
-		{
-			try
-			{
-				var user = await _authService.Login(request);		
-				return Ok(user);
-			}
-			catch (Exception ex)
-			{
-				return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError,ex.Message));
-			}
-		}
-		[HttpPost]
-		[AllowAnonymous]
-		[Route("Refresh")]
-		public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
-		{
+        [AllowAnonymous]
+        [Route("Login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        {
+            try
+            {
+                var user = await _authService.Login(request);
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+            }
+        }
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("Refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
+        {
             try
             {
                 var user = await _authService.Refresh(request);
@@ -43,19 +43,19 @@ namespace Pobytne.Server.Controllers
                 return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
             }
 
-		}
+        }
         [HttpPost]
-		[AllowAnonymous]
-		[Route("ResetPassword")]
+        [AllowAnonymous]
+        [Route("ResetPassword")]
         public async Task<IActionResult> ResetPassword([FromBody] PasswordRequest request)
         {
-			try
-			{
-				await _authService.RefreshPassword(request);
-				return Ok();
-			}
-			catch(Exception ex) 
-			{
+            try
+            {
+                await _authService.ResetPassword(request);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
                 return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
             }
 
@@ -64,13 +64,13 @@ namespace Pobytne.Server.Controllers
         [Route("Revoke")]
         public IActionResult Revoke(int id)
         {
-			try
-			{
-				_authService.RemoveRefreshToken(id);
-				return NoContent();
-			}
-			catch(Exception ex)
-			{
+            try
+            {
+                _authService.RemoveRefreshToken(id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
                 return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
 
             }

@@ -1,16 +1,17 @@
 ﻿@page "/{idModule}/RecordSettings"
 @attribute [Authorize]
 @inject PobytneService service
+@inject IAuthorizationService authService
 @inject IHxMessengerService Messenger
 @inject IHxMessageBoxService MessageBox
 
-<ModuleNav idModule="@idModule" PageTitle="Evidence položek"></ModuleNav>
+<PageTitle>Evidence záznamů</PageTitle>
+<ModuleNav idModule="@idModule" PageTitle="Evidence záznamů"></ModuleNav>
 
-<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Record,EAccess.ReadOnly,idModule)>
+<AuthorizeView  Policy="PermitionPolicy" Resource=(EPermition.RecordAttribute,EAccess.ReadOnly,idModule)>
     <Authorized>
-
         <div class="row">
-            <div class="col-lg-3 h-max">
+            <div class="col-3 h-max" style="max-width:35rem;">
                 <HxTreeView TItem="IDirectory"
                             SelectedItemChanged="OnSelect"
                             OnItemExpanded="OnExpanded"
@@ -20,53 +21,64 @@
                             ItemIconSelector="@(p => p.Icon)"
                             ItemChildrenSelector="@(p => p.SubDirectories)" />
             </div>
-            <div class="col-lg-9">
+            <div class="col">
                 <ListCustom 
                     ListTitle="Počet záznamů" 
                     ListItems=@listOfItems 
-                    selectedItem=selectedItem 
                     selectedItemChanged=OnItemSelect 
                     EventNewItem="OnNewItem">
 
                     <MenuGridColumn>
-		                <HxContextMenuGridColumn TItem="IListItem" Context="item" ItemCssClass="w-auto">
+                        <HxContextMenuGridColumn TItem="IListItem" Context="item" ItemCssClass="d-flex justify-content-evenly">
 
-			                <HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" Tooltip="Smazat" CssClass="px-3" OnClick="async()=> await OnDeleteItem(item)"/>
-                            @if(item is Record r && r.IsBalanceCheck)
-                            {
-                            <HxButton Icon="@BootstrapIcon.BagPlus" Color="ThemeColor.Link" style="color:#50a732; padding: 0px;" Tooltip="Naskladnit" CssClass="px-3" OnClick="async()=>await OnStockAdd(item)" />
+	                        <HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" Tooltip="Smazat" OnClick="async()=> await OnDeleteItem(item)"/>
+                            @if(item is Record r && r.IsBalanceCheck){
+                                <HxButton Icon="@BootstrapIcon.BasketFill" Color="ThemeColor.Link" style="color:green; padding: 0px;" Tooltip="Naskladnit" OnClick="async()=>await OnStockAdd(item)"/>
                             }
+                            else
+                            {
+                                <HxButton Icon="@BootstrapIcon.BasketFill" Color="ThemeColor.Link" style="color:#a3a3a3; padding: 0px;" Enabled="false"/>
+                            }
+
                         </HxContextMenuGridColumn>
-	                </MenuGridColumn>
+                    </MenuGridColumn>
 
                 </ListCustom>
             </div>
-        </div>
-        <FormModal @ref=formModal formItem="formItem" OnSuccessRequest="OnSuccessRequestHandler"/>
-        
+        </div>   
     </Authorized>
-    <NotAuthorized>
-        JSTE V NOACCESS MODU PRO  PRISTUP - APLICATION
-    </NotAuthorized>
+	<NotAuthorized>
+		<Error statusCode="HttpStatusCode.Forbidden"/>
+	</NotAuthorized>
 </AuthorizeView>
+<FormModal @ref=formModal formItem="formItem" OnSuccessRequest="OnSuccessRequestHandler"/>
+
 @code {
     [EditorRequired]
     [Parameter]
     public string idModule { get; set; } = "-1";
     [CascadingParameter]
-    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;    
+    [CascadingParameter]
+    private Task<AuthenticationState> authState { get; set; } = default!;
 
     private IDirectory? selectedDirectory;
-    private IListItem? selectedItem;
     private IListItem? formItem;
     private List<IListItem>? listOfItems;
     private List<RecordDir> fileSystem = [];
 
-    private FormModal? formModal;
+    private FormModal formModal = default!;
 
 
     private async Task OnDeleteItem(IListItem deleteItem)
     {
+        var user = (await authState).User;
+        if (!(await authService.AuthorizeAsync(user,(EPermition.Record,EAccess.FullAccess,moduleWorkspace.ModuleId),"PermitionPolicy")).Succeeded)
+        {
+            Messenger.AddError(title: "Přístup odmítnut", message: "Nemáte dostatečná oprávnění pro smazání záznamu.");
+            return;
+        }
+
         var deleteMessage = await MessageBox.ShowAsync("Smazat položku",$"Opravdu chcete smazat položku: {deleteItem.Name}", MessageBoxButtons.YesNo);
         if (deleteMessage == MessageBoxButtons.No)
             return;
@@ -88,7 +100,7 @@
     }
     private async Task OnStockAdd(IListItem item)
     {
-        if(item is Record r && formModal is not null)
+        if(item is Record r)
         {
             formItem = new RecordStock() { RecordId = r.Id};
             await formModal.InsertForm();     
@@ -96,20 +108,16 @@
     }
     private async Task OnSelect(IDirectory e)
     {
-        this.selectedDirectory = e;
-        if (selectedDirectory is not null)
-        {
-            await selectedDirectory.OnSelect();
-            listOfItems = selectedDirectory.ItemsList;
-        }
+        selectedDirectory = e;
+
+        await selectedDirectory.OnSelect();
+        listOfItems = selectedDirectory.ItemsList;
+
     }
     private async Task OnExpanded(IDirectory e)
     {
-        if (e is not null)
-        {
-            await e.OnExpanded();
-            StateHasChanged();
-        }
+        await e.OnExpanded();
+        StateHasChanged();
 
     }
     private void ItemsChangedHandler(List<RecordDir> dir)
@@ -118,12 +126,8 @@
     }
     private async Task OnItemSelect(IListItem i)
     {
-        if (i is not null && formModal is not null)
-        {
-            formItem = (IListItem)i.Clone();
-            await formModal.UpdateForm();
-        }
-        selectedItem = null;
+        formItem = (IListItem)i.Clone();
+        await formModal.UpdateForm();
     }
     protected override async Task OnInitializedAsync()
     {
@@ -150,7 +154,7 @@
     }
     private async Task OnNewItem()
     {
-        if (selectedDirectory is not null && formModal is not null)
+        if (selectedDirectory is not null)
         {
             formItem = selectedDirectory.GetNew();
             await formModal.InsertForm();

@@ -6,7 +6,7 @@ namespace Pobytne.Shared.Procedural.DTO
 {
     [Serializable]
     [Table("S_TypyPlatby")]
-	public class Payment :  ACreation, ICloneable
+	public class Payment : ACreation, IListItem
     {
         public int Id { get; set; } //IDTypuPlatby
 		[MaxLength(50)]
@@ -21,8 +21,12 @@ namespace Pobytne.Shared.Procedural.DTO
         public DateTime ValidFrom { get; set; } = DateTime.Now;
         [Required(ErrorMessage = "Vyplňte datum")]
         public DateTime ValidTo { get; set; } = DateTime.Now.AddYears(1);
+        [Editable(false)]
+        public string Description => Type.ToString();
+        [Editable(false)]
+        public bool Active => ValidTo > DateTime.Now;
 
-		public object Clone()
+        public object Clone()
 		{
 			return MemberwiseClone();
 		}

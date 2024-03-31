@@ -1,28 +1,27 @@
 ﻿@page "/"
 @attribute [Authorize]
 
-<PageTitle>Home</PageTitle>
 
-    <div class="container mt-5">
-        @if (moduleWorkspace is not null)
+<div class="container mt-5">
+    @if (moduleWorkspace is not null)
+    {
+    <h2 class="headline"> Dostupné moduly</h2>
+	<h4 class="headline text-center mb-3">@moduleWorkspace.LicenseName</h4>
+    <div class="d-flex flex-row flex-wrap">
+    
+        @foreach (var module in moduleWorkspace.ModulesDic)
         {
-        <h2 class="headline"> Dostupné moduly</h2>
-		<h4 class="headline text-center mb-3">@moduleWorkspace.LicenseName</h4>
-        <div class="d-flex flex-row flex-wrap">
-        
-            @foreach (var module in moduleWorkspace.ModulesDic)
-            {
-                <a href="/@module.Key/" class="no-link">
-                    <div class="card floating-card m-2" style="width:18rem;">
-                    <div class="card-body py-5 text-center">
-                            <h3 class="card-title py-2">@module.Value</h3>
-                        </div>
+            <a href="/@module.Key/" class="no-link">
+                <div class="card floating-card m-2" style="width:18rem;">
+                <div class="card-body py-5 text-center">
+                        <h3 class="card-title py-2">@module.Value</h3>
                     </div>
-                </a>
-            }
-        </div>
+                </div>
+            </a>
         }
     </div>
+    }
+</div>
 
 
 @code {

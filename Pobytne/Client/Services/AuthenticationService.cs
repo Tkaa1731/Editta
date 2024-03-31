@@ -13,8 +13,6 @@ namespace Pobytne.Client.Services
 		private readonly PobytneService _pobytneService = pobytneService;
 		private readonly IServiceProvider sp = sp;
 
-		public static EventCallback OnTokenRefreshFailure { get; set; }
-
         public async Task<object?> Login(LoginRequest logRequest)
 		{
 			var logResponse = await _pobytneService.LoginAsync(logRequest);
@@ -38,7 +36,7 @@ namespace Pobytne.Client.Services
 				return true;
 			}
             await RemoveUserAccount();
-            await OnTokenRefreshFailure.InvokeAsync(null);// refresh se nezdaril => odhlas uzivatele
+            (sp.GetService<AuthenticationStateProvider>() as CustomAuthenticationStateProvider)!.UpdateAuthenticationState();
             return false;
 		}
 		public async Task Logout()

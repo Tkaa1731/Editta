@@ -3,24 +3,22 @@
 @inject PobytneService service
 @inject IJSRuntime js
 
+<PageTitle>Můj účet</PageTitle>
 
-<AuthorizeView>
-	<Authorized>
-        <HxCard CssClass="floating-card">
-            <BodyTemplate>
-                <HxCardTitle>Můj účet</HxCardTitle>
-                <HxCardSubtitle CssClass="mb-2 text-muted">@context.User.Claims.FirstOrDefault(c => c.Type == "License")?.Value</HxCardSubtitle>
-                <HxCardText>
-                    <p>Login: @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.Name)?.Value</p>
-                    <p>Id uživatele:, @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.Sid)?.Value</p>
-                    <p>Email: @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.Email)?.Value</p>
-                    <p>Jméno uživatele: @context.User.Claims.FirstOrDefault(c=> c.Type == ClaimTypes.GivenName)?.Value</p>
-                </HxCardText>
-            </BodyTemplate>
-        </HxCard>
-        <div class="w-100 m-2"/>
-	</Authorized>
-</AuthorizeView>
+<HxCard CssClass="floating-card">
+    <BodyTemplate>
+        <HxCardTitle>Můj účet</HxCardTitle>
+        <HxCardSubtitle CssClass="mb-2 text-muted">@moduleWorkspace.LicenseName</HxCardSubtitle>
+        <HxCardText>
+            <div><b>Login:</b> @User?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value</div>
+            <div><b>Id uživatele:</b> @moduleWorkspace.UserId</div>
+            <div><b>Email: </b>@User?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value</div>
+            <div><b>Jméno uživatele:</b> @moduleWorkspace.UserName</div>
+        </HxCardText>
+    </BodyTemplate>
+</HxCard>
+<div class="w-100 m-2"/>
+
 
 
 
@@ -29,6 +27,15 @@
 
 @code {
     [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; } = default!;
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
+    [CascadingParameter]
+    private Task<AuthenticationState> authState { get; set; } = default!;
+    private ClaimsPrincipal? User;
+
+    protected override async Task OnInitializedAsync()
+    {
+        User = (await authState).User;
+        await base.OnInitializedAsync();
+    }
 
 }

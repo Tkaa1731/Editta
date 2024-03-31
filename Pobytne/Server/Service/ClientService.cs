@@ -17,7 +17,7 @@ namespace Pobytne.Server.Service
                 filter.StartIndex,
                 filter.Count,
                 Valid = filter.Active ? 0 : -1,
-                filter.Subfix
+                SubFix = $"%{filter.Subfix}%"
             };
 
             return await _clientTable.GetList(conditions);
@@ -28,7 +28,7 @@ namespace Pobytne.Server.Service
             {
                 ModuleId,
                 Valid = filter.Active ? 0 : -1,
-                filter.Subfix
+                SubFix = $"%{filter.Subfix}%"
             };
             return await _clientTable.GetCount(conditions);
         }
@@ -60,7 +60,7 @@ namespace Pobytne.Server.Service
         public async Task<int> Delete(int id)
         {
 			//Kontrola na existenci navazujících tabulek
-			var errors = await _clientTable.IsDeletable(id);//TODO: DEPENDECIE GRAPH FORM DB
+			var errors = await _clientTable.IsDeletable(id);
 			if (errors.Any())
 				throw new Exception($"Pro typ platby ID:{id},který se pokoušíte smazat existuje platný záznam v tabulce {errors.First().Error}");
 			return await _clientTable.Delete(id);

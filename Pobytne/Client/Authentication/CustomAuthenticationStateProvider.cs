@@ -42,7 +42,7 @@ namespace Pobytne.Client.Authentication
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
 
-            var user = await _service.GetValidUser();// pri kaydem dotazu na authentication State je kontrola expirace + pripadny refresh
+            var user = await _service.GetValidUser();// pri kazdem dotazu na authenticationState je kontrola expirace + pripadny refresh
             if (user == null)
                 return new AuthenticationState(_anonymous);// neni nic v Local storage
             

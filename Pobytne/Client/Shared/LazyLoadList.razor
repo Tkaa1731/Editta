@@ -1,15 +1,14 @@
 ﻿@inject PobytneService _service
-@inject IAuthorizationService authService
 @inject IHxMessengerService Messenger
 @inject IHxMessageBoxService MessageBox
 
 <HxListLayout TFilterModel="HxListLayout.NoFilter" CssClass="floating-card">
         <TitleTemplate>
-           Počet klientů <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@listCount</HxBadge>
+           @ListTitle <HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="ms-1">@listCount</HxBadge>
         </TitleTemplate>
         <SearchTemplate>
-        <HxCheckbox @bind-Value="lazyList.Active" @bind-Value:after="gridComponent.RefreshDataAsync" Text="Zobrazit aktivní"/>
-        <HxInputText Placeholder="Hledat" Type="InputType.Search" @bind-Value="lazyList.Subfix" @bind-Value:after="gridComponent.RefreshDataAsync"/>
+        <HxCheckbox @bind-Value="LazyList.Active" @bind-Value:after="gridComponent.RefreshDataAsync" Text="Zobrazit aktivní"/>
+        <HxInputText Placeholder="Hledat" Type="InputType.Search" @bind-Value="LazyList.Subfix" @bind-Value:after="gridComponent.RefreshDataAsync"/>
         </SearchTemplate>
         <CommandsTemplate>
             @if(Editable){
@@ -31,12 +30,14 @@
                 <HxGridColumn HeaderText="Název" ItemTextSelector="@(item => item.Name)" />
                 <HxGridColumn HeaderText="Popis" ItemTextSelector="@(item => item.Description)"/>
                 <HxGridColumn HeaderText="Poslední úprava" ItemTextSelector="@(item => item.CreationDate.ToString())"/>
-				@if (Editable)
-				{
-					<HxContextMenuGridColumn TItem="IListItem" Context="item" ItemCssClass="d-flex justify-content-evenly">
-							<HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" Tooltip="Smazat" OnClick="async()=>await OnDeleteItem(item)"/>
-					</HxContextMenuGridColumn>     
-				}
+
+				<HxContextMenuGridColumn TItem="IListItem" Context="item" ItemCssClass="d-flex justify-content-evenly">
+					@if (Editable)
+					{
+						<HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" Tooltip="Smazat" OnClick="async()=>await OnDeleteItem(item)"/>
+					}
+				</HxContextMenuGridColumn>     
+  
             </Columns>
         </HxGrid>
     </DataTemplate>
@@ -47,30 +48,33 @@
 @code {
 	[CascadingParameter]
 	private ModuleWorkplace moduleWorkspace { get; set; } = default!;
-    [CascadingParameter]
-    private Task<AuthenticationState> authState { get; set; } = default!;
+	[Parameter]
+	[EditorRequired]
+	public LazyList LazyList { get; set; } = default!;
+	[Parameter]
+	[EditorRequired]
+	public required string ListTitle{ get; set; } 
 	[Parameter]
 	public bool Editable { get; set; } = true;
 	[Parameter]
 	public IListItem? Value { get; set; }
 	[Parameter]
-	public EventCallback<IListItem?> ValueChanged { get; set; }
+	public EventCallback<IListItem> ValueChanged { get; set; }
 	[Parameter]
-	public int PageSize { get; set; } = 10;
+	public int PageSize { get; set; } = 15;
 
 	private FormModal formModal = default!;
-	private HxGrid<IListItem> gridComponent = new();
-	private LazyList lazyList = new(typeof(Client));
+	private HxGrid<IListItem> gridComponent = default!;
 
 	private IListItem itemForm = default!;
 
-	private List<Client> list = [];
+	private List<IListItem> list = [];
 	private int listCount = 0;
 
 	private async  Task<GridDataProviderResult<IListItem>> LoadDataItems(GridDataProviderRequest<IListItem> request)
 	{
-		lazyList.StartIndex = request.StartIndex;
-		lazyList.Count = request.Count??int.MaxValue;
+		LazyList.StartIndex = request.StartIndex;
+		LazyList.Count = request.Count??int.MaxValue;
 
 		Value = null;
 
@@ -85,9 +89,9 @@
 	}
 	private async Task OnLoadMore()
 	{
-		var response = await _service.GetAllAsync<Client>($"?moduleId={moduleWorkspace.Id}&", moduleWorkspace.Id, lazyList);
-		if (response is List<Client> clients)
-			list = clients;
+		var response = await _service.GetAllAsync<IListItem>($"?moduleId={moduleWorkspace.Id}&", moduleWorkspace.Id, LazyList);
+		if (response is List<IListItem> l)
+			list = l;
 		else
 		{
 			list.Clear();
@@ -99,7 +103,7 @@
 	}
 	private async Task OnFilteredCount()
 	{
-		var response = await _service.GetCountAsync<Client>($"?moduleId={moduleWorkspace.Id}&", moduleWorkspace.Id, lazyList);
+		var response = await _service.GetCountAsync<IListItem>($"?moduleId={moduleWorkspace.Id}&", moduleWorkspace.Id, LazyList);
 		if (response is int count)
 		{
 			listCount = count;
@@ -158,24 +162,17 @@
 	}
 	private async Task OnDeleteItem(IListItem deleteItem)
     {
-		var user = (await authState).User;
-        if (!(await authService.AuthorizeAsync(user,(EPermition.Client,EAccess.FullAccess,moduleWorkspace.ModuleId),"PermitionPolicy")).Succeeded)
-        {
-            Messenger.AddError(title: "Přístup odmítnut", message: "Nemáte dostatečná oprávnění pro smazání záznamu.");
-            return;
-        }
-
         var deleteMessage = await MessageBox.ShowAsync("Smazat položku",$"Opravdu chcete smazat položku: {deleteItem.Name}", MessageBoxButtons.YesNo);
         if (deleteMessage == MessageBoxButtons.No)
             return;
 
-        var response = await _service.DeleteAsync<Client>(deleteItem.Id, moduleWorkspace.Id);
+        var response = await _service.DeleteAsync<IListItem>(deleteItem.Id, moduleWorkspace.Id,LazyList.Type);
 
         if(response is ErrorResponse error)
             Messenger.AddError(title: "Chyba při smazáni", message: error.ErrorMessage );
         else
         {
-            list.Remove((Client)deleteItem);
+            list.Remove(deleteItem);
             Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně smazán.");
 			await Task.Delay(1500);
 			Messenger.Clear();

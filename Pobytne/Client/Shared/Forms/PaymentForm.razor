@@ -1,64 +1,69 @@
 ﻿@using System.ComponentModel.DataAnnotations;
 
 
-    <EditForm Model="@payment" OnValidSubmit=OnValidSubmitHandler>
-	    <DataAnnotationsValidator />
-		<div class="mx-3 mt-3">
-			<div class="row">
-				<div class="col">
-                    <HxInputText @bind-Value="payment.Name" Label="Název dokladu" Type="InputType.Text" Enabled="Enabled" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular" />
-				</div>
-				<div class="col">
-                    <HxSelect TItem="RKeyValue"
-                              TValue="int"
-                              Label="Typ platby"
-                              Data="paymentTypeList"
-                              @bind-Value="selectedType"
-                              TextSelector="@(r => r.Name)"
-                              ValueSelector="@(r => r.Id)"
-                              Enabled="Enabled" />
-				</div>
+<EditForm Model="@payment">
+    <DataAnnotationsValidator />
+	<div class="mx-3 mt-3">
+		<div class="row">
+			<div class="col">
+                <HxInputText @bind-Value="payment.Name" Label="Název dokladu" Type="InputType.Text" Enabled="Enabled" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular" />
 			</div>
-			<div class="row">
-				<div class="col">
-                    <HxInputText @bind-Value="payment.InvoicePrefix" Label="Prefix dokladu" Enabled="Enabled" MaxLength=10 ValidationMessageMode="ValidationMessageMode.Regular" />
-				</div>
-                <div class="col"/>
-				<div class="col">
-                    <HxInputNumber @bind-Value="payment.InvoiceNumber" Label="Číslo dokladu" Enabled="Enabled" ValidationMessageMode="ValidationMessageMode.Regular" />
-				</div>
+			<div class="col">
+                <HxSelect TItem="RKeyValue"
+                          TValue="int"
+                          Label="Typ platby"
+                          Data="paymentTypeList"
+                          @bind-Value="selectedType"
+                          TextSelector="@(r => r.Name)"
+                          ValueSelector="@(r => r.Id)"
+                          Enabled="Enabled" />
 			</div>
-			<div class="row">
-                <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="payment.ValidFrom" Enabled="Enabled" Label="Platní od" ValidationMessageMode="ValidationMessageMode.Regular" />
-                </div>
-                <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="payment.ValidTo" MinDate="payment.ValidFrom.AddDays(1)" Enabled="Enabled" Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular" />
-                </div>
+		</div>
+		<div class="row">
+			<div class="col">
+                <HxInputText @bind-Value="payment.InvoicePrefix" Label="Prefix dokladu" Enabled="Enabled" MaxLength=10 ValidationMessageMode="ValidationMessageMode.Regular" />
+			</div>
+            <div class="col"/>
+			<div class="col">
+                <HxInputNumber @bind-Value="payment.InvoiceNumber" Label="Číslo dokladu" Enabled="Enabled" ValidationMessageMode="ValidationMessageMode.Regular" />
+			</div>
+		</div>
+		<div class="row">
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="payment.ValidFrom" Enabled="Enabled" Label="Platní od" ValidationMessageMode="ValidationMessageMode.Regular" />
             </div>
-            @if (formType == EForm.Update)
-            {
-             <div class="mt-2 text-end" style="font-size:smaller;"><b>Poslední úprava:</b> @payment.CreationUserName  @payment.CreationDate.ToShortDateString()</div>   
-            }
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="payment.ValidTo" MinDate="payment.ValidFrom.AddDays(1)" Enabled="Enabled" Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular" />
+            </div>
         </div>
+    </div>
 
-        <div class="d-grid gap-2 mt-3">
-            <HxSubmit Color="ThemeColor.Success" Enabled="Enabled">@ButtonText</HxSubmit>
-        </div>
+    <div class="d-grid gap-2 mt-3">
+        <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.PaymentType,EAccess.FullAccess,moduleWorkspace.ModuleId)>
+            <Authorized Context="auth_context">
+                <HxSubmit Color="ThemeColor.Success" OnValidClick="OnValidSubmitHandler">@ButtonText</HxSubmit>
+            </Authorized>
+            <NotAuthorized Context="auth_context">
+                <HxSubmit Color="ThemeColor.Success" Enabled=false>@ButtonText</HxSubmit>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
 
-    </EditForm>
+</EditForm>
 
 
 @code {
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
     [EditorRequired]
     [Parameter]
-    public Payment payment { get; set; } = new();
+    public Payment payment { get; set; } = default!;
     [EditorRequired]
     [Parameter]
     public EForm formType { get; set; }
     [EditorRequired]
     [Parameter]
-    public EventCallback<(EForm,Payment)> OnValidSubmit{ get; set; }
+    public EventCallback<EForm> OnValidSubmit{ get; set; }
     [Parameter]
     public bool Enabled { get; set; } = true;
 
@@ -88,6 +93,6 @@
         }
         base.OnInitialized();
     }
-    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync((formType,payment));
+    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
 
 }

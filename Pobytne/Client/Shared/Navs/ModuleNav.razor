@@ -3,10 +3,20 @@
 		<div class="collapse dark shadow text-white rounded-bottom" style="z-index:1500" id="menuCollapse">
 			<ul class="navbar-nav mr-auto">
 				<li class="nav-item">
-					<a class="icon-link nav-link text-white" href=@($"{idModule}/Records")>
-						<HxIcon Icon="BootstrapIcon.Book"/>
-						Evidence
-					</a>
+					<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Evidence,EAccess.ReadOnly,moduleWorkspace.ModuleId)>
+						<Authorized>
+							<a class="icon-link nav-link text-white" href=@($"{idModule}/Records")>
+								<HxIcon Icon="BootstrapIcon.Book"/>
+								Evidence
+							</a>
+						</Authorized>
+						<NotAuthorized>
+							<a class="icon-link nav-link text-white disabled">
+								<HxIcon Icon="BootstrapIcon.Book" />
+								Evidence
+							</a>
+						</NotAuthorized>
+					</AuthorizeView>
 				</li>
 				<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle icon-link text-white" href="#" id="KlientiDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -14,8 +24,22 @@
 						Klienti
 					</a>
 					<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-						<li><a class="dropdown-item" href=@($"{idModule}/Clients")>Evidence klientů</a></li>
-						<li><a class="dropdown-item" href=@($"{idModule}/SeasonTicket")>Pernamentky</a></li>
+						<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Client,EAccess.ReadOnly,moduleWorkspace.ModuleId)>
+							<Authorized>
+								<li><a class="dropdown-item" href=@($"{idModule}/Clients")>Evidence klientů</a></li>
+							</Authorized>
+							<NotAuthorized>
+								<li><a class="dropdown-item disabled">Evidence klientů</a></li>
+							</NotAuthorized>
+						</AuthorizeView>
+						<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.SeasonTicket,EAccess.ReadOnly,moduleWorkspace.ModuleId)>
+							<Authorized>
+								<li><a class="dropdown-item" href=@($"{idModule}/SeasonTicket")>Pernamentky</a></li>
+							</Authorized>
+							<NotAuthorized>
+								<li><a class="dropdown-item disabled">Pernamentky</a></li>
+							</NotAuthorized>
+						</AuthorizeView>
 					</ul>
 				</li>
 	@* 			<li class="nav-item dropdown">
@@ -46,9 +70,30 @@
 						Nastavení
 					</a>
 					<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-						<li><a class="dropdown-item" href=@($"{idModule}/RecordSettings")>Evidence položek</a></li>
-						<li><a class="dropdown-item" href=@($"{idModule}/DialerSettings/PaymentDialer")>Číselník plateb</a></li>
-						<li><a class="dropdown-item" href=@($"{idModule}/DialerSettings/ConstantDialer")>Číselník konstant</a></li>
+						<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Record,EAccess.ReadOnly,moduleWorkspace.ModuleId)>
+							<Authorized>
+								<li><a class="dropdown-item" href=@($"{idModule}/RecordSettings")>Evidence položek</a></li>
+							</Authorized>
+							<NotAuthorized>
+								<li><a class="dropdown-item disabled">Evidence položek</a></li>
+							</NotAuthorized>
+						</AuthorizeView>
+						<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.PaymentType,EAccess.ReadOnly,moduleWorkspace.ModuleId)>
+							<Authorized>
+								<li><a class="dropdown-item" href=@($"{idModule}/IndexerSettings/Payment")>Číselník plateb</a></li>
+							</Authorized>
+							<NotAuthorized>
+								<li><a class="dropdown-item disabled">Číselník plateb</a></li>	
+							</NotAuthorized>
+						</AuthorizeView>
+						<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.RecordAttribute,EAccess.ReadOnly,moduleWorkspace.ModuleId)>
+							<Authorized>
+								<li><a class="dropdown-item" href=@($"{idModule}/IndexerSettings/Attribute")>Číselník konstant</a></li>
+							</Authorized>
+							<NotAuthorized>
+								<li><a class="dropdown-item disabled">Číselník konstant</a></li>
+							</NotAuthorized>
+						</AuthorizeView>
 						@* <li><a class="dropdown-item disabled" href="#">Evidence stavu zásob</a></li> *@
 						@* <li><a class="dropdown-item disabled" href="#">Číselník konstatnt</a></li> *@
 					</ul>
@@ -59,8 +104,22 @@
 						Souhrny
 					</a>
 					<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-						<li><a class="dropdown-item" href=@($"{idModule}/CashRegisterReports")>Souhrny plateb</a></li>
-						<li><a class="dropdown-item" href=@($"{idModule}/EvidenceReports")>Souhrny evidence</a></li>
+						<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.CashSummary,EAccess.ReadOnly,moduleWorkspace.ModuleId)>
+							<Authorized>
+								<li><a class="dropdown-item" href=@($"{idModule}/CashRegisterReports")>Souhrny plateb</a></li>
+							</Authorized>
+							<NotAuthorized>
+								<li><a class="dropdown-item disabled">Souhrny plateb</a></li>
+							</NotAuthorized>
+						</AuthorizeView>
+						<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.EvidenceSummary,EAccess.ReadOnly,moduleWorkspace.ModuleId)>
+							<Authorized>
+								<li><a class="dropdown-item" href=@($"{idModule}/EvidenceReports")>Souhrny evidence</a></li>
+							</Authorized>
+							<NotAuthorized>
+								<li><a class="dropdown-item disabled">Souhrny evidence</a></li>
+							</NotAuthorized>
+						</AuthorizeView>
 						@* <li><a class="dropdown-item disabled" href="#">Souhrny čerpání pernamentky</a></li>@*  
 						<li><a class="dropdown-item" href=@($"{idModule}/RecordReports")>Souhrny stavu zásob</a></li> *@
 					</ul>

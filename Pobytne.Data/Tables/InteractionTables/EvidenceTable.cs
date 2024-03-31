@@ -24,7 +24,7 @@ namespace Pobytne.Data.Tables.InteractionTables
                 {
                     int success = await tran.ExecuteAsync(evidenceSQL, param, commandType: CommandType.StoredProcedure);
                     if (success == 1)
-                        return 1;
+                        return param.Get<int>("@IDEvidence"); ;
 
                     throw new Exception("Failed 'p_sp_Interakce_InsUp'");
                 }
@@ -32,9 +32,9 @@ namespace Pobytne.Data.Tables.InteractionTables
         }
         public async Task<IEnumerable<Evidence>> SelectByCondition(DynamicParameters parameters, string sqlCondition)
         {
-			using (IDbConnection cnn = Database.CreateConnection()) // TODO: odstranit omezeni TOP 15
+			using (IDbConnection cnn = Database.CreateConnection())
 			{
-				string sql = @" SELECT TOP 30
+				string sql = @" SELECT
                                     e.*, i.NazevInterakce, i.IDUzivatele, i.Datum, i.IDModulu, u.JmenoUzivatele, 
                                     z.Nazev, z.IDZaznamuVlastnosti AS RecordAttributeId, l.JmenoUser AS CreationUserName,
                                     zv.Nazev AS RecordAttributeName, zv.UcetA AS AccountA, zv.UcetS AS AccountS

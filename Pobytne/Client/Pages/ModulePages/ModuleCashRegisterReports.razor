@@ -4,7 +4,8 @@
 @inject IHxMessengerService Messenger
 @inject ExcelExportService _csvService
 
-<ModuleNav idModule="@idModule" PageTitle="Souhrny pokladna"></ModuleNav>
+<PageTitle>Souhrny pokladny</PageTitle>
+<ModuleNav idModule="@idModule" PageTitle="Souhrny pokladny"></ModuleNav>
 
 <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.EvidenceSummary,EAccess.ReadOnly,idModule)>
     <Authorized>
@@ -109,6 +110,9 @@
 			</div>
 		</div>
 	</Authorized>
+	<NotAuthorized>
+		<Error statusCode="HttpStatusCode.Forbidden"/>
+	</NotAuthorized>
 </AuthorizeView>
 
 
@@ -178,7 +182,7 @@
 			var errorMessage = "Nastala neočekávaná chyba.";
 			if (response is ErrorResponse error)
 				errorMessage = error.ErrorMessage;
-			Messenger.AddError(title: "Chyba při smazáni", message: errorMessage);
+			Messenger.AddError(title: "Chyba při načítání dat", message: errorMessage);
 		}
 
 	}

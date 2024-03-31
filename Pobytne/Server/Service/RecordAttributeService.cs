@@ -10,8 +10,13 @@ namespace Pobytne.Server.Service
         public async Task<IEnumerable<RecordAttribute>> GetAttibutesByModule(int moduleId)
         {
             return await _attributeTable.GetAttributesByModule(moduleId);
-        }
-        public async Task<RecordAttribute?> Update(RecordAttribute updateAttribute)
+		}
+		public async Task<int> GetCount(int ModuleId)
+		{
+			var conditions = new { ModuleId };
+			return await _attributeTable.GetCount(conditions);
+		}
+		public async Task<RecordAttribute?> Update(RecordAttribute updateAttribute)
         {
             //SET Server time
             updateAttribute.CreationDate = DateTime.Now;
