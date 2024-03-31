@@ -1,7 +1,7 @@
 # Pobytne
 !UPDATE!
 
-Verze_01: editta.pobytne.cz
+Verze_02: www.editta.cz
 
 Přihlašovací údaje k testovací verzi účtu je: login = TestovaciUcet, heslo = HeSlO24+ 
 
