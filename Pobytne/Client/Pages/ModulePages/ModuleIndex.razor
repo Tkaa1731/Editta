@@ -4,7 +4,7 @@
 @inject PobytneService service
 
 
-
+<PageTitle>@moduleWorkspace.Name</PageTitle>
 
 <div class="container mt-5">
     <h2 class="headline"> Dostupné akce</h2>
@@ -81,15 +81,14 @@
         <div class="col">
             <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Record,EAccess.ReadOnly,idModule)>
                 <Authorized>
-
-                <a href="@idModule/RecordSettings" class="no-link">
-                    <div class="card floating-card">
-                        <div class="card-body p-5 text-center">
-                            <HxIcon Icon="@BootstrapIcon.Gear" />
-                            <h5 class="card-title">Evidence položek</h5>
+                    <a href="@idModule/RecordSettings" class="no-link">
+                        <div class="card floating-card">
+                            <div class="card-body p-5 text-center">
+                                <HxIcon Icon="@BootstrapIcon.Gear" />
+                                <h5 class="card-title">Evidence položek</h5>
+                            </div>
                         </div>
-                    </div>
-                </a>
+                    </a>
                 </Authorized>
                 <NotAuthorized>
                     <div class="card floating-card disabled">
@@ -102,27 +101,52 @@
             </AuthorizeView>
         </div>
         <div class="col">
-             <a href="@idModule/DialerSettings/ConstantDialer" class="no-link">
-                 <div class="card floating-card">
-                     <div class="card-body p-5 text-center">
-                         <HxIcon Icon="@BootstrapIcon.CalculatorFill" />
-                         <h5 class="card-title">Číselníky</h5>
-                     </div>
-                 </div>
-            </a>
-            
+            <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.RecordAttribute,EAccess.ReadOnly,idModule)>
+                <Authorized>
+                    <a href="@idModule/IndexerSettings/Constant" class="no-link">
+                        <div class="card floating-card">
+                            <div class="card-body p-5 text-center">
+                                <HxIcon Icon="@BootstrapIcon.CalculatorFill" />
+                                <h5 class="card-title">Číselníky</h5>
+                            </div>
+                        </div>
+                    </a>
+                </Authorized>
+                <NotAuthorized>
+                    <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.PaymentType,EAccess.ReadOnly,idModule)>
+                        <Authorized Context="auth_context">
+                            <a href="@idModule/IndexerSettings/Payment" class="no-link">
+                                <div class="card floating-card">
+                                    <div class="card-body p-5 text-center">
+                                        <HxIcon Icon="@BootstrapIcon.CalculatorFill" />
+                                        <h5 class="card-title">Číselníky</h5>
+                                    </div>
+                                </div>
+                            </a>
+                        </Authorized>
+                        <NotAuthorized Context="auth_context">
+                                <div class="card floating-card disabled">
+                                    <div class="card-body p-5 text-center">
+                                        <HxIcon Icon="@BootstrapIcon.CalculatorFill" />
+                                        <h5 class="card-title">Číselníky</h5>
+                                    </div>
+                                </div>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
         <div class="col">
             <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.EvidenceSummary,EAccess.ReadOnly,idModule)>
                 <Authorized>
-                <a href="@idModule/CashRegisterReports" class="no-link">
-                    <div class="card floating-card">
-                        <div class="card-body p-5 text-center">
-                            <HxIcon Icon="@BootstrapIcon.Wallet" />
-                            <h5 class="card-title">Souhrny</h5>
+                    <a href="@idModule/CashRegisterReports" class="no-link">
+                        <div class="card floating-card">
+                            <div class="card-body p-5 text-center">
+                                <HxIcon Icon="@BootstrapIcon.Wallet" />
+                                <h5 class="card-title">Souhrny</h5>
+                            </div>
                         </div>
-                    </div>
-                </a>
+                    </a>
                 </Authorized>
                 <NotAuthorized>
                     <div class="card floating-card disabled">

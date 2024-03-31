@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural;
+using Pobytne.Shared.Procedural.DTO;
 using System.Data;
 
 namespace Pobytne.Data.Tables
@@ -31,8 +32,17 @@ namespace Pobytne.Data.Tables
 
             return await cnn.QueryFirstAsync<RecordAttribute>(sql, conditions);
         }
-        // ------------------ InsUp ---------------------
-        public async Task<int> Update(RecordAttribute attribute)
+		public async Task<int> GetCount(object conditions)
+		{
+			using IDbConnection cnn = Database.CreateConnection();
+			string sql = @"SELECT COUNT(IDZaznamuVlastnosti)
+                               FROM S_ZaznamyVlastnosti
+                               WHERE IDModulu = @ModuleId;";
+
+			return await cnn.ExecuteScalarAsync<int>(sql, conditions);
+		}
+		// ------------------ InsUp ---------------------
+		public async Task<int> Update(RecordAttribute attribute)
         {
             using IDbConnection cnn = Database.CreateConnection();
             return await cnn.UpdateAsync(attribute);

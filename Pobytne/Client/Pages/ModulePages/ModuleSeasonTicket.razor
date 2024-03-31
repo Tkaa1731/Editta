@@ -3,27 +3,41 @@
 @inject PobytneService service
 @inject IHxMessengerService Messenger
 
+<PageTitle>Permanentky</PageTitle>
 <ModuleNav idModule="@idModule" PageTitle="Permanentky"></ModuleNav>
 
 <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.SeasonTicket,EAccess.ReadOnly,idModule)>
     <Authorized>
         <div class="row">
             <div class="col-auto" style="min-width:25rem;">
-                <div class="card floating-card px-3 pb-3 h-max overflow-auto">
-                    <div class="w-100 p-3 text-secondary border-bottom border-2 sticky-top bg-white h6 d-flex justify-content-between">Název<span>Počet vstupů</span></div>
-                    <HxListGroup Numbered="true" Flush="true">
-                        @for(int i = 0; i < seasonTickets.Count; i++)
-                        {
-                            int index = i;                            
-                            <HxListGroupItem OnClick="async()=> await OnselectedItemChanged(index)" Active="@(selected == index)" CssClass="d-flex justify-content-between align-items-start">
-                                <div class="ms-2 me-auto px-1">
-                                    <div class="fw-bold">@seasonTickets[index].Name</div>
-                                    @seasonTickets[index].Description
+                <div class="card floating-card px-3 pb-3 mh-max overflow-hidden">
+                    <div class="w-100 px-3 pt-4 pb-2 fw-bold border-bottom border-1 border-dark d-flex justify-content-between">Název<span>Počet vstupů</span></div>
+                    <div class="overflow-auto mb-3 pb-1 border-1 border-bottom">
+                        <HxListGroup Numbered="true" Flush="true">
+                            @if(seasonTickets.Count == 0)
+                            {
+                                <div class="text-center text-secondary my-5 py-1">
+                                    <div class="fs-3">
+                                        <HxIcon Icon="BootstrapIcon.Inbox" CssClass="pt-1"/>
+                                    </div>
+                                    <div>Žádné permanentky.</div>
                                 </div>
-                                <HxBadge Color="ThemeColor.Primary" Variant="BadgeVariant.RoundedPill">@seasonTickets[index].GroupQuantity</HxBadge>
-                            </HxListGroupItem>
-                        }
-                    </HxListGroup>
+                            }
+                            else{
+                                @for(int i = 0; i < seasonTickets.Count; i++)
+                                {
+                                    int index = i;                            
+                                    <HxListGroupItem OnClick="async()=> await OnselectedItemChanged(index)" Active="@(selected == index)" CssClass="d-flex justify-content-between align-items-start">
+                                        <div class="ms-2 me-auto px-1">
+                                            <div class="fw-bold">@seasonTickets[index].Name</div>
+                                            @seasonTickets[index].Description
+                                        </div>
+                                        <HxBadge Color="ThemeColor.Primary">@seasonTickets[index].GroupQuantity</HxBadge>
+                                    </HxListGroupItem>
+                                }
+                            }
+                        </HxListGroup>
+                    </div>
                 </div>
 
             </div>
@@ -31,7 +45,7 @@
                 <div class="card floating-card p-3">
                     <HxGrid TItem="SeasonTicket" @ref=grid DataProvider="(request)=>Task.FromResult(request.ApplyTo(clients))" PageSize="15" Responsive="true" SelectedDataItemChanged="(item)=> selectedClient = item">
                         <Columns>
-                            <HxGridColumn HeaderText="Id" ItemTextSelector="i =>i.Id.ToString()" />
+                            <HxGridColumn HeaderText="Id" ItemTextSelector="i =>i.Id.ToString()" IsDefaultSortColumn=true SortKeySelector="k=>k.Id"/>
                             <HxGridColumn HeaderText="Uzivatel" ItemTextSelector="i => i.ClientName" />
                             <HxGridColumn HeaderText="Platna" ItemTextSelector="@(i => i.Valid?"Ano":"Ne")" />
                             <HxGridColumn HeaderText="Cena" ItemTextSelector="i => i.Price.ToString()" />
@@ -44,37 +58,50 @@
                     </HxGrid>
                 </div>
             </div>
-            <div class="col-4">
+            <div class="col-3">
+
                 @if(selectedClient is not null)
                 {
-                    <div class="card floating-card px-3 pb-3 h-max overflow-auto">
-                        <div class="w-100 p-3 text-secondary border-bottom border-2 sticky-top bg-white h6 d-flex justify-content-between">Historie vstupů</div>
+                <div class="card floating-card px-3 pb-3 mh-max overflow-hidden">
+                    <div class="w-100 px-3 pt-4 pb-2 fw-bold border-bottom border-1 border-dark d-flex justify-content-between">Historie vstupů<HxBadge Color="ThemeColor.Light" TextColor="ThemeColor.Dark" CssClass="fs-6">@selectedClient.TicketEvidences.Count / @selectedClient.Quantity</HxBadge></div>
+                    <div class="overflow-auto mb-3 pb-1 border-1 border-bottom">
                         <HxListGroup Numbered="false" Flush="true">
-                            @for (int i = 0; i < selectedClient.TicketEvidences.Count; i++)
+                            @if(!selectedClient.TicketEvidences.Any())
                             {
-                                int index = i;
-                                <HxListGroupItem OnClick="async()=> await OnselectedItemChanged(index)" Active="@(selected == index)" CssClass="d-flex align-items-start">
-                                    <div class="ms-2 me-auto px-1">
-                                        @selectedClient.TicketEvidences[index].Id
-                                        <div class="fw-bold">@selectedClient.TicketEvidences[index].InteractionDate</div>
-                                        @selectedClient.TicketEvidences[index].CreationUserName
+                                <div class="text-center text-secondary my-5 py-1">
+                                    <div class="fs-3">
+                                        <HxIcon Icon="BootstrapIcon.Inbox" CssClass="pt-1"/>
                                     </div>
+                                    <div>Žádné evidované vstupy.</div>
+                                </div>
+                            }
+                            else
+                            {
+                                    
+                                @for (int i = 0; i < selectedClient.TicketEvidences.Count; i++)
+                                {
+                                int index = i;
+                                <HxListGroupItem CssClass="d-flex align-items-start">
+                                    <div class="ms-2 me-auto px-1">
+                                        <div class="fw-bold">@selectedClient.TicketEvidences[index].Id</div>    
+                                    @selectedClient.TicketEvidences[index].InteractionDate.ToShortDateString()
+                                    </div>
+                                    @selectedClient.TicketEvidences[index].CreationUserName
                                 </HxListGroupItem>
+                                }
                             }
                         </HxListGroup>
                     </div>
+                </div>
                 }
             </div>
         </div>
     </Authorized>
+	<NotAuthorized>
+		<Error statusCode="HttpStatusCode.Forbidden"/>
+	</NotAuthorized>
 </AuthorizeView>
-<style>
-    .list-group-item.active.list-group-item-action {
-        background: #d7dee1 !important;
-        border-color: #c5c5c5 !important;
-        color: black;
-    }
-</style>
+
 @code {
     [EditorRequired]
     [Parameter]

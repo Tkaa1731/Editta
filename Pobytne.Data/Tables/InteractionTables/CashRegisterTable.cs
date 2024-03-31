@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Data;
-using System.Linq;
+﻿using System.Data;
 using System.Text;
-using System.Threading.Tasks;
 using Pobytne.Shared.Procedural;
 using Dapper.Transaction;
 using Dapper;
@@ -12,7 +7,7 @@ using Pobytne.Shared.Procedural.FilterReports;
 
 namespace Pobytne.Data.Tables.InteractionTables
 {
-    public class CashRegisterTable // P_Pokladna
+	public class CashRegisterTable // P_Pokladna
     {
         public async Task<int> InsUpTran(DynamicParameters param, IDbTransaction tran, IDbConnection cnn)
         {
@@ -23,7 +18,7 @@ namespace Pobytne.Data.Tables.InteractionTables
                 {
                     int success = await tran.ExecuteAsync(cashRegisterSQL, param, commandType: CommandType.StoredProcedure);
                     if (success == 1)
-                        return 1;
+                        return param.Get<int>("@IDPokladna"); ;
 
                     throw new Exception("Failed 'p_sp_Interakce_InsUp'");
                 }
@@ -31,9 +26,9 @@ namespace Pobytne.Data.Tables.InteractionTables
         }
 		public async Task<IEnumerable<CashRegister>> SelectByCondition(DynamicParameters parameters, string sqlCondition)
 		{
-			using (IDbConnection cnn = Database.CreateConnection())// TODO: Odstranit Top 20
+			using (IDbConnection cnn = Database.CreateConnection())
 			{
-				string sql = @" SELECT TOP 25 
+				string sql = @" SELECT
 									p.*,i.NazevInterakce, i.IDUzivatele, i.Datum, i.IDModulu, i.IDTypuPlatby, 
 									z.Nazev, z.IDZaznamuVlastnosti AS RecordAttributeId,u.JmenoUzivatele,l.JmenoUser AS CreationUserName,
 									zv.Nazev AS RecordAttributeName, zv.UcetA AS AccountA, zv.UcetS AS AccountS

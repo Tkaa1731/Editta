@@ -50,13 +50,8 @@
         navManager.NavigateTo("/Login");
 
     }
-    private void RefreshFailureHandler() {
-        navManager.NavigateTo("/Login");
-    }
     protected override async Task OnInitializedAsync()
     {
-        AuthenticationService.OnTokenRefreshFailure = EventCallback.Factory.Create(this, RefreshFailureHandler);
-
         var authState = await authenticationState;
         if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
         {

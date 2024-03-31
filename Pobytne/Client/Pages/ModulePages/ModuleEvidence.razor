@@ -3,6 +3,7 @@
 @inject PobytneService _service
 @inject IHxMessengerService Messenger
 
+<PageTitle>Evidence</PageTitle>
 <ModuleNav idModule="@idModule" PageTitle="Evidence"></ModuleNav>
 
 <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Evidence,EAccess.ReadOnly,idModule)>
@@ -19,7 +20,7 @@
                 </div>
             }
             <div class="col"/>
-           @*  //interakce komponenta   *@
+           <!-- interakce komponenta -->
             <div class="col-auto card p-3 h-max d-flex flex-column justify-content-between border-top border-2 floating-card" style="min-width:30rem; max-width:30rem;">
                 <div  class="overflow-hidden d-flex flex-column" style="flex:1;">
                     <!--Kalendar-->
@@ -31,13 +32,20 @@
                 </div>
                 <div>
                     <hr class="my-3" style="height: 2px;color: #999;">
-                    <div>
+                    <div class="d-flex align-content-start">
                         <span><b>Celkem:</b></span>
-                        <p class="ms-2 fw-normal h3">@interaction.Records.Sum( r => r.Price*r.Quantity) Kč</p>
+                        <span class="ms-4 fs-2">@interaction.Records.Sum( r => r.PriceAmount) Kč</span>
                     </div>
                     <HxInputTextArea Label="Poznámka" LabelType="LabelType.Floating" MaxLength="200" @bind-Value="interaction.InteractionName" CssClass="my-2" />
         
-                    <HxButton CssClass="w-100 my-1" Text="Potvrdit" Color=ThemeColor.Success OnClick="SubmitHandler" Enabled="(interaction.Records.Count>0)"></HxButton>
+                    <AuthorizeView>
+                        <Authorized Context="auth_context">
+                            <HxButton CssClass="w-100 my-1" Text="Potvrdit" Color=ThemeColor.Success OnClick="SubmitHandler" Enabled="(interaction.Records.Count>0)"></HxButton>
+                        </Authorized>
+                        <NotAuthorized Context="auth_context">
+                            <HxButton CssClass="w-100 my-1" Text="Potvrdit" Color=ThemeColor.Success Enabled="false"></HxButton>
+                        </NotAuthorized>
+                    </AuthorizeView>
                     <HxButton CssClass="w-100" Text="Smazat vse" Color=ThemeColor.Danger Enabled="(interaction.Records.Count>0)" OnClick="()=>{interaction.Records.Clear();interaction.InteractionName = string.Empty;}"></HxButton>
                 </div>
             </div>
@@ -45,6 +53,9 @@
         
         </div>
     </Authorized>
+	<NotAuthorized>
+		<Error statusCode="HttpStatusCode.Forbidden"/>
+	</NotAuthorized>
 </AuthorizeView>
 
 <HxModal @ref="clientsModal" Title="Vyberte klienta" Centered=true Backdrop="ModalBackdrop.Static" Size="ModalSize.Large">
@@ -136,7 +147,7 @@
         var errorText = "Vyskytla se neočekávaná chyba";
         if (response is ErrorResponse error)
             errorText = error.ErrorMessage;
-        Messenger.AddError(title: "Chyba při ukladani", message: errorText );
+        Messenger.AddError(title: "Chyba při ukládání", message: errorText );
         return false;
     }
     private async Task OnSelect(RecordTreeView rtv)
@@ -173,7 +184,8 @@
                             Order = interaction.Records.Count,
                             IsBalanceCheck = r.IsBalanceCheck,
                             IsClientRequired = r.IsClientRequired,
-                            IsSeasonTicket = true,
+                            IsSeasonTicket = r.IsSeasonTicket,
+                            IsSeasonTicketPayment = true,
                             RecordType = r.RecordType
                     });
             else
@@ -188,7 +200,8 @@
                             Order = interaction.Records.Count,
                             IsBalanceCheck = r.IsBalanceCheck,
                             IsClientRequired = r.IsClientRequired,
-                            IsSeasonTicket = false,
+                            IsSeasonTicket = r.IsSeasonTicket,
+                            IsSeasonTicketPayment = false,
                             RecordType = r.RecordType
                     });
         }

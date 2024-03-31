@@ -32,8 +32,9 @@ namespace Pobytne.Client
             services.AddAuthorizationCore(config =>
             {
                 config.AddPolicy("PermitionPolicy", policy => policy.AddRequirements(new PermitionRequirement()));
-            });
+			});
             services.AddScoped<AuthenticationService>();
+            
             // ...
         }
         public static async Task Main(string[] args)

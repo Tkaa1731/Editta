@@ -1,9 +1,9 @@
 ﻿@inject IJSRuntime js
 @inject PobytneService service
 
-@if(permition is not null && _editContext is not null)
+@if(_editContext is not null)
 {
-    <EditForm EditContext="_editContext" OnValidSubmit="OnValidSubmitHandler">
+    <EditForm EditContext="_editContext">
     <DataAnnotationsValidator/>
         <div class="mx-3">
             <HxSelect TItem="RKeyValue"
@@ -35,22 +35,30 @@
             </div>
         </div>
     </EditForm>
-    <HxSubmit Color="ThemeColor.Success" CssClass="w-100 mt-3" EditContext="@_editContext" OnValidClick="OnValidSubmitHandler" >@ButtonText</HxSubmit>
+    <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Permition,EAccess.FullAccess,moduleWorkspace.ModuleId)>
+    <Authorized>
+        <HxSubmit Color="ThemeColor.Success" CssClass="w-100 mt-3" EditContext="@_editContext" OnValidClick="OnValidSubmitHandler" >@ButtonText</HxSubmit>
+    </Authorized>
+    <NotAuthorized>
+        <HxSubmit Color="ThemeColor.Success" CssClass="w-100 mt-3" Enabled="false">@ButtonText</HxSubmit>
+    </NotAuthorized>
+    </AuthorizeView>
   
 
 }
 
 @code {
-
-        [EditorRequired]
-        [Parameter]
-        public EForm formType { get; set; }
-        [EditorRequired]
-        [Parameter]
-        public EventCallback<EForm> OnValidSubmit { get; set; }
-        [EditorRequired]
-        [Parameter]
-        public Permition? permition{ get; set; }
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
+    [EditorRequired]
+    [Parameter]
+    public Permition permition { get; set; } = default!;
+    [EditorRequired]
+    [Parameter]
+    public EForm formType { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public EventCallback<EForm> OnValidSubmit { get; set; }
 
     private EditContext? _editContext;
     private List<RKeyValue> userList = new(); 

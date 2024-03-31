@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components;
 using Pobytne.Data.Tables;
 using Pobytne.Shared.Procedural.DTO;
+using Pobytne.Shared.Struct;
 
 namespace Pobytne.Server.Service
 {
@@ -13,7 +14,12 @@ namespace Pobytne.Server.Service
         {
             return await _paymentTable.GetPayments(moduleId);
         }
-        public async Task<Payment> GetPaymentById(int id)
+		public async Task<int> GetCount(int ModuleId)
+		{
+			var conditions = new{ ModuleId };
+			return await _paymentTable.GetCount(conditions);
+		}
+		public async Task<Payment> GetPaymentById(int id)
         {
             return await _paymentTable.GetById(id);
         }

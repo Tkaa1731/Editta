@@ -2,7 +2,9 @@
 using Pobytne.Data;
 using Pobytne.Data.Tables;
 using Pobytne.Shared.Authentication;
+using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural.DTO;
+using System.Net;
 using System.Security.Cryptography;
 
 namespace Pobytne.Server.Service
@@ -32,13 +34,28 @@ namespace Pobytne.Server.Service
         {
             return await  _userTable.GetByLicenseExsModule(moduleNumber);
         }
-        public async Task<User?> GetUserById(int id)
+        public async Task<User> GetUserById(int id)
         {
-            return await _userTable.GetById(id);
+            try
+            {
+                return await _userTable.GetById(id);
+            }
+            catch (Exception)
+			{
+                throw new Exception("Nenašel se záznam s daným Id");
+            }
 		}
-        public async Task<User?> GetUserByEmail(string email)
+        public async Task<User> GetUserByEmail(string email)
         {
-            return await _userTable.GetByEmail(email);
+            try
+            {
+                return await _userTable.GetByEmail(email);
+            }
+            catch (Exception)
+			{
+                throw new Exception("Zadejte validní emailovou adresu svého účtu");
+			}
+
         }
         public async Task<User?> Update(User updateUser)
         {

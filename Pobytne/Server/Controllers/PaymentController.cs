@@ -1,6 +1,7 @@
 ﻿using AuthRequirementsData.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Pobytne.Server.Service;
 using Pobytne.Shared.Extensions;
 using Pobytne.Shared.Procedural.DTO;
@@ -32,7 +33,26 @@ namespace Pobytne.Server.Controllers
                 return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
             }
         }
-        [HttpPut]
+		[HttpGet]
+		[PermissionAuthorize(permition, EAccess.NoAccess)]
+		[Route("Count")]
+		public async Task<IActionResult> GetCount([FromQuery] int moduleId, [FromQuery] string filterJSON = "")
+		{
+			try
+			{
+				//var filter = JsonConvert.DeserializeObject<LazyList>(filterJSON);
+				//if (filter is null)
+				//	return BadRequest(new ErrorResponse(HttpStatusCode.BadRequest, "Vyskytla se chyba v dotazu."));
+
+				var count = await _paymentService.GetCount(moduleId);
+				return Ok(count);
+			}
+			catch (Exception ex)
+			{
+				return Conflict(new ErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+			}
+		}
+		[HttpPut]
         [PermissionAuthorize(permition, EAccess.FullAccess)]
         public async Task<IActionResult> Update([FromBody] Payment updatePayment)
         {

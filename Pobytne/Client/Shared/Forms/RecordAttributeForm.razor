@@ -1,70 +1,72 @@
 ﻿@using System.ComponentModel.DataAnnotations;
 
-@if(recAttribute is not null)
-{
-    <EditForm Model="recAttribute" OnValidSubmit=OnValidSubmitHandler>
-	    <DataAnnotationsValidator />
-		<div class="mx-3 mt-3">
-			<div class="row">
-				<div class="col">
-					<HxInputText @bind-Value="recAttribute.Name" Label="Název vlastnosti" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular" Enabled="Enabled"/>
-				</div>
-				<div class="col">
-                    <HxSelect TItem="RKeyValue"
-                              TValue="int"
-                              Label="Typ záznamu"
-                              Data="recordTypeList"
-                              @bind-Value="selectedType"
-                              TextSelector="@(r => r.Name)"
-                              ValueSelector="@(r => r.Id)"
-                               Enabled="Enabled"/>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col">
-					<HxInputText @bind-Value="recAttribute.AccountA" Label="ÚčetA"  Enabled="Enabled" MaxLength=12 ValidationMessageMode="ValidationMessageMode.Regular"/>
-				</div>
-                <div class="col"/>
-				<div class="col">
-					<HxInputText @bind-Value="recAttribute.AccountS" Label="ÚčetS"  Enabled="Enabled" MaxLength=12 ValidationMessageMode="ValidationMessageMode.Regular"/>
-				</div>
-            </div>
-			<div class="row">
-                <div class="col">
-                    <HxInputText @bind-Value="recAttribute.OrderNumber" Label="Číslo zakázky"  Enabled="Enabled" MaxLength=12 ValidationMessageMode="ValidationMessageMode.Regular" />
-				</div>
-				<div class="col">
-					<HxInputText @bind-Value="recAttribute.CentreNumber" Label="Číslo střediska"  Enabled="Enabled" MaxLength=12 ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>				
-                <div class="col">
-                    <HxInputText @bind-Value="recAttribute.ProjectNumber" Label="Číslo projektu"  Enabled="Enabled" MaxLength=12 ValidationMessageMode="ValidationMessageMode.Regular" />
-                </div>
-			</div>
-			<div class="row">
-            </div>
-            @if (formType == EForm.Update)
-            {
-             <div class="mt-2 text-end" style="font-size:smaller;"><b>Poslední úprava:</b> @recAttribute.CreationUserName  @recAttribute.CreationDate.ToShortDateString()</div>   
-            }
-        </div>
 
-        <div class="d-grid gap-2 mt-3">
-            <HxSubmit Color="ThemeColor.Success"  Enabled="Enabled">@ButtonText</HxSubmit>
+<EditForm Model="recAttribute">
+    <DataAnnotationsValidator />
+	<div class="mx-3 mt-3">
+		<div class="row">
+			<div class="col">
+				<HxInputText @bind-Value="recAttribute.Name" Label="Název vlastnosti" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular" Enabled="Enabled"/>
+			</div>
+			<div class="col">
+                <HxSelect TItem="RKeyValue"
+                          TValue="int"
+                          Label="Typ záznamu"
+                          Data="recordTypeList"
+                          @bind-Value="selectedType"
+                          TextSelector="@(r => r.Name)"
+                          ValueSelector="@(r => r.Id)"
+                           Enabled="Enabled"/>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col">
+				<HxInputText @bind-Value="recAttribute.AccountA" Label="ÚčetA"  Enabled="Enabled" MaxLength=12 ValidationMessageMode="ValidationMessageMode.Regular"/>
+			</div>
+            <div class="col"/>
+			<div class="col">
+				<HxInputText @bind-Value="recAttribute.AccountS" Label="ÚčetS"  Enabled="Enabled" MaxLength=12 ValidationMessageMode="ValidationMessageMode.Regular"/>
+			</div>
         </div>
+		<div class="row">
+            <div class="col">
+                <HxInputText @bind-Value="recAttribute.OrderNumber" Label="Číslo zakázky"  Enabled="Enabled" MaxLength=12 ValidationMessageMode="ValidationMessageMode.Regular" />
+			</div>
+			<div class="col">
+				<HxInputText @bind-Value="recAttribute.CentreNumber" Label="Číslo střediska"  Enabled="Enabled" MaxLength=12 ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>				
+            <div class="col">
+                <HxInputText @bind-Value="recAttribute.ProjectNumber" Label="Číslo projektu"  Enabled="Enabled" MaxLength=12 ValidationMessageMode="ValidationMessageMode.Regular" />
+            </div>
+		</div>
+    </div>
 
-    </EditForm>
-}
+    <div class="d-grid gap-2 mt-3">
+    <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.RecordAttribute,EAccess.FullAccess,moduleWorkspace.ModuleId)>
+        <Authorized Context="auth_context">
+            <HxSubmit Color="ThemeColor.Success" OnValidClick="OnValidSubmitHandler">@ButtonText</HxSubmit>
+        </Authorized>
+        <NotAuthorized Context="auth_context">
+            <HxSubmit Color="ThemeColor.Success" Enabled=false>@ButtonText</HxSubmit>
+        </NotAuthorized>
+    </AuthorizeView>
+    </div>
+
+</EditForm>
+
 
 @code {
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
     [EditorRequired]
     [Parameter]
-    public RecordAttribute recAttribute { get; set; } = new();
+    public RecordAttribute recAttribute { get; set; } = default!;
     [EditorRequired]
     [Parameter]
     public EForm formType { get; set; }
     [EditorRequired]
     [Parameter]
-    public EventCallback<(EForm,RecordAttribute)> OnValidSubmit{ get; set; }
+    public EventCallback<EForm> OnValidSubmit{ get; set; }
     [Parameter]
     public bool Enabled { get; set; } = true;
     private string ButtonText
@@ -81,7 +83,7 @@
         get => (int)recAttribute.Type;
         set { recAttribute.Type = (ERecordType)value; }
     }
-    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync((formType,recAttribute));
+    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
         protected override void OnInitialized()
     {
         foreach (ERecordType pt in Enum.GetValues(typeof(ERecordType)))

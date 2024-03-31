@@ -1,41 +1,49 @@
-﻿@if (Folder is not null)
-{
-    <EditForm Model="@Folder" OnValidSubmit=OnValidSubmitHandler>
-        <DataAnnotationsValidator />
-        <div class="mx-3 mt-3">
-            <div class="row">
-                <div class="col">
-                    <HxInputText @bind-Value="Folder.Name" Label="Název položky" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular" />
-                </div>
-                <div class="col-3">
-                    <HxInputNumber Label="Pořadí položky v seznamu" TValue="int" @bind-Value="Folder.Order" ValidationMessageMode="ValidationMessageMode.Regular" />
-                </div>
+﻿
+<EditForm Model="@Folder">
+    <DataAnnotationsValidator />
+    <div class="mx-3 mt-3">
+        <div class="row">
+            <div class="col">
+                <HxInputText @bind-Value="Folder.Name" Label="Název položky" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular" />
             </div>
-            <div class="row">
-                <div class="col">
-                    <HxInputText @bind-Value="Folder.Note" Label="Poznámka" MaxLength=100 Type="InputType.Text" />
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Folder.ValidFrom" Label="Plati od" ValidationMessageMode="ValidationMessageMode.Regular" />
-                </div>
-                <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Folder.ValidTo" MinDate=Folder.ValidFrom.AddDays(1) Label="Plati do" ValidationMessageMode="ValidationMessageMode.Regular" />
-                </div>
+            <div class="col-3">
+                <HxInputNumber Label="Pořadí položky v seznamu" TValue="int" @bind-Value="Folder.Order" ValidationMessageMode="ValidationMessageMode.Regular" />
             </div>
         </div>
-
-        <div class="d-grid gap-2">
-            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        <div class="row">
+            <div class="col">
+                <HxInputText @bind-Value="Folder.Note" Label="Poznámka" MaxLength=100 Type="InputType.Text" />
+            </div>
         </div>
+        <div class="row">
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Folder.ValidFrom" Label="Plati od" ValidationMessageMode="ValidationMessageMode.Regular" />
+            </div>
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Folder.ValidTo" MinDate=Folder.ValidFrom.AddDays(1) Label="Plati do" ValidationMessageMode="ValidationMessageMode.Regular" />
+            </div>
+        </div>
+    </div>
 
-    </EditForm>
-}
+    <div class="d-grid gap-2">
+        <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Record,EAccess.FullAccess,moduleWorkspace.ModuleId)>
+            <Authorized Context="auth_context">
+                <HxSubmit Color="ThemeColor.Success" OnValidClick="OnValidSubmitHandler">@ButtonText</HxSubmit>
+            </Authorized>
+            <NotAuthorized Context="auth_context">
+                <HxSubmit Color="ThemeColor.Success" Enabled=false>@ButtonText</HxSubmit>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+
+</EditForm>
+
 @code {
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
     [Parameter]
     [EditorRequired]
-    public IFolder_Record? Folder { get; set; }
+    public IFolder_Record Folder { get; set; } = default!;
     [EditorRequired]
     [Parameter]
     public EForm formType { get; set; }

@@ -1,0 +1,223 @@
+﻿@page "/{idModule}/IndexerSettings/{indexerName}"
+@attribute [Authorize]
+@inject PobytneService _service
+@inject IAuthorizationService authService
+@inject IHxMessengerService Messenger
+@inject IHxMessageBoxService MessageBox
+
+<PageTitle>Číselníky</PageTitle>
+<ModuleNav idModule="@idModule" PageTitle="Číselníky"></ModuleNav>
+
+<div class="row">
+	<div class="col-4" style="max-width:35rem;">
+		<div class="card floating-card px-3 pb-3 mh-max overflow-auto">
+			<div class="w-100 px-3 pt-4 pb-2 fw-bold border-bottom border-1 border-dark d-flex justify-content-between">Název<span>Počet záznamů</span></div>
+			<HxListGroup Numbered="true" Flush="true">                           
+				<!--Authorize Payment-->
+				<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.PaymentType,EAccess.FullAccess,moduleWorkspace.ModuleId)>
+					<Authorized>
+						<HxListGroupItem OnClick=@(async()=>await OnItemSelect("Payment")) Active="isPayment" CssClass="d-flex justify-content-between align-items-start">
+							<div class="ms-2 me-auto px-1">
+								<div class="fw-bold">Číselníky plateb</div>
+								Typy platebních metod nastavených pro modul @moduleWorkspace.Name
+							</div>
+							<HxBadge Color="ThemeColor.Primary" Variant="BadgeVariant.RoundedPill">@paymentCount</HxBadge>
+						</HxListGroupItem>
+					</Authorized>
+					<NotAuthorized>
+						<HxListGroupItem Enabled="false" CssClass="d-flex justify-content-between align-items-start">
+							<div class="ms-2 me-auto px-1">
+								<div class="fw-bold">Číselníky plateb</div>
+								Typy platebních metod nastavených pro modul @moduleWorkspace.Name
+							</div>
+							<HxBadge Color="ThemeColor.Secondary" Variant="BadgeVariant.RoundedPill">@paymentCount</HxBadge>
+						</HxListGroupItem>
+					</NotAuthorized>
+				</AuthorizeView>
+				<!--Authorize Attribute-->
+				<AuthorizeView>
+					<Authorized>
+						<HxListGroupItem OnClick=@(async()=>await OnItemSelect("Attribute")) Active="!isPayment" CssClass="d-flex justify-content-between align-items-start">
+							<div class="ms-2 me-auto px-1">
+								<div class="fw-bold">Číselníky konstant</div>
+								Kategorie záznamů nastavené pro modul @moduleWorkspace.Name
+							</div>
+							<HxBadge Color="ThemeColor.Primary" Variant="BadgeVariant.RoundedPill">@attributeCount</HxBadge>
+						</HxListGroupItem>						
+					</Authorized>
+					<NotAuthorized>
+						<HxListGroupItem Enabled=false CssClass="d-flex justify-content-between align-items-start">
+							<div class="ms-2 me-auto px-1">
+								<div class="fw-bold">Číselníky konstant</div>
+								Kategorie záznamů nastavené pro modul @moduleWorkspace.Name
+							</div>
+							<HxBadge Color="ThemeColor.Secondary" Variant="BadgeVariant.RoundedPill">@attributeCount</HxBadge>
+						</HxListGroupItem>
+					</NotAuthorized>
+				</AuthorizeView>
+
+			</HxListGroup>
+		</div>
+	</div>
+	<div class="col">
+		<ListCustom 
+		    ListTitle="Počet záznamů" 
+		    ListItems=@listOfItems 
+		    selectedItem=selectedItem 
+		    selectedItemChanged=OnItemSelect 
+		    EventNewItem="OnNewItem">
+		
+		    <MenuGridColumn>
+		        <HxContextMenuGridColumn TItem="IListItem" Context="item" ItemCssClass="d-flex justify-content-evenly">
+					<HxButton Icon="@BootstrapIcon.Trash" style="color:red; padding: 0px;" Color="ThemeColor.Link" Tooltip="Smazat" OnClick="async()=>await DeleteItemClicked(item)"/>
+		        </HxContextMenuGridColumn>
+		    </MenuGridColumn>
+		
+		</ListCustom>
+	</div>
+</div>
+
+<FormModal formItem="formItem" @ref=formModal OnSuccessRequest="OnSuccessRequestHandler"></FormModal>
+
+@code {
+	[EditorRequired]
+	[Parameter]
+	public string idModule { get; set; } = "-1";
+	[CascadingParameter]
+	private ModuleWorkplace moduleWorkspace { get; set; } = default!;
+    [CascadingParameter]
+    private Task<AuthenticationState> authState { get; set; } = default!;
+	[EditorRequired]
+	[Parameter]
+	public string indexerName { get; set; } = "Payment";
+
+	private IListItem? selectedItem;
+	private IListItem? formItem;
+	private List<IListItem> listOfItems = [];
+	private FormModal formModal = default!;
+
+	private bool isPayment => indexerName == "Payment";    
+	private EPermition deletePermition => isPayment ? EPermition.PaymentType : EPermition.RecordAttribute;
+
+	private int paymentCount;
+	private int attributeCount;
+
+	protected override async Task OnInitializedAsync()
+	{
+		moduleWorkspace.ModuleId = idModule;
+
+		paymentCount = await GetCount<Payment>();
+		attributeCount = await GetCount<RecordAttribute>();
+
+		if (isPayment)
+			await LoadData<Payment>();
+		else
+			await LoadData<RecordAttribute>();
+
+		await base.OnInitializedAsync();
+	}
+	private async Task LoadData<T>() where T : IListItem
+	{
+		var response = await _service.GetAllAsync<T>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
+
+		if (response is null || response is ErrorResponse)
+		{
+			var errorText = "Vyskytla se neočekávaná chyba";
+			if (response is ErrorResponse error)
+				errorText = error.ErrorMessage;
+			Messenger.AddError(title: "Chyba při načítání", message: errorText);
+		}
+		else if (response is List<T> list)
+			listOfItems = list.Select(i => i as IListItem).ToList();
+	}
+	private async Task<int> GetCount<T>()
+	{
+		var response = await _service.GetCountAsync<T>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
+		if (response is int count)
+			return count;
+		else
+		{
+			var errorMessage = "Nastala neočekávaná chyba.";
+			if (response is ErrorResponse error)
+				errorMessage = error.ErrorMessage;
+			Messenger.AddError(title: "Chyba při načítání", message: errorMessage);
+			return 0;
+		}
+	}
+	private async Task OnItemSelect(IListItem i)
+	{
+		if(i is not null && formModal is not null)
+		{
+			formItem = (IListItem)i.Clone();
+			await formModal.UpdateForm();            
+		}
+		selectedItem = null;
+	}
+	private async Task OnItemSelect(string indexer){
+		indexerName = indexer;
+		if (isPayment)
+			await LoadData<Payment>();
+		else
+			await LoadData<RecordAttribute>();
+	}
+	private async Task OnNewItem()
+	{
+		formItem = isPayment ? new Payment() { ModuleId = moduleWorkspace.Id} : new RecordAttribute() { ModuleId = moduleWorkspace.Id };
+		await formModal.InsertForm();            
+	}
+	private void OnSuccessRequestHandler((IListItem,EForm) item)
+	{
+		switch (item.Item2)
+		{
+			case EForm.Insert:
+				listOfItems.Add(item.Item1);
+				if (isPayment)
+					paymentCount = listOfItems.Count();
+				else
+					attributeCount = listOfItems.Count();
+				break;
+			case EForm.Update:
+				var index = listOfItems.FindIndex(i => i.Id == item.Item1.Id);
+				if(index != -1)
+					listOfItems[index] = item.Item1;
+				break;
+		}
+		StateHasChanged();
+    }
+
+	private async Task DeleteItemClicked(IListItem deleteItem)
+	{
+		var user = (await authState).User;
+        if (!(await authService.AuthorizeAsync(user,(deletePermition,EAccess.FullAccess,moduleWorkspace.ModuleId),"PermitionPolicy")).Succeeded)
+        {
+            Messenger.AddError(title: "Přístup odmítnut", message: "Nemáte dostatečná oprávnění pro smazání záznamu.");
+            return;
+        }
+
+		var deleteMessage = await MessageBox.ShowAsync("Smazat položku",$"Opravdu chcete smazat položku: {deleteItem.Name}", MessageBoxButtons.YesNo);
+        if (deleteMessage == MessageBoxButtons.No)
+            return;
+
+        object? response;
+		if(isPayment)
+			response = await _service.DeleteAsync<Payment>(deleteItem.Id, moduleWorkspace.Id);
+		else
+			response = await _service.DeleteAsync<RecordAttribute>(deleteItem.Id, moduleWorkspace.Id);
+
+        if(response is ErrorResponse error)
+            Messenger.AddError(title: "Chyba při smazáni", message: error.ErrorMessage );
+        else
+        {
+            listOfItems.Remove(deleteItem);
+			if (isPayment)
+				paymentCount = listOfItems.Count();
+			else
+				attributeCount = listOfItems.Count();
+
+            Messenger.AddInformation(title: "Vše v pořádku", message: "Záznam byl úspěšně smazán.");
+			await Task.Delay(1500);
+			Messenger.Clear();
+        }
+    }
+
+}

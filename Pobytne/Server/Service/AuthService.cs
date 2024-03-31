@@ -30,13 +30,12 @@ namespace Pobytne.Server.Service
 			GenerateJwtToken(userAccount);
 
 			var urlSafe = EncodeUrlSafeBase64(userAccount.Token);
-			Console.WriteLine(urlSafe);
 
 			return userAccount;
 		}
 		public async Task<UserAccount> Refresh(RefreshRequest request)
 		{
-			if (!_memoryCache.TryGetValue(request.UserId, out string? refreshToken) && refreshToken == request.RefreshToken)
+			if (!_memoryCache.TryGetValue(request.UserId, out string? refreshToken) || refreshToken != request.RefreshToken)
 				throw new Exception("Daný JWT nelze aktualizovat");
 
 			var user = await _userService.GetUserById(request.UserId) ?? throw new Exception("Reference na neexistujiciho uzivatele");
@@ -55,7 +54,7 @@ namespace Pobytne.Server.Service
 			return userAccount;
 			
 		}
-		public async Task RefreshPassword(PasswordRequest request)
+		public async Task ResetPassword(PasswordRequest request)
 		{
 			if (request.Password != request.PasswordConfirm)
 				throw new Exception("Hesla se neshoduji");
@@ -99,18 +98,25 @@ namespace Pobytne.Server.Service
 		}
 		private ClaimsPrincipal ReadJwtToken(string token)
 		{
-            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-            var validationParameters = new TokenValidationParameters
+            try
             {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = Key,
-                ValidateIssuer = false, // Zde můžete změnit na true, pokud chcete ověřovat vydavatele.
-                ValidateAudience = false, // Zde můžete změnit na true, pokud chcete ověřovat posluchače.
-                ValidateLifetime = true
-            };
-            ClaimsPrincipal claimsPrincipal = jwtSecurityTokenHandler.ValidateToken(token, validationParameters, out _);
+				var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+				var validationParameters = new TokenValidationParameters
+				{
+					ValidateIssuerSigningKey = true,
+					IssuerSigningKey = Key,
+					ValidateIssuer = false, // Zde můžete změnit na true, pokud chcete ověřovat vydavatele.
+					ValidateAudience = false, // Zde můžete změnit na true, pokud chcete ověřovat posluchače.
+					ValidateLifetime = true
+				};
+				ClaimsPrincipal claimsPrincipal = jwtSecurityTokenHandler.ValidateToken(token, validationParameters, out _);
+				return claimsPrincipal;
+			}
+			catch (Exception)
+            {
+				throw new Exception("Platnost odkazu vypršela");
+			}
 
-            return claimsPrincipal;
         }
         private void GenerateJwtToken(UserAccount userAccount)
 		{

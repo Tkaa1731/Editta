@@ -19,7 +19,7 @@ namespace Pobytne.Client.Services
         private readonly HttpClient _httpClient = httpClient;
         private readonly ILocalStorageService _storageService = localStorage;
 		private readonly IServiceProvider serviceProvider = serviceProvider;
-        private static string GetControler(Type obj)
+        private static string GetController(Type obj)
         {
             return obj.Name;
         }
@@ -49,8 +49,10 @@ namespace Pobytne.Client.Services
 
             if (responseStatusCode == HttpStatusCode.OK)
                 return JsonConvert.DeserializeObject<UserAccount>(responseBody);
+            if (responseStatusCode == HttpStatusCode.Conflict)
+                return JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
 
-            return JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
+            return new ErrorResponse(HttpStatusCode.InternalServerError,responseBody);
         }
         //Allow UnAuthorized
         public async Task RevokeAsync(RefreshRequest obj)
@@ -66,8 +68,8 @@ namespace Pobytne.Client.Services
             var responseBody = await response.Content.ReadAsStringAsync();
 
             if (responseStatusCode == HttpStatusCode.OK)
-                return Task.CompletedTask;
-            if (responseStatusCode == HttpStatusCode.Conflict)
+				return JsonConvert.DeserializeObject<UserAccount>(responseBody);
+			if (responseStatusCode == HttpStatusCode.Conflict)
                 return JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
 
             return new ErrorResponse(HttpStatusCode.InternalServerError,responseBody);
@@ -87,31 +89,7 @@ namespace Pobytne.Client.Services
 
             return new ErrorResponse(HttpStatusCode.InternalServerError,responseBody);
         }
-        public async Task<object?> ResetPaswordAsync(User? user = null, string email = "")
-        {
-            HttpResponseMessage response;
-            if(user is not null)
-            {
-                await UpdateHeader();
-                response = await _httpClient.PostAsJsonAsync($"/Password/", user);
-            }
-            else if (!email.IsNullOrEmpty())
-                response = await _httpClient.PostAsJsonAsync($"/Password/Anonym", email);
-            else
-                return new ErrorResponse(HttpStatusCode.BadRequest,"Byl zadan nevalidni pozadavek");
-
-            var responseStatusCode = response.StatusCode;
-            var responseBody = await response.Content.ReadAsStringAsync();
-
-            if (responseStatusCode == HttpStatusCode.OK)
-                return Task.CompletedTask;
-            else if (responseStatusCode == HttpStatusCode.Conflict)
-                return JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
-
-            return new ErrorResponse(HttpStatusCode.InternalServerError, responseBody);
-
-        }
-        public async Task<object?> GetAllAsync<T>(string requestUri, int ModuleId, LazyList? filter = null)
+        public async Task<object?> GetAllAsync<T>(string requestUri, int ModuleId, LazyList filter = default!)
         {
             if (filter is not null)
             {
@@ -119,7 +97,7 @@ namespace Pobytne.Client.Services
                 requestUri += $"filterJSON={HttpUtility.UrlEncode(filterJSON)}";
             }
 
-            var request = $"/{GetControler(typeof(T))}/{requestUri}";
+            var request = $"/{GetController(filter?.Type ?? typeof(T))}/{requestUri}";
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, request);
 
             await UpdateHeader(ModuleId);
@@ -128,7 +106,7 @@ namespace Pobytne.Client.Services
         }
         public async Task<object?> GetByIdAsync<T>(int Id, int ModuleId)
         {
-            var request = $"/{GetControler(typeof(T))}/{Id}";
+            var request = $"/{GetController(typeof(T))}/{Id}";
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, request);
 
             await UpdateHeader(ModuleId);
@@ -136,23 +114,23 @@ namespace Pobytne.Client.Services
             return await SendAsyncAuthorizedHandler<T>(requestMessage);
         }
 
-        public async Task<object?> GetCountAsync<T>(string requestUri, int ModuleId, LazyList? filter = null)
+        public async Task<object?> GetCountAsync<T>(string requestUri, int ModuleId, LazyList filter = default!)
         {
             if (filter is not null)
             {
                 string filterJSON = JsonConvert.SerializeObject(filter);
                 requestUri += $"filterJSON={HttpUtility.UrlEncode(filterJSON)}";
             }
-            var request = $"/{GetControler(typeof(T))}/Count{requestUri}";
+            var request = $"/{GetController(filter?.Type ?? typeof(T))}/Count{requestUri}";
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, request);
 
             await UpdateHeader(ModuleId);
 
             return await SendAsyncAuthorizedHandler<int>(requestMessage);
         }
-		public async Task<object?> InsertAsync<T>(T obj, int ModuleId)
+		public async Task<object?> InsertAsync<T>(T obj, int ModuleId, string url = "")
         {
-            var request = $"/{GetControler(typeof(T))}/";
+            var request = $"/{GetController(typeof(T))}/{url}";
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, request);
 
             var jsonContent = JsonConvert.SerializeObject(obj);
@@ -162,9 +140,9 @@ namespace Pobytne.Client.Services
 
             return await SendAsyncAuthorizedHandler<T>(requestMessage);
         }
-        public async Task<object?> UpdateAsync<T>(T obj, int ModuleId)
+        public async Task<object?> UpdateAsync<T>(T obj, int ModuleId, string url = "")
         {
-            var request = $"/{GetControler(typeof(T))}/";
+            var request = $"/{GetController(typeof(T))}/{url}";
             var requestMessage = new HttpRequestMessage(HttpMethod.Put, request);
 
             var jsonContent = JsonConvert.SerializeObject(obj);
@@ -175,9 +153,10 @@ namespace Pobytne.Client.Services
             return await SendAsyncAuthorizedHandler<T>(requestMessage);
         }
 
-        public async Task<object?> DeleteAsync<T>(int Id, int ModuleId)
+        public async Task<object?> DeleteAsync<T>(int Id, int ModuleId,Type Controller = default!)
         {
-            var request = $"/{GetControler(typeof(T))}/{Id}";
+            var controller = GetController(Controller ?? typeof(T));
+            var request = $"/{controller}/{Id}";
             var requestMessage = new HttpRequestMessage(HttpMethod.Delete, request);
 
             await UpdateHeader(ModuleId);
@@ -207,9 +186,14 @@ namespace Pobytne.Client.Services
                     await UpdateHeader();
                     return await SendAsyncAuthorizedHandler<T>(newRequest);// Pokud se podari refresh posli dotaz znovu
                 }
-            }
+				return new ErrorResponse(responseStatusCode, "Vypršela platnost Vašeho přihlášení.");
+			}
+            else if (responseStatusCode == HttpStatusCode.Forbidden)
+                return new ErrorResponse(responseStatusCode,"Nemáte dostatečná oprávnění");
+            else if (responseStatusCode == HttpStatusCode.Conflict || responseStatusCode == HttpStatusCode.BadRequest)
+                return JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
 
-            return JsonConvert.DeserializeObject<ErrorResponse>(responseBody);
+            return new ErrorResponse(responseStatusCode, responseBody);
         }
 
     }

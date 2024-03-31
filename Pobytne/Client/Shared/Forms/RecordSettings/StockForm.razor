@@ -20,7 +20,7 @@
     
 </HxGrid>
 <hr class="w-100"/>
-<EditForm Model="@recordStock" OnValidSubmit="OnValidSubmitHandler">
+<EditForm Model="@recordStock">
     <DataAnnotationsValidator />
     <div class="mx-3 mt-3">
         <div class="row">
@@ -39,7 +39,7 @@
         </div>
     </div>
     <div class="d-grid gap-2">
-        <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        <HxSubmit Color="ThemeColor.Success" OnValidClick="OnValidSubmitHandler">@ButtonText</HxSubmit>
     </div>
  
 </EditForm>
@@ -49,7 +49,7 @@
     private ModuleWorkplace moduleWorkspace { get; set; } = default!;
     [Parameter]
     [EditorRequired]
-    public RecordStock recordStock { get; set; } = new();
+    public RecordStock recordStock { get; set; } = default!;
     [Parameter]
     [EditorRequired]
     public EForm formType { get; set; }

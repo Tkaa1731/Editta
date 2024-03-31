@@ -1,87 +1,95 @@
-﻿@if(Activity is not null)
-{
-    <EditForm Model="@Activity" OnValidSubmit=OnValidSubmitHandler>
-        <DataAnnotationsValidator />
-        <div class="mx-3 mt-3">
-            <div class="row">
-                <div class="col">
-                    <HxInputText @bind-Value="@Activity.Name" Label="Název položky" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-                <div class="col-3">
-                    <HxInputNumber Label="Pořadí položky v seznamu" TValue="int" @bind-Value="Activity.Order" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
+﻿
+<EditForm Model="@Activity">
+    <DataAnnotationsValidator />
+    <div class="mx-3 mt-3">
+        <div class="row">
+            <div class="col">
+                <HxInputText @bind-Value="@Activity.Name" Label="Název položky" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
             </div>
-            <div class="row">
-                <div class="col">
-                    <HxInputNumber @bind-Value="Activity.Adult" Label="Počet dospělých"TValue="int" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-                <div class="col">
-                    <HxInputNumber @bind-Value="Activity.Child" Label="Počet dětí" TValue="int" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-                <div class="col-6">
-                    <HxAutosuggest Label="Účetní specifikace"
-    	               Placeholder="Vyhledat podle názvu.."
-    	               TItem="RKeyValue"
-    	               TValue="int?"
-                       MinimumLength="0"
-    	               @bind-Value="@Activity.RecordAttributeId"
-    	               DataProvider="ProvideSuggestions"
-                       ItemFromValueResolver="ItemValueResolver"
-    	               ValueSelector="p => p.NId"
-    	               TextSelector="p => p.Name">
-                        <EmptyTemplate>
-                            <span class="p-2 text-muted">Neexistující název</span>
-                        </EmptyTemplate>
-                    </HxAutosuggest>
-                </div>
-            </div>
-            <div class="row align-items-center">
-                <div class="col">
-                    <HxSwitch Text="Částka je vyžadována" @bind-Value="@Activity.IsPriceRequired" />
-                </div>
-                <div class="col">
-                    <HxSwitch Text="Klient je povinný" @bind-Value="@Activity.IsClientRequired" />
-                </div>
-                <div class="col">
-                    <HxInputNumber @bind-Value="Activity.Price" Label="Částka" TValue="float" Decimals="2" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-            </div>
-            <hr style="height: 2px;color: #999;">
-            <div class="row align-items-center">
-                <div class="col">
-                    <HxSwitch Text="Používat permanentky" Value="@Activity.IsSeasonTicket" ValueChanged="(value)=>{Activity.IsSeasonTicket = value; if(!value){Activity.GroupPrice = 0; Activity.GroupQuantity = 0; }}" ValueExpression="()=>Activity.IsSeasonTicket"/>
-                </div>
-                <div class="col">
-                    <HxInputNumber @bind-Value="Activity.GroupQuantity" Label="Počet jednotek"TValue="int" Enabled="Activity.IsSeasonTicket"/>
-                </div>
-                <div class="col">
-                    <HxInputNumber @bind-Value="Activity.GroupPrice" Label="Částka celkem" TValue="float" Decimals="2" Enabled="Activity.IsSeasonTicket"/>
-                </div>
-            </div>       
-            <div class="row">
-                <div class="col">
-                    <HxInputText @bind-Value="Activity.Note" Label="Poznámka" MaxLength=100 Type="InputType.Text" />
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Activity.ValidFrom" Label="Platní od" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-                <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Activity.ValidTo" MinDate="Activity.ValidFrom.AddDays(1)"  Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
+            <div class="col-3">
+                <HxInputNumber Label="Pořadí položky v seznamu" TValue="int" @bind-Value="Activity.Order" ValidationMessageMode="ValidationMessageMode.Regular"/>
             </div>
         </div>
-        <div class="d-grid gap-2">
-            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        <div class="row">
+            <div class="col">
+                <HxInputNumber @bind-Value="Activity.Adult" Label="Počet dospělých"TValue="int" ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+            <div class="col">
+                <HxInputNumber @bind-Value="Activity.Child" Label="Počet dětí" TValue="int" ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+            <div class="col-6">
+                <HxAutosuggest Label="Účetní specifikace"
+	               Placeholder="Vyhledat podle názvu.."
+	               TItem="RKeyValue"
+	               TValue="int?"
+                   MinimumLength="0"
+	               @bind-Value="@Activity.RecordAttributeId"
+	               DataProvider="ProvideSuggestions"
+                   ItemFromValueResolver="ItemValueResolver"
+	               ValueSelector="p => p.NId"
+	               TextSelector="p => p.Name">
+                    <EmptyTemplate>
+                        <span class="p-2 text-muted">Neexistující název</span>
+                    </EmptyTemplate>
+                </HxAutosuggest>
+            </div>
         </div>
+        <div class="row align-items-center">
+            <div class="col">
+                <HxSwitch Text="Částka je vyžadována" @bind-Value="@Activity.IsPriceRequired" />
+            </div>
+            <div class="col">
+                <HxSwitch Text="Klient je povinný" @bind-Value="@Activity.IsClientRequired" />
+            </div>
+            <div class="col">
+                <HxInputNumber @bind-Value="Activity.Price" Label="Částka" TValue="float" Decimals="2" ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+        </div>
+        <hr style="height: 2px;color: #999;">
+        <div class="row align-items-center">
+            <div class="col">
+                <HxSwitch Text="Používat permanentky" Value="@Activity.IsSeasonTicket" ValueChanged="(value)=>{Activity.IsSeasonTicket = value; if(!value){Activity.GroupPrice = 0; Activity.GroupQuantity = 0; }}" ValueExpression="()=>Activity.IsSeasonTicket"/>
+            </div>
+            <div class="col">
+                <HxInputNumber @bind-Value="Activity.GroupQuantity" Label="Počet jednotek"TValue="int" Enabled="Activity.IsSeasonTicket"/>
+            </div>
+            <div class="col">
+                <HxInputNumber @bind-Value="Activity.GroupPrice" Label="Částka celkem" TValue="float" Decimals="2" Enabled="Activity.IsSeasonTicket"/>
+            </div>
+        </div>       
+        <div class="row">
+            <div class="col">
+                <HxInputText @bind-Value="Activity.Note" Label="Poznámka" MaxLength=100 Type="InputType.Text" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Activity.ValidFrom" Label="Platní od" ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Activity.ValidTo" MinDate="Activity.ValidFrom.AddDays(1)"  Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+        </div>
+    </div>
+    <div class="d-grid gap-2">
+    <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Record,EAccess.FullAccess,moduleWorkspace.ModuleId)>
+        <Authorized Context="auth_context">
+            <HxSubmit Color="ThemeColor.Success" OnValidClick="OnValidSubmitHandler">@ButtonText</HxSubmit>
+        </Authorized>
+        <NotAuthorized Context="auth_context">
+            <HxSubmit Color="ThemeColor.Success" Enabled=false>@ButtonText</HxSubmit>
+        </NotAuthorized>
+    </AuthorizeView>
+    </div>
 
-    </EditForm>
+</EditForm>
 }
 @code {
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
     [Parameter]
     [EditorRequired]
-    public IActivity_Record? Activity { get; set; }
+    public IActivity_Record Activity { get; set; } = default!;
     [EditorRequired]
     [Parameter]
     public EForm formType { get; set; }

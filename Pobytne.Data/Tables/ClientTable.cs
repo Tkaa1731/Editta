@@ -9,44 +9,37 @@ namespace Pobytne.Data.Tables
     {
         public async Task<IEnumerable<Client>> GetList(object conditions)
         {
-            using (IDbConnection cnn = Database.CreateConnection())
-            {
-                string sql = @"SELECT cl.*, cr.JmenoUser AS CreationClientName
+			using IDbConnection cnn = Database.CreateConnection();
+			string sql = @"SELECT cl.*, cr.JmenoUser AS CreationClientName
                                FROM S_Uzivatele cl
                                JOIN S_LoginUser cr ON cl.Kdo = cr.IDLogin
-                               WHERE cl.IDModulu = @ModuleId AND cl.JmenoUzivatele LIKE '%'+@Subfix+'%' AND cl.JePlatny != @Valid 
+                               WHERE cl.IDModulu = @ModuleId AND cl.JmenoUzivatele LIKE @Subfix AND cl.JePlatny != @Valid 
                                ORDER BY cl.IDUzivatele
                                OFFSET @StartIndex ROWS FETCH NEXT @Count ROWS ONLY;";
 
-                return await cnn.QueryAsync<Client>(sql, conditions);
-            }
-        }
+			return await cnn.QueryAsync<Client>(sql, conditions);
+		}
         public async Task<int> GetCount(object conditions)
         {
-            using (IDbConnection cnn = Database.CreateConnection())
-            {
-                string sql = @"SELECT COUNT(cl.IDUzivatele)
-                               FROM S_Uzivatele cl
-                               JOIN S_LoginUser cr ON cl.Kdo = cr.IDLogin
-                               WHERE cl.IDModulu = @ModuleId AND cl.JmenoUzivatele LIKE '%'+@Subfix+'%' AND cl.JePlatny != @Valid;";
+			using IDbConnection cnn = Database.CreateConnection();
+			string sql = @"SELECT COUNT(IDUzivatele)
+                               FROM S_Uzivatele
+                               WHERE IDModulu = @ModuleId AND JmenoUzivatele LIKE @Subfix AND JePlatny != @Valid;";
 
-                return await cnn.ExecuteScalarAsync<int>(sql,conditions);
-            }
-        }
+			return await cnn.ExecuteScalarAsync<int>(sql, conditions);
+		}
         public async Task<Client> GetById(int clientId)
         {
-            using (IDbConnection cnn = Database.CreateConnection())
-            {
-                string sql = @"SELECT cl.*, cr.JmenoUser AS CreationClientName
+			using IDbConnection cnn = Database.CreateConnection();
+			string sql = @"SELECT cl.*, cr.JmenoUser AS CreationClientName
                                FROM S_Uzivatele cl
                                JOIN S_LoginUser cr ON cl.Kdo = cr.IDLogin
                                WHERE cl.IDUzivatele = @IDUzivatele;";
 
-                var conditions = new { IDUzivatele = clientId };
+			var conditions = new { IDUzivatele = clientId };
 
-                return await cnn.QueryFirstAsync<Client>(sql, conditions);
-            }
-        }
+			return await cnn.QueryFirstAsync<Client>(sql, conditions);
+		}
         //---------------------------- InsUpDel-------------------------------
 
         public async Task<int?> Insert(Client client)

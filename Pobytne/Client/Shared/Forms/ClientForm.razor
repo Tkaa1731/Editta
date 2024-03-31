@@ -1,58 +1,65 @@
 ﻿
-@if (client is not null)
-{
-    <EditForm Model="@client" OnValidSubmit=OnValidSubmitHandler>
-        <DataAnnotationsValidator />
-		<div class="mx-3 mt-3">
-			<div class="row align-items-center">
-				<div class="col">
-					<HxInputText @bind-Value="client.Name" Label="Jméno klienta" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
-				</div>
-				<div class="col-auto">
-			        <HxSwitch Text="Je platný" @bind-Value="client.Valid" />
-				</div>
-                <div class="col-auto">
-			        <HxSwitch Text="Je společný pro organizaci" @bind-Value="client.ThroughoutOrganization" />
-				</div>
+<EditForm Model="@client">
+    <DataAnnotationsValidator />
+	<div class="mx-3 mt-3">
+		<div class="row align-items-center">
+			<div class="col">
+				<HxInputText @bind-Value="client.Name" Label="Jméno klienta" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
 			</div>
-            <div class="row">
-                <div class="col">
-                    <HxInputText @bind-Value="client.Email" Label="Email" Type="InputType.Email" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-                <div class="col">
-                    <HxInputText @bind-Value="client.PhoneNumber" Label="Telefonní číslo" Type="InputType.Tel" MaxLength=30 ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
+			<div class="col-auto">
+		        <HxSwitch Text="Je platný" @bind-Value="client.Valid" />
+			</div>
+            <div class="col-auto">
+		        <HxSwitch Text="Je společný pro organizaci" @bind-Value="client.ThroughoutOrganization" />
+			</div>
+		</div>
+        <div class="row">
+            <div class="col">
+                <HxInputText @bind-Value="client.Email" Label="Email" Type="InputType.Email" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
             </div>
-            <div class="row">
-                <div class="col">
-                    <HxInputText @bind-Value="client.City" Label="Obec" MaxLength=40 Type="InputType.Text" />
-                </div>
-                <div class="col">
-                    <HxInputText @bind-Value="client.Street" Label="Ulice" MaxLength=40 Type="InputType.Text" />
-                </div>
-                <div class="col-3">
-                    <HxInputText @bind-Value="client.PostNumber" Label="PSČ" MaxLength=10 Type="InputType.Text" />
-                </div>
+            <div class="col">
+                <HxInputText @bind-Value="client.PhoneNumber" Label="Telefonní číslo" Type="InputType.Tel" MaxLength=30 ValidationMessageMode="ValidationMessageMode.Regular"/>
             </div>
-            <div class="row">
-                <div class="col">
-                    <HxInputText @bind-Value="client.Description" Label="Poznámka" MaxLength=80 Type="InputType.Text" />
-                </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <HxInputText @bind-Value="client.City" Label="Obec" MaxLength=40 Type="InputType.Text" />
             </div>
-
+            <div class="col">
+                <HxInputText @bind-Value="client.Street" Label="Ulice" MaxLength=40 Type="InputType.Text" />
+            </div>
+            <div class="col-3">
+                <HxInputText @bind-Value="client.PostNumber" Label="PSČ" MaxLength=10 Type="InputType.Text" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <HxInputText @bind-Value="client.Description" Label="Poznámka" MaxLength=80 Type="InputType.Text" />
+            </div>
         </div>
 
-        <div class="d-grid gap-2">
-             <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
-        </div>
+    </div>
 
-    </EditForm>
-}
+    <div class="d-grid gap-2">
+    <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Client,EAccess.FullAccess,moduleWorkspace.ModuleId)>
+        <Authorized Context="auth_context">
+            <HxSubmit Color="ThemeColor.Success" OnValidClick="OnValidSubmitHandler">@ButtonText</HxSubmit>
+        </Authorized>
+        <NotAuthorized Context="auth_context">
+            <HxSubmit Color="ThemeColor.Success" Enabled=false>@ButtonText</HxSubmit>
+        </NotAuthorized>
+    </AuthorizeView>
+    </div>
+
+</EditForm>
+
 
 @code {
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
     [EditorRequired]
     [Parameter]
-    public Client? client { get; set; }
+    public Client client { get; set; } = default!;
     [EditorRequired]
     [Parameter]
     public EForm formType { get; set; }

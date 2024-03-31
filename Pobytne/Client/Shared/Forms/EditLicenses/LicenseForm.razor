@@ -1,85 +1,93 @@
-﻿@if(license is not null)
-{
-    <EditForm Model="@license" OnValidSubmit=OnValidSubmitHandler>
-        <DataAnnotationsValidator />
-        <div class="mx-3">
-            <div class="row">
-                <div class="col-7">
-                    <HxInputText @bind-Value="license.NameOfOrganization" Label="Název organizace" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-                <div class="col">
-                    <HxInputNumber Label="ICO" Decimals="0" TValue="int" @bind-Value="license.ICO" @oninput="ICOChangedHandler" Enabled="formType == EForm.Insert" InputMode="InputMode.Decimal"  />
-                </div>
-                <div class="col">
-                    <HxInputNumber Label="Číslo licence" Decimals="0" TValue="int" @bind-Value="license.ICO" Enabled="false" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
+﻿
+<EditForm Model="@license">
+    <DataAnnotationsValidator />
+    <div class="mx-3">
+        <div class="row">
+            <div class="col-7">
+                <HxInputText @bind-Value="license.NameOfOrganization" Label="Název organizace" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
             </div>
-            <div class="row align-items-center">
-                <div class="col">
-                    <HxInputNumber Label="Typ verze" Decimals="0" TValue="int" @bind-Value="license.VersionType" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-                <div class="col">
-                    <HxSwitch Text="Demo" @bind-Value="@license.IsDemo" />
-                </div>
-                <div class="col">
-                    <HxSwitch Text="Blokovaná" @bind-Value="@license.IsBlocked" />
-                </div>
-                <div class="col">
-                    <HxSwitch Text="Zaplacená" @bind-Value="@license.IsPayed" />
-                </div>
+            <div class="col">
+                <HxInputNumber Label="ICO" Decimals="0" TValue="int" @bind-Value="license.ICO" @oninput="ICOChangedHandler" Enabled="formType == EForm.Insert" InputMode="InputMode.Decimal"  />
             </div>
-            <div class="row">
-                <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.DateOfLaunch"  Label="Datum vystavení"/>
-                </div>                
-                <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.DateOfPayment"  Label="Datum platby" Enabled="license.IsPayed" />
-                </div>
-            </div>
-            <hr style="height: 2px;color: #999;">
-            <div class="row">
-                <div class="col">
-                    <HxInputText @bind-Value="license.ContactPerson" Label="Jméno kontaktní osoby" Type="InputType.Text" MaxLength=35 ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-7">
-                    <HxInputText @bind-Value="license.Email" Label="Email" Type="InputType.Email" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-                <div class="col">
-                    <HxInputText @bind-Value="license.PhoneNumber" Label="Telefonní číslo" Type="InputType.Tel" MaxLength=35 ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <HxInputText @bind-Value="license.City" Label="Obec" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-                <div class="col">
-                    <HxInputText @bind-Value="license.Street" Label="Ulice" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-                <div class="col-3">
-                    <HxInputText @bind-Value="license.PostNumber" Label="PSČ" Type="InputType.Text" MaxLength=10 ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidFrom" Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>                
-                <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidTo" MinDate="license.ValidFrom.AddDays(1)" Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
+            <div class="col">
+                <HxInputNumber Label="Číslo licence" Decimals="0" TValue="int" @bind-Value="license.ICO" Enabled="false" ValidationMessageMode="ValidationMessageMode.Regular"/>
             </div>
         </div>
-        <div class="d-grid gap-2">
-            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        <div class="row align-items-center">
+            <div class="col">
+                <HxInputNumber Label="Typ verze" Decimals="0" TValue="int" @bind-Value="license.VersionType" ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+            <div class="col">
+                <HxSwitch Text="Demo" @bind-Value="@license.IsDemo" />
+            </div>
+            <div class="col">
+                <HxSwitch Text="Blokovaná" @bind-Value="@license.IsBlocked" />
+            </div>
+            <div class="col">
+                <HxSwitch Text="Zaplacená" @bind-Value="@license.IsPayed" />
+            </div>
         </div>
+        <div class="row">
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.DateOfLaunch"  Label="Datum vystavení"/>
+            </div>                
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.DateOfPayment"  Label="Datum platby" Enabled="license.IsPayed" />
+            </div>
+        </div>
+        <hr style="height: 2px;color: #999;">
+        <div class="row">
+            <div class="col">
+                <HxInputText @bind-Value="license.ContactPerson" Label="Jméno kontaktní osoby" Type="InputType.Text" MaxLength=35 ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-7">
+                <HxInputText @bind-Value="license.Email" Label="Email" Type="InputType.Email" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+            <div class="col">
+                <HxInputText @bind-Value="license.PhoneNumber" Label="Telefonní číslo" Type="InputType.Tel" MaxLength=35 ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <HxInputText @bind-Value="license.City" Label="Obec" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+            <div class="col">
+                <HxInputText @bind-Value="license.Street" Label="Ulice" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+            <div class="col-3">
+                <HxInputText @bind-Value="license.PostNumber" Label="PSČ" Type="InputType.Text" MaxLength=10 ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidFrom" Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>                
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="license.ValidTo" MinDate="license.ValidFrom.AddDays(1)" Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+        </div>
+    </div>
+    <div class="d-grid gap-2">
+        <AuthorizeView  Policy="PermitionPolicy" Resource=(EPermition.License,EAccess.FullAccess,moduleWorkspace.ModuleId)>
+            <Authorized Context="auth_context">
+                <HxSubmit Color="ThemeColor.Success" OnValidClick="OnValidSubmitHandler">@ButtonText</HxSubmit>
+            </Authorized>
+            <NotAuthorized Context="auth_context">
+                <HxSubmit Color="ThemeColor.Success" Enabled=false >@ButtonText</HxSubmit>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
 
-    </EditForm>
-}
+</EditForm>
+
 @code {
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
     [EditorRequired]
     [Parameter]
-    public License? license{ get; set; }
+    public License license { get; set; } = default!;
     [Parameter]
     public EForm formType { get; set; }
     [Parameter]

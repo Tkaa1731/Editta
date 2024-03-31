@@ -6,8 +6,8 @@ namespace Pobytne.Shared.Procedural
 {
 	[Serializable]
 	[Table("S_ZaznamyVlastnosti")]
-	public class RecordAttribute : ACreation, ICloneable
-	{
+	public class RecordAttribute : ACreation, IListItem
+    {
 		public int Id {  get; set; }
 		public int ModuleId { get; set; } = -1;
 		public ERecordType Type { get; set; }
@@ -24,6 +24,11 @@ namespace Pobytne.Shared.Procedural
         public string OrderNumber { get; set; } = string.Empty;
 		[MaxLength(12)]
         public string ProjectNumber { get; set; } = string.Empty;
+        [Editable(false)]
+        public string Description => Type.ToString();
+        [Editable(false)]
+        public bool Active => true;
+
         public object Clone()
 		{
 			return MemberwiseClone();

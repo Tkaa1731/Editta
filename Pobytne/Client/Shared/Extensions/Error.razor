@@ -1,0 +1,40 @@
+﻿@inject NavigationManager navManager
+
+<div class="container py-5">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+            <h2 class="d-flex justify-content-center align-items-center gap-2 mb-4">
+                <span class="display-1 fw-bold">4</span>
+                <i class="bi bi-exclamation-circle-fill text-danger display-4"></i>
+            	<span class="display-1 fw-bold bsb-flip-h">@(statusCode==HttpStatusCode.NotFound?"4":"3")</span>
+            </h2>
+            <h3 class="h2 mb-2 headline">Nastala neočekávaná chyba</h3>
+            <p class="mb-5">@text</p>
+            <div class="d-flex justify-content-center">
+                <HxButton CssClass="w-50" Icon="BootstrapIcon.ArrowLeft" Color="ThemeColor.Danger" OnClick=@(()=>navManager.NavigateTo("/"))>Vrátit se zpět</HxButton>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public HttpStatusCode statusCode { get; set; }
+
+    private string text
+    {
+        get
+        {
+            switch (statusCode)
+            {
+                case HttpStatusCode.NotFound:
+                    return "Vypadá to, že hledaná stránka neexistuje, nebo nebyla nalezena.";
+                case HttpStatusCode.Forbidden: 
+                    return "Vypadá to, že nemáte dostatečná oprávnění k přístupu na tuto stránku.";
+                default:
+                    return "";
+            }
+        }    
+    }
+}

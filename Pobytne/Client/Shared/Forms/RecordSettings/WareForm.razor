@@ -1,87 +1,95 @@
-﻿@if(Ware is not null)
-{
-    <EditForm Model="@Ware" OnValidSubmit=OnValidSubmitHandler>
-        <DataAnnotationsValidator />
-        <div class="mx-3 mt-3">
-            <div class="row">
-                <div class="col">
-                    <HxInputText @bind-Value="@Ware.Name" Label="Název položky" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-                <div class="col-3">
-                    <HxInputNumber Label="Pořadí položky v seznamu" TValue="int" @bind-Value="Ware.Order" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
+﻿
+<EditForm Model="@Ware">
+    <DataAnnotationsValidator />
+    <div class="mx-3 mt-3">
+        <div class="row">
+            <div class="col">
+                <HxInputText @bind-Value="@Ware.Name" Label="Název položky" Type="InputType.Text" MaxLength=50 ValidationMessageMode="ValidationMessageMode.Regular"/>
             </div>
-            <div class="row">
-                <div class="col">
-                    <HxInputNumber @bind-Value="Ware.Quantity" Label="Počet kusů"TValue="int" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-                <div class="col">
-                    <HxInputNumber @bind-Value="Ware.Price" Label="Částka" TValue="float" Decimals="2" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-                <div class="col-6">
-                    <HxAutosuggest Label="Účetní specifikace"
-    	               Placeholder="Vyhledat podle názvu.."
-    	               TItem="RKeyValue"
-    	               TValue="int?"
-                       MinimumLength="0"
-    	               @bind-Value="@Ware.RecordAttributeId"
-    	               DataProvider="ProvideSuggestions"
-                       ItemFromValueResolver="ItemValueResolver"
-    	               ValueSelector="p => p.NId"
-    	               TextSelector="p => p.Name">
-                        <EmptyTemplate>
-                            <span class="p-2 text-muted">Neexistující název</span>
-                        </EmptyTemplate>
-                    </HxAutosuggest>
-                </div>
-            </div>
-            <div class="row pt-3">
-                <div class="col">
-                    <HxSwitch Text="Kontrola na zůstatek" @bind-Value="@Ware.IsBalanceCheck" />
-                </div>
-                <div class="col">
-                    <HxSwitch Text="Částka je vyžadována" @bind-Value="@Ware.IsPriceRequired" />
-                </div>
-                <div class="col">
-                    <HxSwitch Text="Klient je povinný" @bind-Value="@Ware.IsClientRequired" />
-                </div>
-            </div>
-            <hr style="height: 2px;color: #999;">
-            <div class="row align-items-center">
-                <div class="col">
-                    <HxSwitch Text="Používat permanentky" Value="@Ware.IsSeasonTicket" ValueChanged="(value)=>{Ware.IsSeasonTicket = value; if(!value){Ware.GroupPrice = 0; Ware.GroupQuantity = 0; }}" ValueExpression="()=>Ware.IsSeasonTicket"/>
-                </div>
-                <div class="col">
-                    <HxInputNumber @bind-Value="Ware.GroupQuantity" Label="Počet jednotek"TValue="int" Enabled="Ware.IsSeasonTicket"/>
-                </div>
-                <div class="col">
-                    <HxInputNumber @bind-Value="Ware.GroupPrice" Label="Částka celkem" TValue="float" Decimals="2" Enabled="Ware.IsSeasonTicket"/>
-                </div>
-            </div>       
-            <div class="row">
-                <div class="col">
-                    <HxInputText @bind-Value="Ware.Note" Label="Poznámka" MaxLength=100 Type="InputType.Text" />
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Ware.ValidFrom" Label="Platní od" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
-                <div class="col">
-                    <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Ware.ValidTo" MinDate="Ware.ValidFrom.AddDays(1)"  Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
-                </div>
+            <div class="col-3">
+                <HxInputNumber Label="Pořadí položky v seznamu" TValue="int" @bind-Value="Ware.Order" ValidationMessageMode="ValidationMessageMode.Regular"/>
             </div>
         </div>
-        <div class="d-grid gap-2">
-            <HxSubmit Color="ThemeColor.Success">@ButtonText</HxSubmit>
+        <div class="row">
+            <div class="col">
+                <HxInputNumber @bind-Value="Ware.Quantity" Label="Počet kusů"TValue="int" ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+            <div class="col">
+                <HxInputNumber @bind-Value="Ware.Price" Label="Částka" TValue="float" Decimals="2" ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+            <div class="col-6">
+                <HxAutosuggest Label="Účetní specifikace"
+	               Placeholder="Vyhledat podle názvu.."
+	               TItem="RKeyValue"
+	               TValue="int?"
+                   MinimumLength="0"
+	               @bind-Value="@Ware.RecordAttributeId"
+	               DataProvider="ProvideSuggestions"
+                   ItemFromValueResolver="ItemValueResolver"
+	               ValueSelector="p => p.NId"
+	               TextSelector="p => p.Name">
+                    <EmptyTemplate>
+                        <span class="p-2 text-muted">Neexistující název</span>
+                    </EmptyTemplate>
+                </HxAutosuggest>
+            </div>
         </div>
+        <div class="row pt-3">
+            <div class="col">
+                <HxSwitch Text="Kontrola na zůstatek" @bind-Value="@Ware.IsBalanceCheck" />
+            </div>
+            <div class="col">
+                <HxSwitch Text="Částka je vyžadována" @bind-Value="@Ware.IsPriceRequired" />
+            </div>
+            <div class="col">
+                <HxSwitch Text="Klient je povinný" @bind-Value="@Ware.IsClientRequired" />
+            </div>
+        </div>
+        <hr style="height: 2px;color: #999;">
+        <div class="row align-items-center">
+            <div class="col">
+                <HxSwitch Text="Používat permanentky" Value="@Ware.IsSeasonTicket" ValueChanged="(value)=>{Ware.IsSeasonTicket = value; if(!value){Ware.GroupPrice = 0; Ware.GroupQuantity = 0; }}" ValueExpression="()=>Ware.IsSeasonTicket"/>
+            </div>
+            <div class="col">
+                <HxInputNumber @bind-Value="Ware.GroupQuantity" Label="Počet jednotek"TValue="int" Enabled="Ware.IsSeasonTicket"/>
+            </div>
+            <div class="col">
+                <HxInputNumber @bind-Value="Ware.GroupPrice" Label="Částka celkem" TValue="float" Decimals="2" Enabled="Ware.IsSeasonTicket"/>
+            </div>
+        </div>       
+        <div class="row">
+            <div class="col">
+                <HxInputText @bind-Value="Ware.Note" Label="Poznámka" MaxLength=100 Type="InputType.Text" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Ware.ValidFrom" Label="Platní od" ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+            <div class="col">
+                <HxInputDate CalendarIcon="BootstrapIcon.Calendar" @bind-Value="Ware.ValidTo" MinDate="Ware.ValidFrom.AddDays(1)"  Label="Platí do" ValidationMessageMode="ValidationMessageMode.Regular"/>
+            </div>
+        </div>
+    </div>
+    <div class="d-grid gap-2">
+    <AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Record,EAccess.FullAccess,moduleWorkspace.ModuleId)>
+        <Authorized Context="auth_context">
+            <HxSubmit Color="ThemeColor.Success" OnValidClick="OnValidSubmitHandler">@ButtonText</HxSubmit>
+        </Authorized>
+        <NotAuthorized Context="auth_context">
+            <HxSubmit Color="ThemeColor.Success" Enabled=false>@ButtonText</HxSubmit>
+        </NotAuthorized>
+    </AuthorizeView>
+    </div>
 
-    </EditForm>
-}
+</EditForm>
+
 @code {
-	[Parameter]
-	[EditorRequired]
-	public IWare_Record? Ware { get; set; }
+    [CascadingParameter]
+    private ModuleWorkplace moduleWorkspace { get; set; } = default!;
+    [Parameter]
+    [EditorRequired]
+    public IWare_Record Ware { get; set; } = default!;
     [EditorRequired]
     [Parameter]
     public EForm formType { get; set; }
