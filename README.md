@@ -1,5 +1,8 @@
 # Pobytne
+!UPDATE!
 
-Přihlašovací údaje k testovací verzi účtu je: login = test, heslo = test 
+Verze_01: editta.pobytne.cz
 
-Validacni token pouze 2 min + funkcni RefreshToken
+Přihlašovací údaje k testovací verzi účtu je: login = TestovaciUcet, heslo = HeSlO24+ 
+
+Validacni token 20 min + funkcni RefreshToken
