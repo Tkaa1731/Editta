@@ -52,7 +52,7 @@
 					</DataTemplate>
 				</HxListLayout>
 			</div>
-			<div class="col-4 d-flex flex-column overflow-hidden h-max" style="max-width:500px;">
+			<div class="col-4 d-flex flex-column overflow-hidden mh-max" style="max-width:500px;">
 				<div class="p-3 mb-3 card floating-card">
 					@* Porovnani k pokladne *@
 					<h2>@reportsList.Sum(r => r.Price) Kč</h2>
@@ -165,8 +165,6 @@
 		moduleWorkspace.ModuleId = idModule;
 		filter.ModuleId = moduleWorkspace.Id;
 
-		filter.From = DateTime.Today.ToUniversalTime().AddHours(1);
-		filter.To = DateTime.Today.ToUniversalTime().AddHours(1);
 		//load payment enum
 		var response = await _service.GetAllAsync<Payment>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);
 
