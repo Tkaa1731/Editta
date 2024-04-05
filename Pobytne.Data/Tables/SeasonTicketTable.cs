@@ -31,7 +31,7 @@ namespace Pobytne.Data.Tables
                 grouped.TicketEvidences = g.Select(p => p.TicketEvidences.Single()).ToList();
 				grouped.TicketEvidences.RemoveAll(t => t is null);
                 return grouped;
-            });
+            }).ToList(); 
 
 		}
 		public async Task<IEnumerable<SeasonTicket>> GetTisketOfClient(int clientId, int recordId, IDbTransaction tran)
@@ -51,7 +51,7 @@ namespace Pobytne.Data.Tables
 				var grouped = g.First();
 				grouped.TicketEvidences = g.Select(p => p.TicketEvidences.Single()).ToList();
 				return grouped;
-			});
+			}).ToList();
 		}
 		// ------------------ InsUp ---------------------
 
