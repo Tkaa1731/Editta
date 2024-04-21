@@ -9,7 +9,7 @@ namespace Pobytne.Data.Tables
 {
     public class RecordTable
     {
-		public async Task<IEnumerable<Record>> GetSubRecords(object conditions)
+		public async Task<IEnumerable<Record>> GetSubRecords(List<int> list)
 		{
             using IDbConnection cnn = Database.CreateConnection();
             string sql = @"SELECT z.*, sz.*, u.JmenoUser AS CreationUserName, zv.Nazev AS RecordAttributeName
@@ -20,7 +20,7 @@ namespace Pobytne.Data.Tables
                                 WHERE sz.IDParent IN @IDParent
                                 ORDER BY z.Poradi;";
 
-            return await cnn.QueryAsync<Record>(sql, conditions);
+			return await cnn.QueryAsync<Record>(sql, new { IDParent = list});
         }
         public async Task<IEnumerable<Record>> GetSeasonTicketRecords(object conditions)
         {
@@ -168,7 +168,7 @@ namespace Pobytne.Data.Tables
         {
             using IDbConnection cnn = Database.CreateConnection();
             var sql = @"SELECT * FROM (
-                        SELECT 1 as Id, 'StrukturaZaznamů' as Error FROM S_StrukturaZaznamu WHERE IDZaznamu = @ID UNION  
+                        --SELECT 1 as Id, 'StrukturaZaznamů' as Error FROM S_StrukturaZaznamu WHERE IDZaznamu = @ID UNION  
                         SELECT 2 as Id, 'Pokladna' as Error FROM P_Pokladna WHERE IDZaznamu = @ID UNION 
                         SELECT 3 as Id, 'Evidence' as Error FROM P_Evidence WHERE IDZaznamu = @ID UNION
                         SELECT 18 as Id, 'Cinnost' as Error FROM P_Cinnost WHERE IDZaznamu = @ID UNION

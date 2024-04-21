@@ -38,16 +38,7 @@
 
     private List<RKeyValue> attributeWare { get; set; } = [];
     private List<RKeyValue> attributeActivity { get; set; } = [];
-    private string recordType
-    {
-        get
-        {
-            if (record?.Id > 0)
-                return record.RecordType.ToString();
-            else
-                return "Folder";
-        }
-    }
+    private string recordType => record!.RecordType.ToString();
     protected override async Task OnInitializedAsync()
     {
         var response = await _service.GetAllAsync<RecordAttribute>($"?moduleId={moduleWorkspace.Id}", moduleWorkspace.Id);

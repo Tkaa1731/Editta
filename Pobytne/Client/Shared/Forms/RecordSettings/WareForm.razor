@@ -107,8 +107,12 @@
             return "Aktualizovat";
         }
     }
-    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
-        private Task<AutosuggestDataProviderResult<RKeyValue>> ProvideSuggestions(AutosuggestDataProviderRequest request) {
+    private async Task OnValidSubmitHandler()
+    {
+        Ware.RecordType = ERecordType.Ware;
+        await OnValidSubmit.InvokeAsync(formType);
+    }
+    private Task<AutosuggestDataProviderResult<RKeyValue>> ProvideSuggestions(AutosuggestDataProviderRequest request) {
         if (request.UserInput?.Length > 0)
 		{
            return Task.FromResult( new AutosuggestDataProviderResult<RKeyValue> { Data = recAttributeList.Where(p => p.Name.ToLower().StartsWith(request.UserInput.ToLower())) }); 
