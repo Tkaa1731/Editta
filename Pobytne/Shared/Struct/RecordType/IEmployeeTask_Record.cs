@@ -9,6 +9,7 @@ namespace Pobytne.Shared.Struct
     public interface IEmployeeTask_Record
     {
         string Name { get; }
+        ERecordType RecordType { get; set; }
         int Order { get; }
         int? RecordAttributeId { get; }
         string RecordAttributeName { get; }

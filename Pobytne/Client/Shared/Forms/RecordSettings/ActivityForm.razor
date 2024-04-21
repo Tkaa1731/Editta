@@ -83,7 +83,7 @@
     </div>
 
 </EditForm>
-}
+
 @code {
     [CascadingParameter]
     private ModuleWorkplace moduleWorkspace { get; set; } = default!;
@@ -108,7 +108,11 @@
         }
     }
 
-    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
+    private async Task OnValidSubmitHandler()
+    {
+        Activity.RecordType = ERecordType.Activity;    
+        await OnValidSubmit.InvokeAsync(formType);
+    }
     private Task<AutosuggestDataProviderResult<RKeyValue>> ProvideSuggestions(AutosuggestDataProviderRequest request) {
         if (request.UserInput?.Length > 0)
 		{

@@ -126,12 +126,15 @@
     }
     private async Task OnItemSelect(IListItem i)
     {
-        formItem = (IListItem)i.Clone();
-        await formModal.UpdateForm();
+        if(i is not null)
+        {        
+            formItem = (IListItem)i.Clone();
+            await formModal.UpdateForm();
+        }
     }
     protected override async Task OnInitializedAsync()
     {
-		moduleWorkspace.ModuleId = idModule;
+        moduleWorkspace.ModuleId = idModule;
 
         fileSystem.Add(
             new RecordDir(

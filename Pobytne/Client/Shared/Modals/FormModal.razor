@@ -49,7 +49,7 @@
     public EventCallback<(IListItem,EForm)> OnSuccessRequest{ get; set; }
     [Parameter]
     [EditorRequired]
-    public required IListItem formItem{ get; set; }
+    public required IListItem? formItem{ get; set; }
     private EForm formType;
 
     public HxModal myModal = new();

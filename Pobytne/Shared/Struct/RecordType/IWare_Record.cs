@@ -3,6 +3,7 @@
     public interface IWare_Record
     {
         string Name { get; set; }
+        ERecordType RecordType { get; set; }
         int Order { get; set; }
         int Stock { get; set; }
         int? RecordAttributeId { get; set; }

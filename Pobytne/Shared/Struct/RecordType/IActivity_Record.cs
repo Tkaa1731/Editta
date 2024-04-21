@@ -3,6 +3,7 @@
     public interface IActivity_Record
     {
         string Name { get; set; }
+        ERecordType RecordType { get; set; }
         int Order { get; set; }
         int? RecordAttributeId { get; set; }
         string RecordAttributeName { get; set; }

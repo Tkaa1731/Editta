@@ -15,8 +15,7 @@ namespace Pobytne.Server.Service
 
         public async Task<IEnumerable<Record>> GetBranch(int parentId)
         {
-            List<int> parameter = [parentId];
-            return await _recordTable.GetSubRecords(new { IDParent = parameter});
+            return await _recordTable.GetSubRecords([parentId]);
         }
         public async Task<IEnumerable<Record>> GetRoot(int moduleId)
         {
@@ -29,7 +28,7 @@ namespace Pobytne.Server.Service
             {
                 if(pivot.Count <= 0)
                     break;
-                var records = await _recordTable.GetSubRecords(new { ParentID = pivot });
+                var records = await _recordTable.GetSubRecords(pivot);
                 result.AddRange(records.Where(w => w.RecordType != ERecordType.Folder).Select(s => s.Id));
 
                 pivot.Clear();
@@ -128,15 +127,15 @@ namespace Pobytne.Server.Service
             }
             // else kontrola na evidenci zaznamu
             else 
+
+                // if WARE and kontrolaNaZustatek and zustate>0
+                if (record.RecordType == ERecordType.Ware && record.IsBalanceCheck && record.Stock > 0)
+                    throw new Exception("Nelze smazat naskladněný záznam!");
             {
                 var isDeletable = await _recordTable.IsDeletable(record.Id);
                 if (isDeletable.Any())
                     throw new Exception("Záznam byl již použit v systému, a proto jej není možno smazat!");
 
-
-                // if WARE and kontrolaNaZustatek and zustate>0
-                if (record.RecordType == ERecordType.Ware && record.IsBalanceCheck && record.Stock > 0)
-                    throw new Exception("Nelze smazat naskladněný záznam.");
             }
             return await _recordTable.Delete(id);
         }

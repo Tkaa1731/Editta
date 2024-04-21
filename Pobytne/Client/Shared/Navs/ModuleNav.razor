@@ -1,6 +1,6 @@
 ﻿<div class="w-100 position-absolute start-0 top-0 d-flex flex-column align-items-center">
 	<nav class="navbar navbar-expand-lg p-0">
-		<div class="collapse dark shadow text-white rounded-bottom" style="z-index:1500" id="menuCollapse">
+		<div class="collapse dark shadow text-white rounded-bottom show" style="z-index:1500" id="menuCollapse">
 			<ul class="navbar-nav mr-auto">
 				<li class="nav-item">
 					<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.Evidence,EAccess.ReadOnly,moduleWorkspace.ModuleId)>
@@ -106,10 +106,10 @@
 					<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
 						<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.CashSummary,EAccess.ReadOnly,moduleWorkspace.ModuleId)>
 							<Authorized>
-								<li><a class="dropdown-item" href=@($"{idModule}/CashRegisterReports")>Souhrny plateb</a></li>
+								<li><a class="dropdown-item" href=@($"{idModule}/CashRegisterReports")>Souhrny pokladny</a></li>
 							</Authorized>
 							<NotAuthorized>
-								<li><a class="dropdown-item disabled">Souhrny plateb</a></li>
+								<li><a class="dropdown-item disabled">Souhrny pokladny</a></li>
 							</NotAuthorized>
 						</AuthorizeView>
 						<AuthorizeView Policy="PermitionPolicy" Resource=(EPermition.EvidenceSummary,EAccess.ReadOnly,moduleWorkspace.ModuleId)>
@@ -128,7 +128,7 @@
 		</div>
 	</nav>
 	<div style="z-index:1500;">
-		<a data-bs-toggle="collapse" href="#menuCollapse" role="button" aria-expanded="false" aria-controls="menuCollapse">
+		<a data-bs-toggle="collapse" href="#menuCollapse" role="button" aria-expanded="true" aria-controls="menuCollapse">
 			<div class="dark shadow text-white rounded-bottom px-4 w-auto">
 					<HxIcon Icon="@BootstrapIcon.ThreeDots" />
 			</div>

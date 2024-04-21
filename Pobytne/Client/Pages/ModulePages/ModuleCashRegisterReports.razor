@@ -52,7 +52,7 @@
 					</DataTemplate>
 				</HxListLayout>
 			</div>
-			<div class="col-4 d-flex flex-column overflow-hidden mh-max" style="max-width:500px;">
+			<div class="col-4 d-flex flex-column overflow-hidden h-max" style="max-width:500px;">
 				<div class="p-3 mb-3 card floating-card">
 					@* Porovnani k pokladne *@
 					<h2>@reportsList.Sum(r => r.Price) Kč</h2>
@@ -81,7 +81,7 @@
 
 							<div class="w-100 pt-1"/>
 							@*Client Filter *@
-							<HxInputText Label="Uzivatel" Enabled="false" CssClass="col" InputCssClass="bg-white border-end-0" @bind-Value="clientName">
+							<HxInputText Label="Klient" Enabled="false" CssClass="col" InputCssClass="bg-white border-end-0" @bind-Value="clientName">
 									<InputGroupEndTemplate>
 										@if (selectedClient is not null)
 										{

@@ -58,5 +58,9 @@
             return "Aktualizovat";
         }
     }
-    private async Task OnValidSubmitHandler() => await OnValidSubmit.InvokeAsync(formType);
+    private async Task OnValidSubmitHandler()
+    {
+        Folder.RecordType = ERecordType.Folder;
+        await OnValidSubmit.InvokeAsync(formType);
+    }
 }

@@ -46,6 +46,7 @@ namespace Pobytne.Client.Extensions.IDirectory
             RootId = Record.RootId,
             ModuleId = Record.ModuleId,
             StructDepth = Record.StructDepth + 1,
+            RecordType = ERecordType.Folder,
             //CreationDate = DateTime.Now, // Implementovano pri submitu v FormModal komponente
             //CreationUserId = 1,// Implementovano pri submitu v FormModal komponente
             Order = subRecords.Count,
