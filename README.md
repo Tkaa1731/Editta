@@ -1,4 +1,4 @@
-# Pobytne
+# Editta
 !UPDATE!
 
 Verze_02: www.editta.cz
